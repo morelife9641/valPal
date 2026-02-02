@@ -1,0 +1,29 @@
+<view class="container">
+    <view class="canvas-full-wrapper">
+        <canvas type="2d" id="testCanvas" class="main-canvas"></canvas>
+        <view class="canvas-operation">
+            <button class="op-btn op-btn-primary" bindtap="togglePanel">选择英雄</button>
+            <button class="op-btn op-btn-secondary" bindtap="saveCanvas">保存壁纸</button>
+            <button class="op-btn op-btn-tertiary" bindtap="resetCanvas">重置画布</button>
+        </view>
+    </view>
+    <root-portal wx:if="{{showPopup}}">
+        <view class="portal-wrapper">
+            <view class="mask {{showPopup ? 'show' : ''}}" bindtap="togglePanel"></view>
+            <view class="bottom-popup {{showPopup ? 'show' : ''}}">
+                <view class="popup-header">
+                    <text>选择英雄</text>
+                    <view class="close-btn" bindtap="togglePanel">✕</view>
+                </view>
+                <scroll-view scroll-x class="selector-view" enhanced show-scrollbar="{{false}}">
+                    <view class="item-list">
+                        <view class="item-card {{currentAgent.uuid === item.uuid ? 'selected' : ''}}" wx:for="{{allAgents}}" wx:key="uuid" bindtap="selectAgent" data-agent="{{item}}">
+                            <image src="{{item.displayIconLocal || item.displayIcon}}" class="agent-icon" mode="aspectFit"></image>
+                            <text class="agent-name">{{item.displayName}}</text>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
+    </root-portal>
+</view>

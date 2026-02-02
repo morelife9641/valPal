@@ -1,0 +1,9 @@
+<view class="map-grid">
+    <view class="map-card" wx:for="{{maps}}" wx:key="uuid" data-uuid="{{item.uuid}}" data-name="{{item.displayName}}" data-icon="{{item.displayIcon}}" bindtap="goToDetail">
+        <image class="map-splash" src="{{item.splash}}" mode="aspectFill"></image>
+        <view class="map-mask">
+            <text class="map-name">{{item.displayName}}</text>
+            <text class="map-coord">{{item.coordinates || ''}}</text>
+        </view>
+    </view>
+</view>

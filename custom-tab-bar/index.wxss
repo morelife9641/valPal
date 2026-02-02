@@ -1,0 +1,49 @@
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background: rgba(22, 25, 29, 0.92); /* 与页面主题一致 */
+  backdrop-filter: blur(15px); /* 毛玻璃效果 */
+  display: flex;
+  padding: 10px 0;
+  /* padding-bottom: env(safe-area-inset-bottom); */
+  border-top: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.tab-bar-item {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+}
+
+.tab-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 4rpx;
+}
+
+.tab-text {
+  font-size: 20rpx;
+  color: #fff;
+}
+
+.tab-text.active {
+  color: #ff4655;
+  font-weight: bold;
+}
+
+/* 选中时的顶部发光线条 */
+.active-line {
+  position: absolute;
+  top: 0;
+  width: 40rpx;
+  height: 4rpx;
+  background: #ff4655;
+  box-shadow: 0 0 10rpx #ff4655;
+}

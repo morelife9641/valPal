@@ -1,0 +1,67 @@
+{
+  "pages": [
+    "pages/strategy/index",
+    "pages/news/index",
+    "pages/skins/index",
+    "pages/tools/index",
+    "pages/index/detail"
+  ],
+  "subpackages": [
+    {
+      "root": "packageStrategy",
+      "name": "strategyDetail",
+      "pages": ["pages/detail/detail"]
+    },
+    {
+      "root": "packageWallpaper",
+      "name": "wallpaperEditor",
+      "pages": ["pages/wallpaper/wallpaper"]
+    }
+  ],
+  "preloadRule": {
+    "pages/strategy/index": {
+      "network": "all",
+      "packages": ["packageStrategy"]
+    }
+  },
+  "window": {
+    "navigationBarBackgroundColor": "#000000",
+    "navigationBarTitleText": "瓦友友",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f0f2f5"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#ff4655",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "custom": true,
+    "list": [
+      {
+        "pagePath": "pages/strategy/index",
+        "text": "攻略",
+        "iconPath": "assets/index.png",
+        "selectedIconPath": "assets/index_active.png"
+      },
+      {
+        "pagePath": "pages/news/index",
+        "text": "资讯",
+        "iconPath": "assets/news.png",
+        "selectedIconPath": "assets/news_active.png"
+      },
+      {
+        "pagePath": "pages/skins/index",
+        "text": "皮肤",
+        "iconPath": "assets/skin.png",
+        "selectedIconPath": "assets/skin_active.png"
+      },
+      {
+        "pagePath": "pages/tools/index",
+        "text": "工具",
+        "iconPath": "assets/pinpoint.png",
+        "selectedIconPath": "assets/pinpoint_active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}

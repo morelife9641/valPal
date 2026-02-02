@@ -1,0 +1,113 @@
+<view class="container">
+    <view class="filter-bar">
+        <scroll-view scroll-x class="type-scroll">
+            <view class="type-item {{activeTab == index ? 'active' : ''}}" wx:for="{{categories}}" wx:key="index" bindtap="switchTab" data-index="{{index}}">
+                {{item}}
+            </view>
+        </scroll-view>
+    </view>
+    <view class="group-section" wx:for="{{groupedList}}" wx:key="typeName">
+        <view class="group-header">
+            <text class="group-title">{{item.typeName}}</text>
+            <view class="group-line"></view>
+        </view>
+        <view class="weapon-card {{expandedId === weapon.e_name ? 'active' : ''}}" wx:for="{{item.weapons}}" wx:for-item="weapon" wx:key="e_name" bindtap="toggleExpand" data-ename="{{weapon.e_name}}">
+            <view class="card-header">
+                <view class="header-left">
+                    <image class="gun-icon" src="{{weapon.icon}}" mode="aspectFit" lazy-load></image>
+                </view>
+                <view class="header-mid">
+                    <text class="cn-name">{{weapon.name}}</text>
+                    <text class="en-name">{{weapon.e_name}}</text>
+                </view>
+                <view class="header-right">
+                    <text class="price-tag {{weapon.price === '免费' ? 'free' : ''}}">
+                        {{weapon.priceText}}
+                    </text>
+                    <text class="type-tag-small">{{weapon.type_name}}</text>
+                </view>
+            </view>
+            <view class="card-detail" wx:if="{{expandedId === weapon.e_name}}">
+                <view class="stats-grid">
+                    <view class="stat-box">
+                        <view class="stat-info">
+                            <text>射速</text>
+                            <text>
+                                {{weapon.firing_speed}}
+                                <small>发/秒</small>
+                            </text>
+                        </view>
+                        <view class="bar-bg">
+                            <view class="bar" style="width: {{weapon.fireRatePercent}}%"></view>
+                        </view>
+                    </view>
+                    <view class="stat-box">
+                        <view class="stat-info">
+                            <text>跑速</text>
+                            <text>
+                                {{weapon.moving_speed}}
+                                <small>公尺/秒</small>
+                            </text>
+                        </view>
+                        <view class="bar-bg">
+                            <view class="bar" style="width: {{weapon.moveSpeedPercent}}%"></view>
+                        </view>
+                    </view>
+                    <view class="stat-box">
+                        <view class="stat-info">
+                            <text>弹匣容量</text>
+                            <text>
+                                {{weapon.cli_size}}
+                                <small>发</small>
+                            </text>
+                        </view>
+                        <view class="bar-bg">
+                            <view class="bar" style="width: {{weapon.cliWidth}}%"></view>
+                        </view>
+                    </view>
+                    <view class="stat-box">
+                        <view class="stat-info">
+                            <text>填弹速度</text>
+                            <text>
+                                {{weapon.loading_speed}}
+                                <small>秒</small>
+                            </text>
+                        </view>
+                        <view class="bar-bg">
+                            <view class="bar" style="width: {{65}}%"></view>
+                        </view>
+                    </view>
+                </view>
+                <view class="misc-info">
+                    <view class="misc-item">
+                        <text class="label">切枪速度</text>
+                        <text class="val">{{weapon.equipping_speed}}s</text>
+                    </view>
+                    <view class="misc-item">
+                        <text class="label">穿透力</text>
+                        <text class="val">{{weapon.penetration_name}}</text>
+                    </view>
+                    <view class="misc-item">
+                        <text class="label">模式</text>
+                        <text class="val">{{weapon.main_firing_mode}}</text>
+                    </view>
+                </view>
+                <view class="damage-section">
+                    <view class="table-header">
+                        <text class="td-range">距离</text>
+                        <text class="td">头部</text>
+                        <text class="td">身部</text>
+                        <text class="td">腿部</text>
+                    </view>
+                    <view class="table-row" wx:for="{{weapon.damage}}" wx:key="distance" wx:for-item="dmg">
+                        <text class="td-range">{{dmg.distance}}</text>
+                        <text class="td head">{{dmg.head}}</text>
+                        <text class="td body">{{dmg.body}}</text>
+                        <text class="td leg">{{dmg.leg}}</text>
+                    </view>
+                </view>
+                <view class="weapon-desc" wx:if="{{weapon.desc}}">{{weapon.desc}}</view>
+            </view>
+        </view>
+    </view>
+</view>
