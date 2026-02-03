@@ -1,0 +1,434 @@
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0f1923; /* 瓦罗兰特深色底色 */
+}
+
+.canvas-full-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#testCanvas,
+canvas[canvas-id="testCanvas"] {
+  width: 100%;
+  height: 100%;
+  /* background-color: #f5f5f5; */
+  z-index: 1;
+}
+
+/* 按钮 */
+/* 左上主操作区 */
+.canvas-operation-left {
+  position: absolute;
+  top: 30rpx;
+  left: 30rpx;
+  z-index: 10;
+}
+
+/* 右上辅助操作区 */
+.canvas-operation-right {
+  position: absolute;
+  top: 40rpx; /* 根据你的导航栏高度调整，避免被胶囊按钮挡住 */
+  right: 20rpx;
+
+  display: flex;
+  flex-direction: row; /* 关键：横向排列 */
+  align-items: center;
+
+  z-index: 100; /* 确保层级高于 Canvas */
+}
+
+.operation-container {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(20, 20, 20, 0.9) 100%
+  );
+  backdrop-filter: blur(15rpx);
+  border-radius: 12rpx;
+  padding: 15rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  box-shadow:
+    0 4rpx 20rpx rgba(0, 0, 0, 0.5),
+    0 0 0 1rpx rgba(255, 70, 85, 0.3);
+}
+
+.valo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64rpx;
+  padding: 0 16rpx;
+  border-radius: 12rpx;
+  background: rgba(15, 25, 35, 0.9); /* 瓦罗兰特深蓝黑 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 24rpx;
+  white-space: nowrap; /* 防止文字换行 */
+  margin: 0; /* 清除默认 margin */
+}
+.valo-btn-icon {
+  padding: 0;
+  width: 64rpx; /* 宽高相等 */
+  height: 64rpx;
+  font-size: 32rpx; /* 图标稍微大一点 */
+  background: rgba(15, 25, 35, 0.8);
+}
+
+/* 按钮点击态 */
+.valo-btn-hover {
+  opacity: 0.8;
+  transform: scale(0.95);
+}
+
+.valo-btn:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 0 20rpx rgba(255, 70, 85, 0.3);
+}
+
+.valo-btn-primary {
+  background: linear-gradient(135deg, #ff4655 0%, #ff1744 100%);
+}
+
+.valo-btn-weapon {
+  background: rgba(40, 40, 40, 0.95);
+  border: 1rpx solid rgba(255, 70, 85, 0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.expand-icon {
+  font-size: 20rpx;
+  color: #ff4655;
+  transition: transform 0.3s;
+  margin-left: 10rpx;
+}
+
+.valo-btn-secondary {
+  background: rgba(40, 40, 40, 0.9);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.valo-btn-tertiary {
+  background: rgba(50, 50, 50, 0.85);
+  border: 1rpx solid rgba(255, 255, 255, 0.15);
+}
+
+/* 武器装饰组 - 纵向展开 */
+.weapon-group {
+  position: relative;
+}
+
+.weapon-submenu-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-top: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.weapon-group.expanded .weapon-submenu-vertical {
+  max-height: 250rpx;
+  opacity: 1;
+  margin-top: 8rpx;
+}
+
+.weapon-group.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+/* 子按钮 */
+.valo-sub-btn {
+  width: 100%;
+  height: 60rpx;
+  padding: 0;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1rpx solid rgba(255, 70, 85, 0.6);
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 0 15rpx rgba(255, 70, 85, 0.2);
+}
+
+.valo-sub-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 25rpx rgba(255, 70, 85, 0.6);
+  background: rgba(255, 70, 85, 0.2);
+}
+
+/* 英雄卡片优化 */
+.item-card {
+  display: inline-block;
+  width: 160rpx;
+  margin: 30rpx 20rpx;
+  text-align: center;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.item-card image {
+  width: 120rpx;
+  height: 120rpx;
+  background: #1f2326;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* 模拟瓦罗兰特的几何边框 */
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 80% 100%, 0 100%);
+}
+
+.item-card.selected image {
+  border: 4rpx solid #ff4655;
+  box-shadow: 0 0 20rpx rgba(255, 70, 85, 0.4);
+  transform: translateY(-10rpx);
+}
+
+.item-card text {
+  display: block;
+  /* margin-top: 15rpx; */
+  font-size: 22rpx;
+  color: #8b8b8b;
+  font-weight: bold;
+}
+
+.item-card.selected text {
+  color: #ff4655;
+}
+
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  /* 遮罩稍微快一点，为弹出层铺垫 */
+  transition: all 0.3s ease;
+}
+
+.mask.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 1. 弹出层容器：加入缩放效果 */
+.bottom-popup {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  background-color: #0f1923;
+  z-index: 1001;
+  border-top: 4rpx solid #ff4655;
+
+  /* 初始状态：完全透明、向下偏移、稍微缩小 */
+  transform: translateY(100%) scaleY(0.8);
+  transform-origin: bottom;
+  opacity: 0 !important;
+  visibility: hidden !important;
+
+  /* 关键：使用贝塞尔曲线模拟游戏的清脆感 */
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease-out,
+    visibility 0.4s;
+}
+
+/* 2. 显示态：恢复原状 */
+.bottom-popup.show {
+  transform: translateY(0) scaleY(1);
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* 3. 内部英雄卡片：入场动画 */
+.item-card {
+  opacity: 0;
+  transform: translateX(40rpx); /* 从右侧滑入 */
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 当父级 show 时，所有卡片滑入 */
+.bottom-popup.show .item-card {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 4. 为前几个英雄添加交错延迟（模拟逐个弹出的高级感） */
+.item-card:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.item-card:nth-child(2) {
+  transition-delay: 0.15s;
+}
+.item-card:nth-child(3) {
+  transition-delay: 0.2s;
+}
+.item-card:nth-child(4) {
+  transition-delay: 0.25s;
+}
+.item-card:nth-child(5) {
+  transition-delay: 0.3s;
+}
+
+/* 内部页眉：英雄选择标题 */
+.popup-header {
+  /* height: 100rpx; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40rpx;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 70, 85, 0.1) 0%,
+    transparent 100%
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.popup-header text {
+  color: #ece8e1;
+  font-size: 28rpx;
+  font-weight: 800;
+  /* text-transform: uppercase; */
+  letter-spacing: 4rpx;
+}
+
+/* 关闭按钮 */
+.close-btn {
+  width: 60rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  text-align: center;
+  color: rgba(236, 232, 225, 0.5);
+  font-size: 40rpx;
+  transition: color 0.2s;
+}
+
+.close-btn:active {
+  color: #ff4655;
+}
+
+/* 横向滚动区域 */
+.selector-view {
+  width: 100%;
+  white-space: nowrap;
+  /* padding: 40rpx 0; */
+  /* height: 300rpx; */
+}
+
+/* 英雄卡片 */
+.item-card {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 120rpx !important;
+  margin-left: 30rpx !important;
+  position: relative !important;
+}
+
+.item-card image {
+  width: 140rpx !important;
+  height: 140rpx !important;
+  background-color: #1f2326 !important;
+  border: 2rpx solid rgba(255, 255, 255, 0.1) !important;
+  /* 模拟游戏里的切角矩形头像框 */
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%) !important;
+  transition: all 0.3s !important;
+}
+
+.item-card text {
+  margin-top: 15rpx;
+  font-size: 22rpx;
+  color: #8b8b8b;
+  font-weight: bold;
+}
+
+/* 选中态：红色高亮 */
+.item-card.selected image {
+  border: 4rpx solid #ff4655;
+  background: linear-gradient(135deg, rgba(255, 70, 85, 0.3) 0%, #1f2326 100%);
+  transform: translateY(-10rpx);
+}
+
+.item-card.selected text {
+  color: #ff4655;
+}
+
+/* 卡片背后增加一个微弱的序号或装饰文本 */
+.item-card::before {
+  content: "//";
+  position: absolute;
+  top: -10rpx;
+  right: 20rpx;
+  font-size: 18rpx;
+  color: rgba(255, 70, 85, 0.3);
+}
+
+/* Tabs 样式 */
+.tabs-view {
+  padding: 10rpx 20rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  height: 60rpx;
+}
+.tab-item {
+  display: inline-block;
+  padding: 10rpx 30rpx;
+  color: #888;
+  font-size: 26rpx;
+  transition: all 0.3s;
+}
+.tab-item.active {
+  color: #ff4655;
+  font-weight: bold;
+  border-bottom: 4rpx solid #ff4655;
+}
+
+/* 底部炫彩条样式 */
+.chroma-bar-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 15rpx 30rpx;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+.chroma-tip {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-right: 20rpx;
+}
+.chroma-scroll {
+  flex: 1;
+  white-space: nowrap;
+}
+.chroma-dot {
+  display: inline-block;
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 2rpx solid transparent;
+  overflow: hidden;
+}
+.chroma-dot.active {
+  border-color: #ff4655;
+  transform: scale(1.1);
+}
+.swatch-img {
+  width: 100%;
+  height: 100%;
+}

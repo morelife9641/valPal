@@ -1,0 +1,72 @@
+<view class="container">
+    <view class="canvas-full-wrapper" style="{{canvasWrapperStyle}}">
+        <canvas type="2d" id="testCanvas" class="main-canvas"></canvas>
+        <!-- 左上：主要操作 -->
+        <view class="canvas-operation-left">
+            <view class="operation-container">
+                <button class="valo-btn valo-btn-primary" bindtap="togglePanel" data-type="hero">
+                    <text>英雄</text>
+                </button>
+                <view class="weapon-group {{weaponMenuExpanded ? 'expanded' : ''}}">
+                    <button class="valo-btn valo-btn-weapon" bindtap="toggleWeaponMenu">
+                        <text>装饰</text>
+                    </button>
+                    <view class="weapon-submenu-vertical">
+                        <button class="valo-sub-btn" bindtap="togglePanel" data-type="weapon">
+                            🔫
+                        </button>
+                        <button class="valo-sub-btn" bindtap="showStickerPanel">✨</button>
+                        <button class="valo-sub-btn" bindtap="clearDecorations">🗑️</button>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <!-- 右上：辅助操作 -->
+        <view class="canvas-operation-right">
+            <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
+                <text>⬆️</text>
+            </button>
+            <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
+                <text>⬇️</text>
+            </button>
+            <button class="valo-btn valo-btn-tertiary" bindtap="resetCanvas">
+                <text>重置</text>
+            </button>
+            <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
+                <text>保存</text>
+            </button>
+        </view>
+    </view>
+    <root-portal wx:if="{{showPopup}}">
+        <view class="portal-wrapper">
+            <view class="mask {{showPopup ? 'show' : ''}}" bindtap="togglePanel"></view>
+            <view class="bottom-popup {{showPopup ? 'show' : ''}}">
+                <!-- <view class="popup-header">
+                    <text>{{popupType === 'hero' ? '选择英雄' : '选择装饰'}}</text>
+                    <view class="close-btn" bindtap="togglePanel">✕</view>
+                </view> -->
+                <scroll-view scroll-x class="tabs-view" enhanced show-scrollbar="{{false}}">
+                    <view wx:for="{{popupTabs}}" wx:key="*this" class="tab-item {{currentTab === item ? 'active' : ''}}" bindtap="onTabChange" data-tab="{{item}}">
+                        {{item}}
+                    </view>
+                </scroll-view>
+                <scroll-view scroll-x class="selector-view" enhanced show-scrollbar="{{false}}" bindscrolltolower="loadMoreWeapons">
+                    <view class="item-list">
+                        <view wx:for="{{filteredList}}" wx:key="uuid" class="item-card {{popupType === 'hero' ? (currentAgent.uuid === item.uuid ? 'selected' : '') : (currentWeapon.uuid === item.uuid ? 'selected' : '')}}" bindtap="{{popupType === 'hero' ? 'selectAgent' : 'selectWeapon'}}" data-item="{{item}}">
+                            <image src="{{item.displayIconLocal || item.displayIcon}}" class="agent-icon" mode="aspectFit"></image>
+                            <text class="agent-name">{{item.displayName || item.skinName}}</text>
+                        </view>
+                    </view>
+                </scroll-view>
+                <view class="chroma-bar-wrapper" wx:if="{{popupType === 'weapon' && currentWeapon.chromas.length > 0}}">
+                    <text class="chroma-tip">切换颜色:</text>
+                    <scroll-view scroll-x class="chroma-scroll">
+                        <view wx:for="{{currentWeapon.chromas}}" wx:key="chromaUuid" class="chroma-dot {{tempChromaUuid === item.chromaUuid ? 'active' : ''}}" bindtap="changeChroma" data-chroma="{{item}}">
+                            <image src="{{item.swatch}}" class="swatch-img"></image>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+        </view>
+    </root-portal>
+</view>

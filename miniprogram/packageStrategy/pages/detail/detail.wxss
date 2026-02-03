@@ -1,0 +1,290 @@
+/* 基础容器：强制黑屏底色防止闪烁 */
+.detail-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #0f1923; /* 瓦罗兰特主背景色 */
+  overflow: hidden;
+  position: relative;
+  color: #ece8e1; /* 浅米色文字 */
+}
+
+/* 初始状态隐藏 */
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 准备就绪后的淡入动画 */
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.6s cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+
+.loading-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #0f1923;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.valorant-loader {
+  width: 80rpx;
+  height: 80rpx;
+  border: 4rpx solid rgba(255, 70, 85, 0.2);
+  border-top: 4rpx solid #ff4655; /* 瓦红 */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 30rpx;
+  font-size: 24rpx;
+  letter-spacing: 4rpx;
+  color: #ff4655;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.canvas-area {
+  width: 100%;
+  height: 65vh; /* 留出下方选择器空间 */
+  position: relative;
+  background-color: #000;
+}
+
+#mapCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.side-tools {
+  position: absolute;
+  right: 30rpx;
+  top: 10px; /* 避开状态栏 */
+  display: flex;
+  flex-direction: row; /* 横向排列 */
+  align-items: center;
+  gap: 0; /* 使用分割线代替间距 */
+  z-index: 100;
+
+  /* 瓦罗兰特黑红配色 */
+  background: rgba(15, 25, 35, 0.85);
+  border: 1rpx solid rgba(255, 70, 85, 0.6);
+  border-radius: 4rpx;
+  padding: 2rpx 2rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px); /* 背景模糊，增加高级感 */
+}
+
+.tool-item {
+  display: flex;
+  flex-direction: row; /* 图标文字横向排列，更省空间 */
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 10rpx;
+  transition: all 0.2s;
+}
+
+.tool-item .icon {
+  font-size: 32rpx;
+  margin-right: 18rpx;
+}
+.tool-label {
+  font-size: 22rpx;
+  color: #ece8e1;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+/* 分割线 */
+.tool-divider {
+  width: 1rpx;
+  height: 30rpx;
+  background: #fff;
+  margin: 0 10rpx;
+}
+
+/* 点击反馈 */
+.tool-item-hover {
+  background: rgba(255, 70, 85, 0.2);
+  transform: scale(0.95);
+}
+
+.tool-item:active .tool-label {
+  color: #ff4655;
+}
+
+.mode-switch {
+  display: flex;
+  justify-content: center;
+  padding: 20rpx 0;
+  background: #16191d;
+}
+
+.mode-btn {
+  padding: 12rpx 40rpx;
+  margin: 0 10rpx;
+  font-size: 26rpx;
+  color: #888;
+  border: 1rpx solid #333;
+  transition: 0.3s;
+}
+
+.mode-btn.active {
+  background: #ff4655;
+  color: #fff;
+  border-color: #ff4655;
+}
+
+.bottom-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx 30rpx;
+  gap: 20rpx;
+  background: linear-gradient(to top, #0f1923, transparent);
+}
+
+.primary-btn {
+  flex: 1;
+  height: 40rpx;
+  line-height: 90rpx;
+  font-size: 28rpx;
+  font-weight: 800;
+  border-radius: 0; /* 瓦罗兰特倾向于方正设计 */
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 💾 保存按钮：经典红色 */
+.save-btn {
+  background-color: #ff4655;
+  color: #fff;
+  box-shadow: 0 4rpx 20rpx rgba(255, 70, 85, 0.4);
+}
+
+/* 🔗 分享按钮：浅色对比 */
+.share-btn {
+  background-color: #ece8e1;
+  color: #0f1923;
+}
+
+.primary-btn:active {
+  opacity: 0.8;
+  transform: translateY(2rpx);
+}
+
+/* 分类容器 */
+.icon-selector-container {
+  background: #111; /* 极深灰，区分于纯黑底图 */
+  padding-bottom: 140rpx;
+  border-top: 1rpx solid #333;
+}
+
+/* 角色 Tabs 样式 */
+.role-selector {
+  display: flex;
+  padding: 10rpx 20rpx;
+  background: #1a1a1a;
+  border-bottom: 1rpx solid #222;
+}
+
+.role-tab {
+  font-size: 22rpx;
+  color: #888;
+  padding: 8rpx 24rpx;
+  margin-right: 15rpx;
+  border-radius: 4rpx;
+  transition: all 0.2s;
+}
+
+.role-tab.active {
+  color: #fff;
+  background: #ff4655; /* 瓦罗兰特红 */
+  font-weight: bold;
+}
+
+/* 英雄头像列表瘦身 */
+.agent-scroll {
+  white-space: nowrap;
+  padding: 12rpx 0;
+  height: 90rpx;
+}
+
+.agent-item {
+  display: inline-block;
+  width: 70rpx;
+  height: 70rpx;
+  margin: 4rpx 12rpx;
+  border: 2rpx solid #333;
+  opacity: 0.6;
+}
+
+.agent-item.active {
+  border-color: #ff4655;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.agent-item image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 技能选择器微调 */
+.ability-scroll {
+  /* height: 120rpx; */
+}
+.ability-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140rpx;
+  animation: abilityFadeIn 0.3s ease-out;
+}
+@keyframes abilityFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.ability-item image {
+  width: 70rpx;
+  height: 70rpx;
+  background: #2a2f36;
+  padding: 10rpx;
+  margin-bottom: 8rpx;
+}
+.ability-item.active image {
+  background: rgba(255, 70, 85, 0.2);
+  border: 2rpx solid #ff4655;
+}
+.ability-item text {
+  font-size: 22rpx;
+  color: #888;
+}
+.ability-item.active text {
+  color: #fff;
+}
