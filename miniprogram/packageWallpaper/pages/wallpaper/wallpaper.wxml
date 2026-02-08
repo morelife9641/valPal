@@ -1,11 +1,15 @@
 <view class="container">
     <view class="canvas-full-wrapper" style="{{canvasWrapperStyle}}">
-        <canvas type="2d" id="testCanvas" class="main-canvas"></canvas>
+        <!-- <canvas type="2d" id="testCanvas" class="main-canvas"></canvas> -->
+        <canvas type="2d" id="testCanvas" class="main-canvas" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" disable-scroll="true"></canvas>
         <!-- 左上：主要操作 -->
         <view class="canvas-operation-left">
             <view class="operation-container">
                 <button class="valo-btn valo-btn-primary" bindtap="togglePanel" data-type="hero">
                     <text>英雄</text>
+                </button>
+                <button class="valo-btn valo-btn-primary" bindtap="toggleCardsPanel" data-type="hero">
+                    <text>背景</text>
                 </button>
                 <view class="weapon-group {{weaponMenuExpanded ? 'expanded' : ''}}">
                     <button class="valo-btn valo-btn-weapon" bindtap="toggleWeaponMenu">
@@ -35,16 +39,16 @@
             <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
                 <text>保存</text>
             </button>
+            <button class="valo-btn valo-btn-secondary" bindtap="openSaveModal">
+                <text>上传</text>
+            </button>
         </view>
     </view>
-    <root-portal wx:if="{{showPopup}}">
+    <!-- 拆 -->
+    <root-portal wx:if="{{showPopup && popupType === 'weapon'}}">
         <view class="portal-wrapper">
             <view class="mask {{showPopup ? 'show' : ''}}" bindtap="togglePanel"></view>
             <view class="bottom-popup {{showPopup ? 'show' : ''}}">
-                <!-- <view class="popup-header">
-                    <text>{{popupType === 'hero' ? '选择英雄' : '选择装饰'}}</text>
-                    <view class="close-btn" bindtap="togglePanel">✕</view>
-                </view> -->
                 <scroll-view scroll-x class="tabs-view" enhanced show-scrollbar="{{false}}">
                     <view wx:for="{{popupTabs}}" wx:key="*this" class="tab-item {{currentTab === item ? 'active' : ''}}" bindtap="onTabChange" data-tab="{{item}}">
                         {{item}}
@@ -52,19 +56,84 @@
                 </scroll-view>
                 <scroll-view scroll-x class="selector-view" enhanced show-scrollbar="{{false}}" bindscrolltolower="loadMoreWeapons">
                     <view class="item-list">
-                        <view wx:for="{{filteredList}}" wx:key="uuid" class="item-card {{popupType === 'hero' ? (currentAgent.uuid === item.uuid ? 'selected' : '') : (currentWeapon.uuid === item.uuid ? 'selected' : '')}}" bindtap="{{popupType === 'hero' ? 'selectAgent' : 'selectWeapon'}}" data-item="{{item}}">
+                        <view wx:for="{{filteredList}}" wx:key="uuid" class="item-card {{currentWeapon.uuid === item.uuid ? 'selected' : ''}}" bindtap="selectWeapon" data-item="{{item}}">
                             <image src="{{item.displayIconLocal || item.displayIcon}}" class="agent-icon" mode="aspectFit"></image>
-                            <text class="agent-name">{{item.displayName || item.skinName}}</text>
+                            <text class="agent-name">{{item.skinName}}</text>
                         </view>
                     </view>
                 </scroll-view>
-                <view class="chroma-bar-wrapper" wx:if="{{popupType === 'weapon' && currentWeapon.chromas.length > 0}}">
+                <view class="chroma-bar-wrapper" wx:if="{{currentWeapon && currentWeapon.chromas.length > 0}}">
                     <text class="chroma-tip">切换颜色:</text>
                     <scroll-view scroll-x class="chroma-scroll">
                         <view wx:for="{{currentWeapon.chromas}}" wx:key="chromaUuid" class="chroma-dot {{tempChromaUuid === item.chromaUuid ? 'active' : ''}}" bindtap="changeChroma" data-chroma="{{item}}">
                             <image src="{{item.swatch}}" class="swatch-img"></image>
                         </view>
                     </scroll-view>
+                </view>
+            </view>
+        </view>
+    </root-portal>
+    <!-- 背景选择 -->
+    <root-portal wx:if="{{showCardPanel}}">
+        <view class="card-modal">
+            <view class="modal-mask" bindtap="closeCardPanel"></view>
+            <view class="modal-content {{showCardPanel ? 'up' : ''}}">
+                <!-- <view class="modal-header">
+                    <text class="title">选择背景卡面</text>
+                    <view class="close-btn" bindtap="closeCardPanel">DONE</view>
+                </view> -->
+                <view class="search-box">
+                    <input class="search-input" placeholder="搜索卡面..." bindinput="onSearchCard" value="{{searchQuery}}" placeholder-style="color:rgba(255,255,255,0.3)" />
+                </view>
+                <scroll-view scroll-y class="card-scroll" enable-flex>
+                    <view class="card-grid-item {{!usePlayerCard ? 'active' : ''}}" bindtap="resetToHeroBg">
+                        <view class="card-thumb default-bg">
+                            <view class="icon-reset"></view>
+                        </view>
+                        <text class="card-label">原厂背景</text>
+                    </view>
+                    <view wx:for="{{filteredCards}}" wx:key="uuid" class="card-grid-item {{usePlayerCard && currentCard.uuid === item.uuid ? 'active' : ''}}" bindtap="selectPlayerCard" data-card="{{item}}">
+                        <image class="card-thumb" src="{{item.largeArt}}" mode="aspectFill" lazy-load></image>
+                        <text class="card-label">{{item.displayName}}</text>
+                        <view class="active-dot" wx:if="{{currentCard.uuid === item.uuid}}"></view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
+    </root-portal>
+    <!-- 特工选择 -->
+    <agent-selector show="{{showPopup && popupType === 'hero'}}" currentAgentUuid="{{currentAgent.uuid}}" bind:close="togglePanel" bind:select="selectAgent" />
+    <root-portal wx:if="{{showSaveModal}}">
+        <view class="save-modal-wrapper">
+            <view class="modal-mask" bindtap="closeSaveModal"></view>
+            <view class="modal-content">
+                <view class="modal-header">
+                    <view class="v-line"></view>
+                    <text class="modal-title">保存方案</text>
+                </view>
+                <view class="input-section">
+                    <text class="input-label">方案名称 (必填)</text>
+                    <input class="valo-input" placeholder="输入搭配名称..." bindinput="onNameInput" value="{{presetName}}" maxlength="20" />
+                </view>
+                <view class="tag-section">
+                    <text class="input-label">选择标签</text>
+                    <wxs module="tools">
+  module.exports = {
+    contains: function(arr, val) {
+      if (!arr || !arr.indexOf) return false;
+      return arr.indexOf(val) !== -1;
+    }
+  }
+</wxs>
+                    <view class="tag-list">
+                        <view wx:for="{{availableTags}}" wx:key="*this" class="tag-item {{tools.contains(selectedTags, item) ? 'active' : ''}}" bindtap="toggleTag" data-tag="{{item}}">
+                            {{item}}
+                        </view>
+                    </view>
+                </view>
+                <view class="modal-footer">
+                    <button class="modal-btn cancel" bindtap="closeSaveModal">取消</button>
+                    <button class="modal-btn confirm" bindtap="submitPreset">确认入库</button>
                 </view>
             </view>
         </view>

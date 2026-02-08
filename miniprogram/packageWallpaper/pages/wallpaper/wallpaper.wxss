@@ -432,3 +432,249 @@ canvas[canvas-id="testCanvas"] {
   width: 100%;
   height: 100%;
 }
+
+/* 保存方案弹窗 */
+.save-modal-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 25, 35, 0.85);
+  backdrop-filter: blur(10px);
+}
+.modal-content {
+  box-sizing: border-box;
+  position: relative;
+  width: 600rpx;
+  background: #0f1923;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  padding: 40rpx 0;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+.v-line {
+  width: 6rpx;
+  height: 30rpx;
+  background: #ff4655;
+  margin-right: 15rpx;
+}
+.modal-title {
+  color: #ece8e1;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+  font-size: 28rpx;
+}
+
+.input-label {
+  font-size: 20rpx;
+  color: #8b9196;
+  margin-bottom: 15rpx;
+  display: block;
+  text-transform: uppercase;
+}
+.valo-input {
+  background: #1f2326;
+  border: 1rpx solid #383e42;
+  padding: 20rpx;
+  color: #ece8e1;
+  font-size: 26rpx;
+  margin-bottom: 30rpx;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15rpx;
+  margin-bottom: 40rpx;
+}
+.tag-item {
+  padding: 10rpx 25rpx;
+  font-size: 22rpx;
+  color: #8b9196;
+  background: #1f2326;
+  border: 1rpx solid #383e42;
+  transition: all 0.2s;
+}
+.tag-item.active {
+  background: rgba(255, 70, 85, 0.1);
+  border-color: #ff4655;
+  color: #ff4655;
+  font-weight: bold;
+  box-shadow: 0 0 10rpx rgba(255, 70, 85, 0.2);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20rpx;
+}
+.modal-btn {
+  flex: 1;
+  height: 80rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  border: none;
+}
+.modal-btn.cancel {
+  background: #383e42;
+  color: #ece8e1;
+}
+.modal-btn.confirm {
+  background: #ff4655;
+  color: #fff;
+}
+
+/* 卡面逻辑 */
+/* 容器与遮罩 */
+.card-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.modal-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+/* 弹出内容：高度占 70% */
+.modal-content {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  background: #0f1923; /* 瓦罗兰特深蓝黑 */
+  border-top: 4rpx solid #ff4655;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-content.up {
+  transform: translateY(0);
+}
+
+/* 头部 */
+.modal-header {
+  padding: 30rpx 40rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header .title {
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+.close-btn {
+  color: #ff4655;
+  font-size: 24rpx;
+  font-weight: 900;
+}
+
+/* 搜索框 */
+.search-box {
+  padding: 0 40rpx 20rpx;
+}
+
+.search-input {
+  height: 70rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 30rpx;
+  color: #fff;
+  font-size: 24rpx;
+}
+
+/* 列表网格：一行四个 */
+.card-scroll {
+  flex: 1;
+  padding: 10rpx 20rpx;
+  display: flex;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  height: 1px; /* 微信小程序中 flex:1 配合 height:1px 才能正确触发 scroll-view 滚动 */
+}
+
+.card-grid-item {
+  width: 25%; /* 一行四个 */
+  padding: 10rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20rpx;
+}
+
+.card-thumb {
+  width: 100%;
+  height: 220rpx; /* 纵向比例，适合在网格中展示卡面精髓 */
+  background: #1f2326;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.card-grid-item.active .card-thumb {
+  border-color: #ff4655;
+  box-shadow: 0 0 15rpx rgba(255, 70, 85, 0.4);
+}
+
+.card-label {
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  color: #8b978f;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 默认背景图标 */
+.default-bg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #1f2326, #363c42);
+}
+
+.icon-reset {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #ff4655;
+  border-radius: 50%;
+  position: relative;
+}
+
+.active-dot {
+  position: absolute;
+  top: 15rpx;
+  right: 15rpx;
+  width: 12rpx;
+  height: 12rpx;
+  background: #ff4655;
+  border-radius: 50%;
+  box-shadow: 0 0 10rpx #ff4655;
+}

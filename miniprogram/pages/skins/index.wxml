@@ -1,1 +1,117 @@
-<view class="container">1</view>
+<!-- <template is="skeleton" wx:if="{{loading}}" /> -->
+<view wx:if="{{loading}}" class="skeleton-container">
+    <view class="sk-header">
+        <view class="sk-btn" wx:for="{{3}}" wx:key="index"></view>
+    </view>
+    <view class="sk-card" wx:for="{{4}}" wx:key="index">
+        <view class="sk-badge"></view>
+        <view class="sk-content">
+            <view class="sk-line long"></view>
+            <view class="sk-line short"></view>
+        </view>
+        <view class="sk-scan"></view>
+    </view>
+</view>
+<view class="preset-container" wx:else>
+    <view class="header-filter-row">
+        <view class="filter-btns">
+            <view class="filter-view-btn {{isFavoriteOnly ? 'active' : ''}}" bindtap="toggleFavoriteFilter">
+                <view class="btn-content">
+                    <text class="btn-label">收藏</text>
+                    <text class="btn-value">{{isFavoriteOnly ? '收藏' : '全部'}}</text>
+                </view>
+            </view>
+            <view class="filter-view-btn {{filterAgent.uuid ? 'active' : ''}}" bindtap="openFilter" data-type="hero">
+                <view class="btn-content">
+                    <text class="btn-label">特工</text>
+                    <text class="btn-value">{{filterAgent.displayName || '全部'}}</text>
+                </view>
+                <view wx:if="{{filterAgent.uuid}}" class="clear-icon" catchtap="clearAgentFilter">
+                    ✕
+                </view>
+            </view>
+            <view class="filter-view-btn {{filterTag !== '全部' ? 'active' : ''}}" bindtap="openFilter" data-type="tag">
+                <view class="btn-content">
+                    <text class="btn-label">标签</text>
+                    <text class="btn-value">{{filterTag || 'ALL'}}</text>
+                </view>
+                <view wx:if="{{filterTag !== '全部'}}" class="clear-icon" catchtap="clearTagFilter">
+                    ✕
+                </view>
+            </view>
+        </view>
+        <view class="add-btn-wrap" bindtap="goToEditor">
+            <view class="add-icon">+</view>
+        </view>
+    </view>
+    <scroll-view scroll-y class="preset-scroll" bindscrolltolower="loadMore" enhanced show-scrollbar="{{false}}">
+        <!-- <view wx:if="{{presets.length === 0}}" class="empty-tip">NO PRESETS FOUND / 暂无方案</view> -->
+        <view wx:if="{{presets.length === 0}}" class="presets-empty-container">
+            <view class="tactical-frame">
+                <view class="corner-t-l"></view>
+                <view class="corner-t-r"></view>
+                <view class="corner-b-l"></view>
+                <view class="corner-b-r"></view>
+                <view class="empty-icon-wrapper">
+                    <view class="pulse-ring"></view>
+                    <view class="central-dot"></view>
+                    <view class="scan-line-v"></view>
+                </view>
+            </view>
+            <view class="text-group">
+                <text class="empty-main-title">暂无数据</text>
+                <!-- <text class="empty-sub-title">系统未检索到相关的方案数据</text> -->
+                <view class="deco-bar"></view>
+            </view>
+        </view>
+        <view wx:for="{{presets}}" wx:key="_id" class="preset-card" bindtap="viewDetail" data-id="{{item._id}}">
+            <image src="{{item.snapshot}}" mode="aspectFill" class="card-snapshot-bg" lazy-load></image>
+            <!-- <view class="card-overlay" style="background: linear-gradient(to top, #{{item.agent.backgroundGradientColors[0]}} 0%, #{{item.agent.backgroundGradientColors[1]}} 35%, #{{item.agent.backgroundGradientColors[2]}}66 60%, transparent 100%);"> -->
+            <view class="card-overlay" style="background: linear-gradient(to right, #{{item.agent.backgroundGradientColors[0]}}ff 0%, #{{item.agent.backgroundGradientColors[1]}}cc 30%, #{{item.agent.backgroundGradientColors[2]}}44 60%, transparent 90%);">
+                <view class="card-top">
+                    <view class="agent-badge">
+                        <image src="{{item.localAvatar}}" class="badge-icon"></image>
+                        <text>{{item.agent.name}}</text>
+                    </view>
+                    <view class="favorite-star {{item.isFavorite ? 'active' : ''}}" catchtap="toggleFavorite" data-id="{{item._id}}">
+                        {{item.isFavorite ? '★' : '☆'}}
+                    </view>
+                </view>
+                <view class="card-bottom">
+                    <view class="main-info">
+                        <text class="p-name">{{item.name}}</text>
+                        <view class="p-tags">
+                            <view class="tag-item" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">
+                                {{tag}}
+                            </view>
+                        </view>
+                    </view>
+                    <view class="meta-info">
+                        <text>EQUIPPED：{{item.weapons.length}}</text>
+                        <text>{{item.dateStr}}</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view class="load-more-tip">
+            <text wx:if="{{hasMore}}"></text>
+            <text wx:elif="{{presets.length > 0}}">已显示全部</text>
+        </view>
+    </scroll-view>
+</view>
+<!-- 选英雄 -->
+<agent-selector show="{{showPopup && popupType === 'hero'}}" currentAgentUuid="{{filterAgent.uuid || ''}}" bind:close="togglePopup" bind:select="onFilterSelect" />
+<!-- 选tag -->
+<root-portal wx:if="{{showPopup && popupType === 'tag'}}">
+    <view class="portal-wrapper">
+        <view class="mask {{showPopup ? 'show' : ''}}" bindtap="togglePopup"></view>
+        <view class="bottom-popup tag-popup-height {{showPopup ? 'show' : ''}}">
+            <view class="item-list tag-list-gap">
+                <view wx:for="{{popupList}}" wx:key="*this" class="tag-chip {{filterTag === item ? 'selected' : ''}}" bindtap="onTagSelect" data-tag="{{item}}">
+                    <text class="tag-hash">#</text>
+                    <text class="tag-text">{{item}}</text>
+                </view>
+            </view>
+        </view>
+    </view>
+</root-portal>

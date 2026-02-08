@@ -1,4 +1,7 @@
 const db = wx.cloud.database();
+import { availableTags } from "../../../config/tags";
+import { PLAYER_CARDS } from "../../../config/player_cards_index";
+
 const WEAPON_MAP = {
   近战: "melee",
   标配: "classic",
@@ -19,6 +22,16 @@ const WEAPON_MAP = {
   冥驹: "operator",
   战神: "ares",
   奥丁: "odin",
+};
+
+// 在 Page 外定义，存图片对象
+let ImageCache = {
+  bg: null,
+  hero: null,
+  weapons: {},
+  lastBgSrc: "",
+  lastHeroSrc: "",
+  lastWeaponSrc: "",
 };
 
 Page({
@@ -64,7 +77,6 @@ Page({
     weaponCache: {},
     popupTabs: [],
     filteredList: [],
-    currentTab: "",
 
     // --- 弹窗与过滤逻辑 ---
     currentTab: "全部",
@@ -84,145 +96,121 @@ Page({
     isWeaponOver: false,
     canUndo: false,
     canRedo: false,
+
+    activeWeapons: [], // 存储当前画布上所有的武器对象
+    selectedWeaponIndex: -1, // 当前正在拖拽或选中的武器索引
+
+    //首图数据
+    currentAgent: {
+      uuid: "e370fa57-4757-3604-3648-499e1f642d3f",
+      displayName: "盖可",
+      role: "先锋",
+      bustPortrait:
+        "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/agents/portraits/e370fa57-4757-3604-3648-499e1f642d3f.webp",
+      background:
+        "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/agents/backgrounds/e370fa57-4757-3604-3648-499e1f642d3f.webp",
+      backgroundGradientColors: [
+        "371c5cff",
+        "0f1923ff",
+        "3a2656ff",
+        "0f192300",
+      ],
+    },
+    canvasWrapperStyle:
+      "background: linear-gradient(to bottom, rgba(55, 28, 92, 1), rgba(15, 25, 35, 1));", // 初始背景色
+
+    // 保存弹窗
+    showSaveModal: false,
+    presetName: "",
+    selectedTags: [],
+    availableTags: availableTags,
+
+    //选择背景
+    activePanel: null, // 当前打开的面板类型
+    searchQuery: "",
+    allCards: PLAYER_CARDS,
+    filteredCards: PLAYER_CARDS.slice(0, 50), // 初始只渲染前50个，防止卡顿
+    usePlayerCard: false, // 是否使用玩家卡面
+    currentCard: null, // 当前选中的卡面对象
   },
 
   onReady() {
-    this.setData({ systemInfo: wx.getSystemInfoSync() });
-
-    // 获取 Canvas 2D 实例
     const query = wx.createSelectorQuery();
     query
       .select("#testCanvas")
       .fields({ node: true, size: true })
-      .exec((res) => {
+      .exec(async (res) => {
         const canvas = res[0].node;
         const ctx = canvas.getContext("2d");
-
-        // 处理高清屏适配
-        const dpr = wx.getSystemInfoSync().pixelRatio;
-        canvas.width = res[0].width * dpr;
-        canvas.height = res[0].height * dpr;
-        ctx.scale(dpr, dpr);
-
-        this.canvasNode = canvas; // 存储节点供保存时使用
-        this.canvasCtx = ctx; // 存储上下文
-        this.loadData();
-      });
-  },
-
-  // 你的初始化 canvas 方法（可能在 onReady 或其他地方）
-  onReady() {
-    const query = wx.createSelectorQuery();
-    query
-      .select("#testCanvas")
-      .fields({ node: true, size: true })
-      .exec((res) => {
-        const canvas = res[0].node;
-        const ctx = canvas.getContext("2d");
-
         const dpr = wx.getSystemInfoSync().pixelRatio;
         const { windowWidth, windowHeight } = wx.getSystemInfoSync();
 
-        // 关键：设置 canvas 实际尺寸
         canvas.width = windowWidth * dpr;
         canvas.height = windowHeight * dpr;
-
-        // 缩放上下文以匹配设备像素比
         ctx.scale(dpr, dpr);
 
         this.canvasNode = canvas;
         this.canvasCtx = ctx;
         this.setData({ systemInfo: wx.getSystemInfoSync() });
 
-        // 初始绘制
-        this.drawWithLocalFiles();
-        this.loadData();
+        // --- 关键：先加载数据/触发下载，不要一上来就画 ---
+        // 1. 初始化列表
+        // this.initAgentCategories();
+
+        // 2. 触发第一个英雄的下载（这会调用 downloadFileToLocal 并最终触发绘制）
+        this.selectAgent(this.data.currentAgent);
       });
   },
 
   async loadData() {
     try {
-      wx.showLoading({ title: "同步英雄资源..." });
+      wx.showLoading({ title: "同步英雄数据..." });
 
-      // --- 1. 获取全量英雄数据 (处理分页) ---
+      // 1. 只获取文本数据 (处理分页)
       const agentCount = await db.collection("agents").count();
-      const MAX_LIMIT = 20;
-      const batchTimes = Math.ceil(agentCount.total / MAX_LIMIT);
+      const batchTimes = Math.ceil(agentCount.total / 20);
       const tasks = [];
-
       for (let i = 0; i < batchTimes; i++) {
-        const promise = db
-          .collection("agents")
-          .skip(i * MAX_LIMIT)
-          .limit(MAX_LIMIT)
-          .get();
-        tasks.push(promise);
+        tasks.push(
+          db
+            .collection("agents")
+            .skip(i * 20)
+            .limit(20)
+            .get(),
+        );
       }
-
       const results = await Promise.all(tasks);
       const allAgentsRaw = results.reduce(
         (acc, cur) => acc.concat(cur.data),
         [],
       );
 
-      // --- 2. 预处理：下载图片并转换本地路径 ---
-      // 这里确保了 drawWithLocalFiles 使用的是下载好的路径
-      const agentsWithLocal = await Promise.all(
-        allAgentsRaw.map(async (agent) => {
-          // 下载背景图
-          const backgroundLocal = await this.downloadFileToLocal(
-            agent.background,
-          );
-          // 下载英雄半身像
-          const portraitLocal = await this.downloadFileToLocal(
-            agent.bustPortrait,
-          );
-          // 下载英雄图标 (弹窗用)
-          const iconLocal = await this.downloadFileToLocal(agent.displayIcon);
-
-          return {
-            ...agent,
-            backgroundLocal: backgroundLocal,
-            bustPortraitLocal: portraitLocal,
-            displayIconLocal: iconLocal,
-          };
-        }),
-      );
-
-      // --- 3. 分类装箱逻辑 (用于弹窗 Tabs) ---
+      // 2. 分类逻辑 (保持不变，因为这只是纯对象操作)
       const heroRoles = [
-        ...new Set(agentsWithLocal.map((a) => a.role.displayName)),
+        ...new Set(allAgentsRaw.map((a) => a.role.displayName)),
       ];
-      const heroMap = { 全部: agentsWithLocal };
-
-      heroRoles.forEach((roleName) => {
-        heroMap[roleName] = agentsWithLocal.filter(
-          (a) => a.role.displayName === roleName,
-        );
+      const heroMap = { 全部: allAgentsRaw };
+      heroRoles.forEach((role) => {
+        heroMap[role] = allAgentsRaw.filter((a) => a.role.displayName === role);
       });
 
-      // --- 4. 一次性同步状态并设置初始数据 ---
+      // 3. 设置数据 (此时 UI 的列表已经能出来了)
       this.setData({
-        allAgents: agentsWithLocal, // 全量数据
-        heroTabs: ["全部", ...heroRoles], // 弹窗 Tabs
-        heroMap: heroMap, // 分类 Map
-        filteredList: agentsWithLocal, // 弹窗初始展示列表
-        currentTab: "全部", // 初始 Tab 状态
+        allAgents: allAgentsRaw,
+        heroTabs: ["全部", ...heroRoles],
+        heroMap: heroMap,
+        filteredList: allAgentsRaw,
       });
 
-      // --- 5. 核心：执行默认选中并触发 Canvas 绘制 ---
-      if (agentsWithLocal.length > 0) {
-        const defaultAgent = agentsWithLocal[0];
-        // 调用 selectAgent 处理背景色计算并执行 drawWithLocalFiles
-        this.selectAgent(defaultAgent);
+      // 4. 默认选中第一个 (在 selectAgent 内部执行下载)
+      if (allAgentsRaw.length > 0) {
+        this.selectAgent(allAgentsRaw[0]);
       }
 
       wx.hideLoading();
-      console.log(`英雄数据初始化成功，共 ${agentsWithLocal.length} 条数据`);
     } catch (err) {
-      console.error("Agent loadData 失败:", err);
+      console.error("loadData 失败:", err);
       wx.hideLoading();
-      wx.showToast({ title: "资源加载失败", icon: "none" });
     }
   },
 
@@ -306,81 +294,119 @@ Page({
    * 核心工具：下载云存储图片到本地（兼容所有版本）
    * 返回本地临时文件路径 wxfile:// 开头
    */
+
   downloadFileToLocal(cloudPath) {
-    return new Promise((resolve, reject) => {
-      // 非云存储路径直接返回
-      if (!cloudPath || !cloudPath.startsWith("cloud://")) {
-        resolve(cloudPath);
+    return new Promise((resolve) => {
+      // 注意：这里只传 resolve，不传 reject
+      if (!cloudPath) return resolve(null);
+
+      // 如果已经是本地路径，直接返回
+      if (
+        cloudPath.startsWith("http://tmp") ||
+        cloudPath.startsWith("wxfile://")
+      ) {
+        return resolve(cloudPath);
+      }
+
+      if (!cloudPath.startsWith("cloud://")) {
+        // 处理普通 HTTP 路径的下载
+        wx.downloadFile({
+          url: cloudPath,
+          success: (res) =>
+            resolve(res.statusCode === 200 ? res.tempFilePath : null),
+          fail: () => resolve(null),
+        });
         return;
       }
 
-      // 第一步：把cloud://转临时HTTP链接
+      // 处理云路径
       wx.cloud.getTempFileURL({
         fileList: [cloudPath],
         success: (res) => {
-          const tempUrl = res.fileList[0].tempFileURL;
-          if (!tempUrl) {
-            reject(new Error(`临时链接获取失败：${cloudPath}`));
-            return;
+          const file = res.fileList[0];
+          // 关键：如果 status 不是 0 或者 tempUrl 为空，说明云端文件有问题
+          if (!file || !file.tempFileURL || file.status !== 0) {
+            console.warn(`⚠️ 云端资源失效或不存在: ${cloudPath}`);
+            return resolve(null); // 优雅返回 null，不报错
           }
 
-          // 第二步：下载临时链接的图片到本地
           wx.downloadFile({
-            url: tempUrl,
+            url: file.tempFileURL,
             success: (downloadRes) => {
-              // 下载成功返回本地路径
-              resolve(downloadRes.tempFilePath);
+              resolve(
+                downloadRes.statusCode === 200
+                  ? downloadRes.tempFilePath
+                  : null,
+              );
             },
-            fail: (err) => {
-              console.error(`图片下载失败：${tempUrl}`, err);
-              reject(err);
-            },
+            fail: () => resolve(null),
           });
         },
-        fail: (err) => {
-          console.error(`临时链接转换失败：${cloudPath}`, err);
-          reject(err);
-        },
+        fail: () => resolve(null),
       });
     });
   },
 
-  selectAgent(e) {
-    // 兼容：如果是点击触发，从 dataset 拿；如果是 loadData 自动触发，直接用传入的对象
-    const agent = e.currentTarget ? e.currentTarget.dataset.item : e;
-
-    if (!agent) {
-      console.error("未找到英雄数据");
-      return;
+  async selectAgent(e) {
+    console.log(e);
+    let agent = null;
+    if (e.detail && e.detail.item) {
+      agent = e.detail.item;
+    } else if (e.currentTarget && e.currentTarget.dataset.item) {
+      agent = e.currentTarget.dataset.item;
+    } else {
+      agent = e;
     }
 
-    // 处理渐变背景样式
+    // const agent = e.currentTarget ? e.currentTarget.dataset.item : e;
+    if (!agent) return;
+
+    // --- 1. 处理渐变背景样式 (纯计算，先行设置) ---
     let gradientStyle = "";
-    if (
-      agent.backgroundGradientColors &&
-      agent.backgroundGradientColors.length > 0
-    ) {
+    if (agent.backgroundGradientColors?.length > 0) {
       const colors = agent.backgroundGradientColors.map((color) => {
-        // 瓦罗兰特颜色格式通常是 rrggbbaa
-        const r = parseInt(color.substr(0, 2), 16);
-        const g = parseInt(color.substr(2, 2), 16);
-        const b = parseInt(color.substr(4, 2), 16);
-        const a = parseInt(color.substr(6, 2), 16) / 255;
+        const r = parseInt(color.substr(0, 2), 16),
+          g = parseInt(color.substr(2, 2), 16),
+          b = parseInt(color.substr(4, 2), 16),
+          a = parseInt(color.substr(6, 2), 16) / 255;
         return `rgba(${r}, ${g}, ${b}, ${a})`;
       });
       gradientStyle = `background: linear-gradient(to bottom, ${colors.join(", ")});`;
     }
 
+    // --- 2. 核心：检查是否需要下载图片 (Lazy Load) ---
+    // 如果没有 backgroundLocal，说明是第一次切换到该英雄
+    if (!agent.backgroundLocal || !agent.bustPortraitLocal) {
+      wx.showLoading({ title: "加载英雄立绘...", mask: true });
+
+      // 下载该英雄特有的资源
+      const [bgLocal, portraitLocal] = await Promise.all([
+        this.downloadFileToLocal(agent.background),
+        this.downloadFileToLocal(agent.bustPortrait),
+      ]);
+
+      // 更新该英雄在内存中的数据，这样下次点就不走这里了
+      agent.backgroundLocal = bgLocal;
+      agent.bustPortraitLocal = portraitLocal;
+
+      // 同步更新全量列表中的该项（可选，保持数据一致性）
+      const index = this.data.allAgents.findIndex((a) => a.uuid === agent.uuid);
+      if (index !== -1) {
+        this.setData({ [`allAgents[${index}]`]: agent });
+      }
+
+      wx.hideLoading();
+    }
+
+    // --- 3. 设置当前选中的英雄并重绘 ---
     this.setData(
       {
         currentAgent: agent,
         canvasWrapperStyle: gradientStyle,
       },
       () => {
-        // 确保数据设置成功后，立刻调用画布绘制
-        if (this.drawWithLocalFiles) {
-          this.drawWithLocalFiles();
-        }
+        // 此时图片路径已是本地/缓存路径，绘制会非常丝滑
+        this.drawWithLocalFiles();
       },
     );
   },
@@ -411,82 +437,106 @@ Page({
   },
 
   async drawWithLocalFiles() {
-    console.log("🚀 [Canvas] 开始重绘...");
-    if (!this.canvasCtx || !this.canvasNode) {
-      console.log("🛠 [真机修复] 尝试重新初始化 Canvas 实例...");
-      const res = await new Promise((resolve) => {
-        const query = wx.createSelectorQuery();
-        query
-          .select("#mainCanvas")
-          .fields({ node: true, size: true })
-          .exec((res) => resolve(res[0]));
-      });
-      if (res) {
-        this.canvasNode = res.node;
-        this.canvasCtx = res.node.getContext("2d");
-        // 重要：真机必须重新设置画布宽高，否则会黑屏
-        const dpr = wx.getSystemInfoSync().pixelRatio;
-        this.canvasNode.width = res.width * dpr;
-        this.canvasNode.height = res.height * dpr;
-        this.canvasCtx.scale(dpr, dpr);
-      }
-    }
-
     const ctx = this.canvasCtx;
-    // 【核心】必须每次重绘都从 data 实时获取最新快照
-    const { currentAgent, currentWeapon, systemInfo, weaponTransform } =
-      this.data;
+    const { currentAgent, activeWeapons, systemInfo } = this.data;
 
-    if (!ctx || !this.canvasNode || !currentAgent) {
-      console.error("❌ [Canvas] 绘图环境缺失");
-      return;
-    }
+    if (!ctx || !this.canvasNode || !currentAgent) return;
 
-    const cw = systemInfo.windowWidth || 375;
-    const ch = systemInfo.windowHeight || 667;
-
-    // 1. 清空画布
-    ctx.clearRect(0, 0, cw, ch);
+    const cw = systemInfo.windowWidth;
+    const ch = systemInfo.windowHeight;
 
     try {
-      // 2. 准备所有素材（并行加载）
-      const tasks = [
-        this.loadImage(
-          currentAgent.backgroundLocal || currentAgent.background,
-        ).catch(() => null),
-        this.loadImage(
-          currentAgent.bustPortraitLocal || currentAgent.bustPortrait,
-        ).catch(() => null),
-        // 武器加载：强制优先读取最新存入的 imageLocal
-        this.loadImage(currentWeapon?.imageLocal || currentWeapon?.image).catch(
-          () => null,
-        ),
-      ];
+      // --- 1. 准备加载任务队列 ---
+      const bgSrc = currentAgent.backgroundLocal || currentAgent.background;
+      const heroSrc =
+        currentAgent.bustPortraitLocal || currentAgent.bustPortrait;
+      const loadTasks = [];
 
-      const [bgRes, pRes, wRes] = await Promise.all(tasks);
+      // 背景图缓存检查
+      if (bgSrc !== ImageCache.lastBgSrc || !ImageCache.bg) {
+        loadTasks.push(
+          this.loadImage(bgSrc).then((img) => {
+            ImageCache.bg = img;
+            ImageCache.lastBgSrc = bgSrc;
+          }),
+        );
+      }
 
-      // 3. 绘制层级
-      // 背景层
-      if (bgRes) {
-        const bgScale = Math.max(cw / bgRes.width, ch / bgRes.height);
+      // 英雄图缓存检查
+      if (heroSrc !== ImageCache.lastHeroSrc || !ImageCache.hero) {
+        loadTasks.push(
+          this.loadImage(heroSrc).then((img) => {
+            ImageCache.hero = img;
+            ImageCache.lastHeroSrc = heroSrc;
+          }),
+        );
+      }
+
+      // 多武器图缓存检查：遍历 activeWeapons 数组
+      activeWeapons.forEach((w) => {
+        const wId = w.instanceId;
+        const wSrc = w.imageLocal || w.image;
+        // 如果这个实例没缓存，或者图片路径变了（切换了幻彩），则加载
+        if (
+          !ImageCache.weapons[wId] ||
+          ImageCache.weapons[wId].src.indexOf(w.imageLocal) === -1
+        ) {
+          loadTasks.push(
+            this.loadImage(wSrc).then((img) => {
+              ImageCache.weapons[wId] = img;
+            }),
+          );
+        }
+      });
+
+      // 等待所有新素材加载完成
+      if (loadTasks.length > 0) {
+        await Promise.all(loadTasks);
+      }
+
+      // --- 2. 开始物理绘制 ---
+      // 清空画布（由于图片已在内存，这一步之后立即绘制不会闪烁）
+      ctx.clearRect(0, 0, cw, ch);
+
+      // A. 绘制背景
+      if (ImageCache.bg) {
+        const bg = ImageCache.bg;
+        const bgScale = Math.max(cw / bg.width, ch / bg.height);
+        console.log("--- 背景计算参数 ---", {
+          原始宽: bg.width,
+          原始高: bg.height,
+          缩放后宽: bg.width * bgScale,
+          缩放后高: bg.height * bgScale,
+          绘制起点的X: (cw - bg.width * bgScale) / 2,
+          绘制起点的Y: (ch - bg.height * bgScale) / 2,
+        });
         ctx.globalAlpha = 0.6;
         ctx.drawImage(
-          bgRes,
-          (cw - bgRes.width * bgScale) / 2,
-          (ch - bgRes.height * bgScale) / 2,
-          bgRes.width * bgScale,
-          bgRes.height * bgScale,
+          bg,
+          (cw - bg.width * bgScale) / 2,
+          (ch - bg.height * bgScale) / 2,
+          bg.width * bgScale,
+          bg.height * bgScale,
         );
         ctx.globalAlpha = 1.0;
       }
 
-      // 英雄层
-      if (pRes) {
+      // B. 绘制英雄
+      if (ImageCache.hero) {
+        const hero = ImageCache.hero;
         const pRenderH = ch * 0.85;
-        const pRatio = pRes.width / pRes.height;
+        const pRatio = hero.width / hero.height;
         const pRenderW = pRenderH * pRatio;
+        console.log("--- 英雄计算参数 ---", {
+          画布宽cw: cw,
+          画布高ch: ch,
+          渲染高度H: pRenderH,
+          渲染宽度W: pRenderW,
+          英雄比例Ratio: pRatio,
+          英雄绘制起点Y: ch - pRenderH,
+        });
         ctx.drawImage(
-          pRes,
+          hero,
           (cw - pRenderW) / 2,
           ch - pRenderH,
           pRenderW,
@@ -494,68 +544,66 @@ Page({
         );
       }
 
-      // 武器层 (Top)
-      if (wRes && currentWeapon) {
-        console.log("🎨 [Canvas] 正在绘制新色彩武器...");
-        // 使用你调整好的 0.3-0.35 缩放
-        const scale = weaponTransform.scale || 0.35;
-        const wW = wRes.width * scale;
-        const wH = wRes.height * scale;
+      // C. 绘制所有武器 (遍历数组)
+      activeWeapons.forEach((w, index) => {
+        const wImg = ImageCache.weapons[w.instanceId];
+        if (wImg) {
+          ctx.save();
+          ctx.translate(w.x, w.y);
 
-        ctx.save();
-        ctx.translate(weaponTransform.x, weaponTransform.y);
-        // 居中绘制
-        ctx.drawImage(wRes, -wW / 2, -wH / 2, wW, wH);
-        ctx.restore();
-      }
+          // 如果是当前选中的武器，可以加个简单的视觉反馈（可选）
+          if (index === this.data.selectedWeaponIndex) {
+            // ctx.shadowBlur = 15;
+            // ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+          }
 
-      console.log("✅ [Canvas] 绘制完毕");
+          const scale = w.scale || 0.35;
+          const wW = wImg.width * scale;
+          const wH = wImg.height * scale;
+
+          // 居中绘制武器
+          ctx.drawImage(wImg, -wW / 2, -wH / 2, wW, wH);
+          ctx.restore();
+        }
+      });
+
+      console.log(`✅ [Canvas] 成功渲染英雄 + ${activeWeapons.length} 把武器`);
     } catch (err) {
-      console.error("🔥 [Canvas] 绘制流程崩溃:", err);
+      console.error("🔥 [Canvas] 绘制异常:", err);
     }
   },
 
   saveCanvas() {
     const { systemInfo } = this.data;
-    if (!systemInfo || !this.canvasNode || !this.canvasCtx) return;
+    if (!this.canvasNode) return;
 
-    wx.showLoading({ title: "保存中..." });
+    wx.showLoading({ title: "合成壁纸中...", mask: true });
 
-    const ctx = this.canvasCtx;
-    const cw = systemInfo.windowWidth;
-    const ch = systemInfo.windowHeight;
-
-    // 重新绘制，这次包含渐变背景
+    // 执行带渐变的重绘
     this.drawWithGradient(() => {
-      // 绘制完成后保存
       wx.canvasToTempFilePath({
         canvas: this.canvasNode,
-        x: 0,
-        y: 0,
-        width: cw,
-        height: ch,
-        destWidth: cw * 2,
-        destHeight: ch * 2,
+        // 这里的宽高决定了导出的清晰度
+        destWidth: this.canvasNode.width,
+        destHeight: this.canvasNode.height,
+        fileType: "jpg",
+        quality: 1,
         success: (res) => {
           wx.saveImageToPhotosAlbum({
             filePath: res.tempFilePath,
             success: () => {
-              wx.hideLoading();
-              wx.showToast({ title: "保存成功", icon: "success" });
-              // 恢复为不含渐变的版本（透出 CSS 渐变）
-              this.drawWithLocalFiles();
+              wx.showToast({ title: "已存至相册", icon: "success" });
             },
-            fail: () => {
+            complete: () => {
               wx.hideLoading();
-              wx.showToast({ title: "请授权保存相册", icon: "none" });
+              // 导出完记得切回“透明背景”版，否则界面上会看到两层颜色
               this.drawWithLocalFiles();
             },
           });
         },
         fail: (err) => {
-          console.error("保存失败", err);
+          console.error("导出失败", err);
           wx.hideLoading();
-          wx.showToast({ title: "保存失败", icon: "none" });
           this.drawWithLocalFiles();
         },
       });
@@ -564,277 +612,220 @@ Page({
 
   drawGradientBackground(ctx, cw, ch) {
     const { currentAgent } = this.data;
-    if (
-      !currentAgent.backgroundGradientColors ||
-      currentAgent.backgroundGradientColors.length === 0
-    ) {
-      return;
-    }
-
-    // 过滤掉完全透明的颜色
-    const validColors = currentAgent.backgroundGradientColors.filter(
-      (color) => {
-        const a = parseInt(color.substr(6, 2), 16);
-        return a > 0; // 只保留 alpha > 0 的颜色
-      },
-    );
-
-    if (validColors.length === 0) return;
+    let colors = currentAgent.backgroundGradientColors || [];
+    if (colors.length === 0) return;
 
     const gradient = ctx.createLinearGradient(0, 0, 0, ch);
 
-    validColors.forEach((color, index) => {
-      const position = index / (validColors.length - 1);
-      const r = parseInt(color.substr(0, 2), 16);
-      const g = parseInt(color.substr(2, 2), 16);
-      const b = parseInt(color.substr(4, 2), 16);
-      const a = parseInt(color.substr(6, 2), 16) / 255;
+    colors.forEach((color, index) => {
+      // 移除 # 号
+      const hex = color.replace("#", "");
+      const position = index / (colors.length - 1);
+
+      // 提取 RGBA
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      // 如果只有 6 位则 alpha 默认为 1，如果是 8 位则计算 alpha
+      const a = hex.length === 8 ? parseInt(hex.substr(6, 2), 16) / 255 : 1;
 
       gradient.addColorStop(position, `rgba(${r}, ${g}, ${b}, ${a})`);
     });
 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, cw, ch);
-
-    console.log("渐变绘制：", cw, ch, "有效颜色数：", validColors.length);
   },
 
   drawWithGradient(callback) {
     const ctx = this.canvasCtx;
-    const { currentAgent, systemInfo } = this.data;
-    if (!ctx || !currentAgent || !this.canvasNode) return;
+    const { currentAgent, activeWeapons, systemInfo } = this.data;
+    if (!ctx || !this.canvasNode || !currentAgent) return;
 
     const cw = systemInfo.windowWidth;
     const ch = systemInfo.windowHeight;
-    const dpr = systemInfo.pixelRatio;
 
-    // 保存当前状态
-    ctx.save();
-
-    // 重置并重新设置 scale（防止之前的操作影响）
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // 重置变换
-    ctx.scale(dpr, dpr); // 重新缩放
-
-    // 清空画布
-    ctx.clearRect(0, 0, cw, ch);
-
-    console.log("开始绘制 - 窗口尺寸:", cw, ch);
-    console.log("Canvas尺寸:", this.canvasNode.width, this.canvasNode.height);
-
-    // 绘制渐变背景
+    // 1. 绘制渐变层 (最底层)
     this.drawGradientBackground(ctx, cw, ch);
 
-    // 绘制背景图
-    const bgImg = this.canvasNode.createImage();
-    bgImg.src = currentAgent.backgroundLocal;
-    bgImg.onload = () => {
-      const bgScale = Math.max(cw / bgImg.width, ch / bgImg.height);
-      const bgW = bgImg.width * bgScale;
-      const bgH = bgImg.height * bgScale;
-      const bgX = (cw - bgW) / 2;
-      const bgY = (ch - bgH) / 2;
-
+    // 2. 绘制背景图 (从缓存拿，不用等待 onload)
+    if (ImageCache.bg) {
+      const bg = ImageCache.bg;
+      const bgScale = Math.max(cw / bg.width, ch / bg.height);
       ctx.globalAlpha = 0.6;
-      ctx.drawImage(bgImg, bgX, bgY, bgW, bgH);
+      ctx.drawImage(
+        bg,
+        (cw - bg.width * bgScale) / 2,
+        (ch - bg.height * bgScale) / 2,
+        bg.width * bgScale,
+        bg.height * bgScale,
+      );
       ctx.globalAlpha = 1.0;
+    }
 
-      // 绘制英雄
-      const pImg = this.canvasNode.createImage();
-      pImg.src = currentAgent.bustPortraitLocal;
-      pImg.onload = () => {
-        const pRenderH = ch * 0.85;
-        const pRatio = pImg.width / pImg.height;
-        const pRenderW = pRenderH * pRatio;
-        const px = (cw - pRenderW) / 2;
-        const py = ch - pRenderH;
+    // 3. 绘制英雄
+    if (ImageCache.hero) {
+      const hero = ImageCache.hero;
+      const pRenderH = ch * 0.85;
+      const pRatio = hero.width / hero.height;
+      const pRenderW = pRenderH * pRatio;
+      ctx.drawImage(
+        hero,
+        (cw - pRenderW) / 2,
+        ch - pRenderH,
+        pRenderW,
+        pRenderH,
+      );
+    }
 
-        ctx.drawImage(pImg, px, py, pRenderW, pRenderH);
-
-        console.log("绘制完成");
-
-        // 恢复状态
+    // 4. 【关键：绘制所有武器】
+    activeWeapons.forEach((w) => {
+      const wImg = ImageCache.weapons[w.instanceId];
+      if (wImg) {
+        ctx.save();
+        ctx.translate(w.x, w.y);
+        const scale = w.scale || 0.35;
+        const wW = wImg.width * scale;
+        const wH = wImg.height * scale;
+        ctx.drawImage(wImg, -wW / 2, -wH / 2, wW, wH);
         ctx.restore();
+      }
+    });
 
-        // 等待确保绘制完成
-        if (callback) {
-          setTimeout(() => callback(), 150);
-        }
-      };
-    };
+    // 5. 强制等待一小会儿确保硬件缓冲区写入
+    setTimeout(() => {
+      if (callback) callback();
+    }, 200);
   },
 
   async selectWeapon(e) {
     const item = e.currentTarget.dataset.item;
     if (!item) return;
-    console.log(
-      "👉 [DEBUG] 点击事件触发对象:",
-      e.currentTarget.dataset.item.skinName,
-    );
 
-    // 2. 看看这一刻，英雄数据还是不是英雄
-    console.log(
-      "🕵️ [DEBUG] 此时此刻 Agent 还是英雄吗？",
-      this.data.currentAgent.displayName || "已经丢了",
-    );
-    // 调试 Log：看看这一步 currentAgent 是不是正常的英雄
-    console.log("Before SetData - Agent:", this.data.currentAgent.displayName);
-
-    wx.showLoading({ title: "装配中...", mask: true });
+    // 1. 开启加载提示，防止用户重复点击
+    wx.showLoading({ title: "正在装配武器...", mask: true });
 
     try {
-      let localPath = item.imageLocal;
+      const { systemInfo, activeWeapons } = this.data;
+      const cw = systemInfo.windowWidth;
+      const ch = systemInfo.windowHeight;
+
+      // 2. 确定初始显示的图片（如果有炫彩优先取第一个炫彩，否则取主图）
+      const displayImg =
+        item.chromas && item.chromas.length > 0
+          ? item.chromas[0].image || item.image
+          : item.image;
+
+      // 3. 资源安检：转换云路径并下载到本地临时目录
+      const localPath = await this.downloadFileToLocal(displayImg);
+
+      // 如果下载失败（如云端文件不存在），拦截后续逻辑
       if (!localPath) {
-        localPath = await this.downloadFileToLocal(item.image);
-      }
-
-      const updatedWeapon = { ...item, imageLocal: localPath };
-      const info = this.data.systemInfo.windowWidth
-        ? this.data.systemInfo
-        : wx.getSystemInfoSync();
-
-      // ⚠️ 关键修正：只更新 currentWeapon，严禁把 item 赋给 currentAgent
-      this.setData(
-        {
-          // 这里绝对不要写 currentAgent: item
-          currentWeapon: updatedWeapon,
-          weaponTransform: {
-            x: info.windowWidth / 2,
-            y: info.windowHeight * 0.6,
-            scale: 0.35, // 从 0.6 调小到 0.35，避免占满全屏
-            lastX: 0,
-            lastY: 0,
-          },
-        },
-        () => {
-          console.log(
-            "After SetData - Agent Check:",
-            this.data.currentAgent.displayName,
-          );
-          this.drawWithLocalFiles();
-        },
-      );
-    } catch (err) {
-      console.error("❌ 选中失败:", err);
-    } finally {
-      wx.hideLoading();
-    }
-  },
-
-  async changeChroma(e) {
-    const chroma = e.currentTarget.dataset.chroma;
-    const { currentWeapon } = this.data;
-    if (!chroma || !currentWeapon) return;
-
-    console.log("🔍 [Chroma] 原始数据检查:", chroma); // 看看 log 里到底有什么字段
-
-    this.setData({ tempChromaUuid: chroma.chromaUuid });
-    wx.showLoading({ title: "同步色彩...", mask: true });
-
-    try {
-      // 1. 尝试多个可能的字段，瓦罗兰特 API 幻彩图常见字段：fullRender > displayIcon > swatch
-      // 如果都没有，兜底使用皮肤的主图 currentWeapon.image
-      const chromaImg =
-        chroma.fullRender ||
-        chroma.displayIcon ||
-        chroma.swatch ||
-        currentWeapon.image;
-
-      if (!chromaImg) {
-        throw new Error("未找到有效的图片地址");
-      }
-
-      // 2. 下载
-      const localPath = await this.downloadFileToLocal(chromaImg);
-
-      // 3. 严格检查 localPath 是否成功拿到
-      if (!localPath) {
-        console.error("❌ 下载失败，路径为空");
+        wx.hideLoading();
+        wx.showToast({ title: "资源获取失败", icon: "none" });
         return;
       }
 
-      const timestampedPath = `${localPath}?t=${Date.now()}`;
+      // 4. 计算新成员的索引位置
+      const newIndex = activeWeapons.length;
 
-      const updatedWeapon = {
-        ...currentWeapon,
-        imageLocal: timestampedPath,
-        chromaUuid: chroma.chromaUuid,
+      // 5. 创建武器实例
+      const newWeaponInstance = {
+        ...item, // 继承原始数据（含 chromas 数组）
+        instanceId: Date.now(), // 唯一实例标识，用于 ImageCache 缓存 key
+        imageLocal: localPath, // 核心：Canvas 绘图只认这个本地路径
+        chromaUuid:
+          item.chromas && item.chromas.length > 0
+            ? item.chromas[0].chromaUuid
+            : "",
+        // 初始物理状态
+        x: cw / 2,
+        y: ch / 2,
+        scale: 0.35, // 默认缩放比例
+        lastX: 0,
+        lastY: 0,
       };
 
+      // 6. 原子化更新数据
       this.setData(
         {
-          currentWeapon: updatedWeapon,
+          // 将新武器追加到画布数组
+          activeWeapons: [...activeWeapons, newWeaponInstance],
+          // 【关键】立即选中这把新武器，后续 changeChroma 才能精准定位
+          selectedWeaponIndex: newIndex,
+          // 同步给 UI 层渲染的引用
+          currentWeapon: item,
+          // 重置下方炫彩栏的选择态
+          tempChromaUuid: newWeaponInstance.chromaUuid,
         },
         () => {
-          console.log("✅ [Chroma] 数据更新成功，新路径:", timestampedPath);
+          // 7. 渲染层同步后，触发 Canvas 重绘
           this.drawWithLocalFiles();
+          wx.hideLoading();
+
+          // 可选：添加成功后自动关闭选择弹窗
+          // this.setData({ showPopup: false });
         },
       );
     } catch (err) {
-      console.error("❌ 切换幻彩失败:", err);
-      wx.showToast({ title: "该幻彩暂无预览图", icon: "none" });
-    } finally {
+      console.error("❌ selectWeapon 流程异常:", err);
       wx.hideLoading();
+      wx.showToast({ title: "装配发生错误", icon: "none" });
     }
   },
 
   async changeChroma(e) {
     const chroma = e.currentTarget.dataset.chroma;
-    const { currentWeapon } = this.data;
-    if (!chroma || !currentWeapon) return;
+    const { activeWeapons, selectedWeaponIndex } = this.data;
+
+    // 【核心修复】必须确保有一个被选中的索引，且该索引在数组范围内
+    if (
+      !chroma ||
+      selectedWeaponIndex === -1 ||
+      !activeWeapons[selectedWeaponIndex]
+    ) {
+      console.warn("⚠️ 未选中任何武器实例，无法更换炫彩");
+      return;
+    }
 
     this.setData({ tempChromaUuid: chroma.chromaUuid });
     wx.showLoading({ title: "同步色彩...", mask: true });
 
     try {
-      const chromaImg = chroma.image || chroma.swatch || currentWeapon.image;
+      // 确定图片地址
+      const chromaImg = chroma.image || chroma.swatch;
       const localPath = await this.downloadFileToLocal(chromaImg);
 
-      if (!localPath) return;
+      if (!localPath) {
+        wx.hideLoading();
+        return;
+      }
 
-      // 【关键修复】不要在路径后面加 ?t=...
-      // 直接传原始临时路径，真机对这种路径的读取最稳定
+      // 【核心修复】精准更新数组中“当前选中”的那一把
+      const targetWeapon = activeWeapons[selectedWeaponIndex];
       const updatedWeapon = {
-        ...currentWeapon,
+        ...targetWeapon,
         imageLocal: localPath,
         chromaUuid: chroma.chromaUuid,
       };
 
       this.setData(
         {
-          currentWeapon: updatedWeapon,
+          // 1. 更新当前选中的 UI 引用（供底栏使用）
+          "currentWeapon.imageLocal": localPath,
+          "currentWeapon.chromaUuid": chroma.chromaUuid,
+          // 2. 使用 ES6 动态键名精准修改数组中的特定项
+          [`activeWeapons[${selectedWeaponIndex}]`]: updatedWeapon,
         },
         () => {
-          // 延迟一小会儿执行，给系统文件 IO 一点反应时间
-          setTimeout(() => {
-            this.drawWithLocalFiles();
-          }, 50);
+          // 渲染层同步完成后重绘
+          this.drawWithLocalFiles();
+          wx.hideLoading();
         },
       );
     } catch (err) {
-      console.error("❌ 切换幻彩失败:", err);
-    } finally {
+      console.error("❌ 切换炫彩失败:", err);
       wx.hideLoading();
     }
-  },
-
-  /**
-   * 重置画布
-   */
-  resetCanvas() {
-    const { systemInfo } = this.data;
-    if (!systemInfo) return;
-
-    this.canvasCtx.clearRect(
-      0,
-      0,
-      systemInfo.windowWidth,
-      systemInfo.windowHeight,
-    );
-    this.canvasCtx.setFillStyle("#e5e5e5");
-    this.canvasCtx.fillRect(50, 50, 100, 100);
-    this.canvasCtx.draw(true);
-
-    wx.showToast({ title: "画布已重置", icon: "none" });
   },
 
   toggleWeaponMenu() {
@@ -926,29 +917,6 @@ Page({
 
   onTabChange: function (e) {
     const tab = e.currentTarget.dataset.tab;
-    const { popupType, allAgents, allWeapons } = this.data;
-    let newList = [];
-
-    if (popupType === "hero") {
-      newList =
-        tab === "全部"
-          ? allAgents
-          : allAgents.filter((a) => a.role.displayName === tab);
-    } else {
-      newList =
-        tab === "全部"
-          ? allWeapons
-          : allWeapons.filter((w) => w.category === tab);
-    }
-
-    this.setData({
-      currentTab: tab,
-      filteredList: newList,
-    });
-  },
-
-  onTabChange: function (e) {
-    const tab = e.currentTarget.dataset.tab;
     this.setData({ currentTab: tab });
 
     if (this.data.popupType === "hero") {
@@ -970,5 +938,374 @@ Page({
 
     console.log("触底加载更多武器...");
     this.fetchWeaponData(this.data.currentTab, true);
+  },
+
+  touchStart(e) {
+    // 如果弹窗开着，或者没有武器，不处理
+    if (this.data.showPopup || this.data.activeWeapons.length === 0) return;
+
+    const currentTime = e.timeStamp;
+    const lastTapTime = this.lastTapTime || 0;
+    this.lastTapTime = currentTime;
+
+    // --- 1. 双击判定 (用于删除) ---
+    if (currentTime - lastTapTime < 300) {
+      console.log("🖱️ 检测到双击，尝试删除选中武器");
+      // 如果点中了某个武器才执行删除
+      if (this.data.selectedWeaponIndex !== -1) {
+        this.deleteSelectedWeapon(); // 确保你之前写的删除函数名叫 deleteSelected
+      }
+      return;
+    }
+
+    // --- 2. 坐标与选中判定 ---
+    if (e.touches.length === 1) {
+      const { clientX, clientY } = e.touches[0];
+      const { activeWeapons } = this.data;
+
+      // 判定点中了哪把枪（倒序查找，优先最上层）
+      let foundIndex = -1;
+      for (let i = activeWeapons.length - 1; i >= 0; i--) {
+        const w = activeWeapons[i];
+        // 判定范围 60 像素
+        if (Math.abs(clientX - w.x) < 60 && Math.abs(clientY - w.y) < 60) {
+          foundIndex = i;
+          break;
+        }
+      }
+
+      if (foundIndex !== -1) {
+        const selectedW = activeWeapons[foundIndex];
+        this.setData(
+          {
+            selectedWeaponIndex: foundIndex,
+            currentWeapon: selectedW, // 同步给底部的 Chroma 栏
+            tempChromaUuid: selectedW.chromaUuid || "",
+            [`activeWeapons[${foundIndex}].lastX`]: clientX,
+            [`activeWeapons[${foundIndex}].lastY`]: clientY,
+          },
+          () => {
+            this.drawWithLocalFiles(); // 重绘以显示高亮
+          },
+        );
+      } else {
+        // 点在空白处取消选中
+        this.setData({ selectedWeaponIndex: -1 });
+        this.drawWithLocalFiles();
+      }
+    }
+    // --- 3. 双指缩放初始化 ---
+    else if (e.touches.length === 2 && this.data.selectedWeaponIndex !== -1) {
+      const xLen = e.touches[1].clientX - e.touches[0].clientX;
+      const yLen = e.touches[1].clientY - e.touches[0].clientY;
+      // 记录初始双指间距
+      this.startDistance = Math.sqrt(xLen * xLen + yLen * yLen);
+      // 记录初始缩放值
+      this.startScale =
+        this.data.activeWeapons[this.data.selectedWeaponIndex].scale || 0.35;
+    }
+  },
+
+  touchMove(e) {
+    const { activeWeapons, selectedWeaponIndex, showPopup } = this.data;
+    if (showPopup || selectedWeaponIndex === -1) return;
+
+    // --- A. 单指拖拽逻辑 ---
+    if (e.touches.length === 1) {
+      const { clientX, clientY } = e.touches[0];
+      const w = activeWeapons[selectedWeaponIndex];
+
+      // 计算位移
+      const dx = clientX - w.lastX;
+      const dy = clientY - w.lastY;
+
+      this.setData(
+        {
+          [`activeWeapons[${selectedWeaponIndex}].x`]: w.x + dx,
+          [`activeWeapons[${selectedWeaponIndex}].y`]: w.y + dy,
+          [`activeWeapons[${selectedWeaponIndex}].lastX`]: clientX,
+          [`activeWeapons[${selectedWeaponIndex}].lastY`]: clientY,
+        },
+        () => {
+          this.drawWithLocalFiles();
+        },
+      );
+    }
+    // --- B. 双指缩放逻辑 ---
+    else if (e.touches.length === 2) {
+      const xLen = e.touches[1].clientX - e.touches[0].clientX;
+      const yLen = e.touches[1].clientY - e.touches[0].clientY;
+      const currentDistance = Math.sqrt(xLen * xLen + yLen * yLen);
+
+      // 如果初始间距太小，避免计算错误
+      if (this.startDistance > 10) {
+        const ratio = currentDistance / this.startDistance;
+        let newScale = this.startScale * ratio;
+
+        // 限制缩放范围：最小 0.1 倍，最大 1.5 倍
+        newScale = Math.max(0.1, Math.min(newScale, 1.5));
+
+        this.setData(
+          {
+            [`activeWeapons[${selectedWeaponIndex}].scale`]: newScale,
+          },
+          () => {
+            this.drawWithLocalFiles();
+          },
+        );
+      }
+    }
+  },
+
+  // 3. 触摸结束：清理状态（可选）
+  touchEnd() {
+    // 可以在这里做一些自动对齐或者保存的操作
+  },
+
+  deleteSelectedWeapon() {
+    const { activeWeapons, selectedWeaponIndex } = this.data;
+
+    if (selectedWeaponIndex === -1 || activeWeapons.length === 0) {
+      wx.showToast({ title: "请先选择一把武器", icon: "none" });
+      return;
+    }
+
+    const targetId = activeWeapons[selectedWeaponIndex].instanceId;
+
+    // 1. 清理缓存
+    if (ImageCache.weapons[targetId]) {
+      delete ImageCache.weapons[targetId];
+    }
+
+    // 2. 从数组中移除
+    const newList = activeWeapons.filter(
+      (_, index) => index !== selectedWeaponIndex,
+    );
+
+    this.setData(
+      {
+        activeWeapons: newList,
+        selectedWeaponIndex: -1, // 删除后重置选中状态
+      },
+      () => {
+        this.drawWithLocalFiles();
+        wx.showToast({ title: "已移除", icon: "success" });
+      },
+    );
+  },
+
+  resetCanvas() {
+    wx.showModal({
+      title: "提示",
+      content: "确定要清空所有装饰吗？",
+      success: (res) => {
+        if (res.confirm) {
+          // 清空数组
+          this.setData(
+            {
+              activeWeapons: [],
+              selectedWeaponIndex: -1,
+            },
+            () => {
+              // 清空所有武器缓存
+              ImageCache.weapons = {};
+              this.drawWithLocalFiles();
+            },
+          );
+        }
+      },
+    });
+  },
+  // 保存逻辑
+  // 打开弹窗
+  openSaveModal() {
+    if (this.data.activeWeapons.length === 0) {
+      wx.showToast({ title: "请先添加武器", icon: "none" });
+      return;
+    }
+    this.setData({ showSaveModal: true });
+  },
+
+  closeSaveModal() {
+    this.setData({ showSaveModal: false, presetName: "", selectedTags: [] });
+  },
+
+  onNameInput(e) {
+    this.setData({ presetName: e.detail.value });
+  },
+
+  toggleTag(e) {
+    const tag = e.currentTarget.dataset.tag;
+    let selectedTags = this.data.selectedTags || []; // 确保是数组
+
+    const index = selectedTags.indexOf(tag);
+
+    if (index > -1) {
+      // 已经有了，就删掉
+      selectedTags.splice(index, 1);
+    } else {
+      // 没有，就加进去
+      selectedTags.push(tag);
+    }
+
+    // 重点：一定要重新 setData
+    this.setData({
+      selectedTags: selectedTags,
+    });
+
+    console.log("选中的标签数组:", selectedTags);
+  },
+
+  closeSaveModal() {
+    this.setData({
+      showSaveModal: false,
+      presetName: "",
+      selectedTags: [],
+    });
+  },
+
+  async submitPreset() {
+    const { presetName, selectedTags, activeWeapons, currentAgent } = this.data;
+
+    if (!presetName.trim()) {
+      wx.showToast({ title: "请输入方案名称", icon: "none" });
+      return;
+    }
+
+    wx.showLoading({ title: "上传作品中...", mask: true });
+
+    try {
+      // --- 1. 生成快照临时路径 ---
+      // 确保此时画布是“带渐变”的完整重绘版
+      const snapshotPath = await new Promise((resolve, reject) => {
+        this.drawWithGradient(() => {
+          wx.canvasToTempFilePath({
+            canvas: this.canvasNode,
+            destWidth: this.canvasNode.width,
+            destHeight: this.canvasNode.height,
+            fileType: "jpg",
+            quality: 0.8, // 预览图不需要 1.0 那么大，0.8 兼顾清晰度和体积
+            success: (res) => resolve(res.tempFilePath),
+            fail: (err) => reject(err),
+          });
+        });
+      });
+
+      // --- 2. 上传快照到云存储 ---
+      const cloudPath = `presets/${Date.now()}-${Math.floor(Math.random() * 1000)}.jpg`;
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: snapshotPath,
+      });
+      const snapshotFileID = uploadRes.fileID;
+
+      // --- 3. 最终入库 ---
+      const db = wx.cloud.database();
+      await db.collection("user_presets").add({
+        data: {
+          name: presetName,
+          snapshot: snapshotFileID, // 【核心】预览直接用这个
+          tags: selectedTags,
+          isFavorite: false, // 初始收藏状态：未收藏
+          likeCount: 0, // 初始点赞数：0
+          agent: {
+            uuid: currentAgent.uuid,
+            name: currentAgent.displayName,
+            background: currentAgent.background,
+            portrait: currentAgent.bustPortrait,
+            // 记得把颜色数组也存进去，万一以后要改色
+            backgroundGradientColors:
+              currentAgent.backgroundGradientColors || [],
+          },
+          weapons: activeWeapons.map((w) => ({
+            uuid: w.uuid,
+            instanceId: w.instanceId,
+            image: w.image,
+            chromaUuid: w.chromaUuid,
+            x: w.x,
+            y: w.y,
+            scale: w.scale,
+            width: w.width, // 存一下原始宽
+            height: w.height, // 存一下原始高
+          })),
+          createTime: db.serverDate(),
+          userInfo: wx.getStorageSync("userInfo") || {},
+        },
+      });
+
+      // 绘制完记得切回编辑器透明版
+      this.drawWithLocalFiles();
+
+      wx.hideLoading();
+      wx.showToast({
+        title: "上传成功",
+        icon: "success",
+        success: () => {
+          // 延迟一秒返回，让用户看清成功提示
+          setTimeout(() => {
+            // wx.event.emit("refresh_presets");
+            wx.navigateBack();
+          }, 1000);
+        },
+      });
+      this.closeSaveModal();
+    } catch (err) {
+      console.error("保存失败详情:", err);
+      wx.hideLoading();
+      wx.showToast({ title: "保存失败", icon: "none" });
+      // 失败也切回透明版
+      this.drawWithLocalFiles();
+    }
+  },
+
+  //卡面逻辑
+
+  toggleCardsPanel(e) {
+    const type = e.currentTarget.dataset.type;
+    this.setData({ showCardPanel: type });
+  },
+
+  closePanel() {
+    this.setData({ activePanel: null, searchQuery: "" });
+  },
+
+  // 搜索过滤：性能优化，防抖
+  onSearchCard(e) {
+    const query = e.detail.value.toLowerCase();
+    const filtered = this.data.allCards
+      .filter((card) => card.name.toLowerCase().includes(query))
+      .slice(0, 50); // 依然只取前50个结果展示
+
+    this.setData({ filteredCards: filtered });
+  },
+
+  // 切换回英雄背景
+  resetToHeroBg() {
+    this.setData({
+      usePlayerCard: false,
+      currentCard: null,
+      activePanel: null,
+    });
+    this.drawWithLocalFiles(); // 重新触发 Canvas 绘制
+  },
+
+  // 选中玩家卡面
+  async selectPlayerCard(e) {
+    const card = e.currentTarget.dataset.card;
+    wx.showLoading({ title: "加载背景...", mask: true });
+
+    // 调用之前的下载逻辑：将 cloud:// 转为本地临时路径
+    const localPath = await this.downloadFileToLocal(card.url);
+
+    if (localPath) {
+      const updatedCard = { ...card, localPath };
+      this.setData({
+        usePlayerCard: true,
+        currentCard: updatedCard,
+        activePanel: null,
+      });
+      this.drawWithLocalFiles(); // 触发重绘
+    }
+    wx.hideLoading();
   },
 });

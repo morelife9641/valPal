@@ -1,0 +1,17 @@
+<view class="preview-container">
+    <image wx:if="{{preset.snapshot}}" class="full-snapshot" src="{{preset.snapshot}}" mode="aspectFill" show-menu-by-longpress="{{true}}"></image>
+    <view wx:if="{{loading}}" class="loading-box">
+        <view class="valorant-loader"></view>
+        <text>RESTORING AGENT...</text>
+    </view>
+    <view class="bottom-bar" wx:if="{{!loading}}">
+        <view class="info">
+            <text class="name">{{preset.name}}</text>
+            <text class="author">by {{preset.agent.name}}</text>
+        </view>
+        <view class="btns">
+            <view class="btn-back" bindtap="goBack">返回</view>
+            <view class="btn-apply" bindtap="applyPreset">导出</view>
+        </view>
+    </view>
+</view>

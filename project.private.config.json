@@ -22,11 +22,18 @@
     "miniprogram": {
       "list": [
         {
-          "name": "packageWallpaper/pages/wallpaper/wallpaper",
-          "pathName": "packageWallpaper/pages/wallpaper/wallpaper",
+          "name": "pages/news/index",
+          "pathName": "pages/news/index",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "packageWallpaper/pages/wallpaper/wallpaper",
+          "pathName": "packageWallpaper/pages/wallpaper/wallpaper",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "pages/skins/index",

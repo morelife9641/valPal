@@ -1,82 +1,680 @@
 page {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: #000;
+  background-color: #0f1923; /* 瓦罗兰特深蓝黑背景 */
+  color: #ece8e1;
 }
 
-/* 画布占满全屏 */
-.canvas-full-wrapper {
+.preset-container {
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 筛选栏样式 */
+.header-filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  gap: 14rpx;
+}
+
+/* 容器：平分三份 */
+.filter-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* padding: 20rpx; */
+  gap: 15rpx; /* 按钮间距 */
+  background: #0f1923; /* 瓦蓝背景底色 */
+  width: 100%;
+}
+
+.filter-view-btn {
+  flex: 1; /* 核心：三个容器平分 */
+  display: flex;
+  align-items: center;
+  height: 90rpx;
+  padding: 0 15rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative; /* 为 X 号定位 */
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+/* 激活状态 */
+.filter-view-btn.active {
+  border-color: #ff4655;
+  background: rgba(255, 70, 85, 0.05);
+}
+
+/* 左侧内容区：Label 和 Value 垂直堆叠 */
+.btn-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  overflow: hidden; /* 防止文字溢出 */
+}
+
+.btn-label {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+  margin-bottom: 4rpx;
+}
+
+.btn-value {
+  font-size: 24rpx;
+  color: #ece8e1;
+  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.filter-view-btn.active .btn-value {
+  color: #ff4655;
+}
+
+/* 右侧删除号：绝对定位，保证不占空间导致容器抖动 */
+.clear-icon {
+  position: absolute;
+  right: 10rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 24rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4rpx;
+  z-index: 2;
+}
+
+.clear-icon:active {
+  background: #ff4655;
+  color: #fff;
+}
+
+/* 添加 */
+
+.add-btn-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  background: #ff4655;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-icon {
+  font-size: 40rpx;
+  color: #ece8e1;
+}
+
+/* 卡片样式重构 */
+.preset-card {
+  position: relative;
+  width: 100%;
+  height: 240rpx;
+  margin-bottom: 30rpx;
+  background: #1f2326;
+  overflow: hidden;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.card-snapshot-bg {
+  width: 100%;
+  /* 1. 让图片高度远超容器，这样向上挪动时底部不会露白 */
+  height: 360%;
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  opacity: 0.8;
+
+  /* 2. 关键：将图片顶部与容器顶部对齐，然后向上偏移 */
+  top: 0;
+  /* 向上位移 15% 左右，这个值越大，露出的部位越靠下（即头顶离顶边越近） */
+  /* 如果头还没出来，就改成 -20% 或 -25% */
+  transform: translateY(-15%);
+
+  /* 3. 保持缩放模式 */
+  object-fit: cover;
+}
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  /* 我们在 HTML 里写了 background 渐变，这里可以加个半透明滤镜增强高级感 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24rpx;
+  box-sizing: border-box;
+  /* backdrop-filter: saturate(1.6) brightness(1.1);  */
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-bottom {
+  /* height: 140rpx; 设定一个足以容纳 名字+Tag+Meta 的固定高度 */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* 让内容始终沉在底部 */
+}
+
+.agent-badge {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 6rpx 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 20rpx;
+  border-left: 4rpx solid #ff4655;
+}
+
+.badge-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.favorite-star {
+  font-size: 40rpx;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.favorite-star.active {
+  color: #ff4655;
+}
+
+.p-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  line-height: 40rpx;
+  height: 40rpx; /* 固定高度 */
+  margin-bottom: 12rpx;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 名字太长也不要撑开 */
+}
+
+.p-tags {
+  display: flex;
+  gap: 10rpx;
+  align-items: center;
+  height: 36rpx; /* 这里的固定高度非常关键！即使里面没 tag，它也占着 36rpx */
+  margin-bottom: 4rpx; /* 统一间距 */
+}
+
+.tag-item {
+  /* 关键点 1：将 display 改为 flex 并设置居中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 关键点 2：去掉固定 height: 40rpx，改用 min-height 或直接靠 padding 撑开 */
+  min-height: 32rpx;
+
+  /* 关键点 3：统一背景和字体样式 */
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4rpx 12rpx;
+  color: #8b978f;
+  font-size: 18rpx; /* 原本 14rpx 太小了，在真机上容易产生重心偏移 */
+  border-radius: 4rpx;
+
+  /* 关键点 4：消除 text 默认行高 */
+  line-height: 1;
+}
+
+.p-tags text {
+  font-size: 14rpx;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4rpx 12rpx;
+  color: #8b978f;
+}
+
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  height: 24rpx; /* 固定高度 */
+  align-items: center;
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: monospace;
+  margin-top: 8rpx;
+}
+
+/* 垫子 */
+
+.load-more-tip {
+  text-align: center;
+  /* 上间距 40rpx，底部间距考虑全面屏安全高度，至少留 100rpx */
+  padding: 40rpx 0 calc(100rpx + env(safe-area-inset-bottom));
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 4rpx;
+  font-family: monospace;
+}
+
+/* 即使没有数据时，也给一个兜底高度，防止 scroll-view 底部贴死 */
+.preset-scroll {
+  /* 确保 padding-bottom 在 scroll-view 内部生效 */
+  box-sizing: border-box;
+}
+
+/* 骨架 */
+/* index.wxss */
+.skeleton-container {
+  padding: 30rpx;
+  background: #0f1923; /* 瓦罗兰特主底色 */
+  min-height: 100vh;
+}
+
+.sk-header {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.sk-btn {
+  width: 140rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sk-card {
+  position: relative;
+  height: 240rpx;
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 30rpx;
+  border-left: 6rpx solid rgba(255, 70, 85, 0.2); /* 淡淡的瓦红边 */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 30rpx;
+}
+
+.sk-line {
+  background: rgba(255, 255, 255, 0.1);
+  height: 30rpx;
+  margin-bottom: 15rpx;
+}
+.sk-line.long {
+  width: 60%;
+}
+.sk-line.short {
+  width: 30%;
+}
+
+/* 核心：扫光动画 */
+.sk-scan {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  animation: scan 1.5s infinite;
+}
+
+@keyframes scan {
+  from {
+    left: -100%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+/* 弹窗 */
+/* index.wxss */
+.portal-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 1;
-}
-
-#wallpaperCanvas {
-  width: 100%;
-  height: 100%;
-}
-
-/* 悬浮按钮组 */
-.floating-controls {
-  position: fixed;
-  right: 30rpx;
-  top: 15%;
-  z-index: 10;
+  z-index: 999;
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
+  justify-content: flex-end;
 }
 
-.icon-btn {
-  width: 100rpx;
-  height: 100rpx;
-  background: rgba(23, 33, 43, 0.8);
-  border: 2rpx solid #ff4655;
-  border-radius: 50%;
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* 半透明黑，很有代入感 */
+  backdrop-filter: blur(4px); /* 可选：给背景加一点点毛玻璃，更硬核 */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+.mask.show {
+  opacity: 0.3;
+}
+
+.bottom-popup {
+  position: relative;
+  z-index: 2;
+  background: #0f1923;
+  border-top: 4rpx solid #ff4655;
+
+  /* --- 核心修改：设置定高 --- */
+  height: 380rpx; /* 根据你的 UI 比例调整，建议 400-500rpx 之间 */
+  display: flex;
+  flex-direction: column; /* 纵向排列 Tab 和 列表 */
+
+  /* padding-bottom: env(safe-area-inset-bottom); */
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.bottom-popup.show {
+  transform: translateY(0);
+}
+
+/* 横向滚动区域 */
+.selector-view {
+  width: 100%;
+  white-space: nowrap;
+}
+.item-list {
+  display: inline-flex;
+  padding: 0 40rpx;
+  gap: 30rpx;
+  height: 100%;
+  flex-wrap: wrap;
+}
+
+/* 2. 显示态：恢复原状 */
+.bottom-popup.show {
+  transform: translateY(0) scaleY(1);
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* 3. 内部英雄卡片：入场动画 */
+.item-card {
+  opacity: 0;
+  transform: translateX(40rpx); /* 从右侧滑入 */
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 当父级 show 时，所有卡片滑入 */
+.bottom-popup.show .item-card {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 4. 为前几个英雄添加交错延迟（模拟逐个弹出的高级感） */
+.item-card:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.item-card:nth-child(2) {
+  transition-delay: 0.15s;
+}
+.item-card:nth-child(3) {
+  transition-delay: 0.2s;
+}
+.item-card:nth-child(4) {
+  transition-delay: 0.25s;
+}
+.item-card:nth-child(5) {
+  transition-delay: 0.3s;
+}
+
+/* 缺省 */
+/* 1. 容器居中 */
+.presets-empty-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-}
-
-.icon-btn image {
-  width: 50rpx;
-  height: 50rpx;
-}
-.icon-btn text {
-  font-size: 20rpx;
-  color: #fff;
-  margin-top: 5rpx;
-}
-
-/* 底部弹窗 */
-.bottom-popup {
-  position: fixed;
-  bottom: -500rpx; /* 默认隐藏 */
-  left: 0;
+  padding: 120rpx 0;
   width: 100%;
-  height: 450rpx;
-  background: rgba(23, 33, 43, 0.95);
-  border-top: 4rpx solid #ff4655;
-  transition: bottom 0.3s ease;
-  z-index: 100;
-  padding: 20rpx;
+}
+
+/* 2. 战术边框 */
+.tactical-frame {
+  position: relative;
+  width: 240rpx;
+  height: 240rpx;
+  background: rgba(255, 70, 85, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 60rpx;
+}
+
+/* 绘制四个角的小红点/折线 */
+.corner-t-l,
+.corner-t-r,
+.corner-b-l,
+.corner-b-r {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+  border: 2rpx solid #ff4655;
+}
+.corner-t-l {
+  top: -2rpx;
+  left: -2rpx;
+  border-right: 0;
+  border-bottom: 0;
+}
+.corner-t-r {
+  top: -2rpx;
+  right: -2rpx;
+  border-left: 0;
+  border-bottom: 0;
+}
+.corner-b-l {
+  bottom: -2rpx;
+  left: -2rpx;
+  border-right: 0;
+  border-top: 0;
+}
+.corner-b-r {
+  bottom: -2rpx;
+  right: -2rpx;
+  border-left: 0;
+  border-top: 0;
+}
+
+/* 3. 核心图标与动画 */
+.empty-icon-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.pulse-ring {
+  width: 80rpx;
+  height: 80rpx;
+  border: 2rpx solid rgba(255, 70, 85, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s infinite ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.scan-line-v {
+  position: absolute;
+  width: 2rpx;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, #ff4655, transparent);
+  left: 50%;
+  animation: scanLR 3s infinite linear;
+}
+
+@keyframes scanLR {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* 4. 文字组 */
+.text-group {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.empty-main-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #ff4655;
+  /* font-style: italic; */
+  letter-spacing: 4rpx;
+}
+
+.empty-sub-title {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 10rpx;
+}
+
+.deco-bar {
+  width: 60rpx;
+  height: 4rpx;
+  background: #ff4655;
+  margin: 20rpx auto;
+}
+
+/* 5. 动作按钮 */
+.action-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ece8e1;
+  font-size: 22rpx;
+  border-radius: 0;
+  padding: 0 40rpx;
+}
+
+/* tags弹窗 */ /* 复用你提供的 .portal-wrapper, .mask, .bottom-popup 基础样式 */
+/* 标签弹窗专用高度 */
+
+.tag-container-scroll {
+  width: 100%;
+  padding: 30rpx 40rpx;
   box-sizing: border-box;
 }
-
-.bottom-popup.show {
-  bottom: 0;
+/* 1. 容器：由横滑改为自动换行 */
+.tag-list-gap {
+  display: flex;
+  flex-wrap: wrap; /* 核心：自动换行 */
+  padding: 30rpx 40rpx; /* 侧边留白 */
+  gap: 20rpx; /* 标签之间的间距 (微信基础库 2.25.0+ 支持) */
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: auto; /* 撤销之前 item-list 的 100% 高度 */
 }
 
-.popup-header {
+/* 2. 标签方块设计 */
+.tag-chip {
   display: flex;
-  justify-content: space-between;
-  color: #fff;
-  font-size: 28rpx;
-  margin-bottom: 20rpx;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 32rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 140rpx; /* 保证短文字不会太窄 */
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 瓦式切角：右下角小斜切 */
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 88% 100%, 0 100%);
+}
+
+/* 3. 内部元素样式 */
+.tag-hash {
+  color: #ff4655;
+  font-size: 20rpx;
+  margin-right: 10rpx;
+  font-weight: 900;
+  font-family: monospace;
+}
+
+.tag-text {
+  font-size: 24rpx;
+  color: #ece8e1;
+  letter-spacing: 2rpx;
+  font-weight: 500;
+}
+
+/* 4. 选中态：发光红边与背景 */
+.tag-chip.selected {
+  background: rgba(255, 70, 85, 0.15);
+  border: 1px solid #ff4655;
+  box-shadow: 0 0 15rpx rgba(255, 70, 85, 0.2);
+}
+
+.tag-chip.selected .tag-text {
+  color: #ff4655;
+  font-weight: bold;
+}
+
+/* 5. 点击反馈 */
+.tag-chip:active {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.95);
+}
+
+/* 简单的滑入动画 */
+.bottom-popup.show .tag-chip {
+  animation: slideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

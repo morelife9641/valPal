@@ -1,3 +1,94 @@
-<!-- pages/news/index.wxml -->
-<text>pages/news/index.wxml</text>
-313131
+<view class="container">
+    <view class="tab-header">
+        <view wx:for="{{tabs}}" wx:key="*this" class="tab-item {{currentTab === index ? 'active' : ''}}" bindtap="handleTabChange" data-index="{{index}}">
+            {{item}}
+            <view class="tab-line" wx:if="{{currentTab === index}}"></view>
+        </view>
+    </view>
+    <view class="tab-content">
+        <view wx:if="{{currentTab === 0}}" class="schedule-section">
+            <scroll-view scroll-x class="date-nav" enhanced show-scrollbar="{{false}}">
+                <view wx:for="{{dateList}}" wx:key="full" class="date-item {{selectedDate == item.full ? 'active' : ''}}" bindtap="onDateTap" data-date="{{item.full}}">
+                    <view class="week">{{item.weekday}}</view>
+                    <view class="day-label">{{item.short}}</view>
+                </view>
+            </scroll-view>
+            <view class="match-list">
+                <view wx:for="{{displayMatches}}" wx:key="match_id" class="match-card" bindtap="goToWallpaper" data-id="{{item.match_id}}">
+                    <view class="left-time">
+                        <text class="t">{{item.time}}</text>
+                        <text class="s">BO3</text>
+                    </view>
+                    <view class="middle-vs">
+                        <view class="v-team">
+                            <image class="v-logo" src="../../assets/logos/{{item.teamA.name}}.png" mode="aspectFit" />
+                            <text class="v-name">{{item.teamA.name}}</text>
+                        </view>
+                        <view class="v-score-box">
+                            <view class="v-score">{{item.teamA.score}} : {{item.teamB.score}}</view>
+                            <view class="tag {{item.status == 2 ? 'live' : ''}}">
+                                {{item.status == 3 ? '已结束' : (item.status == 2 ? '进行中' : '未开始')}}
+                            </view>
+                        </view>
+                        <view class="v-team">
+                            <image class="v-logo" src="../../assets/logos/{{item.teamB.name}}.png" mode="aspectFit" />
+                            <text class="v-name">{{item.teamB.name}}</text>
+                        </view>
+                    </view>
+                </view>
+                <view wx:if="{{displayMatches.length == 0}}" class="empty-tip">今天没有比赛安排</view>
+            </view>
+        </view>
+        <view wx:if="{{currentTab === 1}}" class="teams-container">
+            <view wx:for="{{teamsList}}" wx:key="_id" class="team-block">
+                <view class="team-header">
+                    <image class="team-logo" src="../../assets/logos/{{item.logoName}}.png" mode="aspectFit" />
+                    <view class="team-text">
+                        <text class="team-name">{{item.teamName}}</text>
+                        <text class="member-count">{{item.members.length}} 成员</text>
+                    </view>
+                </view>
+                <scroll-view scroll-x class="member-scroll" enhanced show-scrollbar="{{false}}">
+                    <view class="member-list">
+                        <view wx:for="{{item.members}}" wx:for-item="player" wx:key="name" class="member-card">
+                            <view class="avatar">{{player.name[0]}}</view>
+                            <text class="p-name">{{player.name}}</text>
+                            <text class="p-role {{player.role ? 'is-special' : ''}}">
+                                {{player.role || 'PLAYER'}}
+                            </text>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
+        <view wx:if="{{currentTab === 2}}" class="event-timeline">
+            <view wx:for="{{annualEvents}}" wx:key="name" class="event-node {{item.status}} {{item.type}}">
+                <view class="timeline-left">
+                    <view class="city-flag">{{item.flag}}</view>
+                    <view class="dot-box">
+                        <view class="dot"></view>
+                        <view class="line" wx:if="{{index !== annualEvents.length - 1}}"></view>
+                    </view>
+                </view>
+                <view class="event-card-v2">
+                    <view class="card-header">
+                        <view class="event-title">{{item.name}}</view>
+                        <view class="status-badge">{{item.statusText}}</view>
+                    </view>
+                    <view class="card-body">
+                        <view class="info-row">
+                            <text class="icon">📍</text>
+                            <text class="info-text">{{item.location}}</text>
+                        </view>
+                        <view class="info-row">
+                            <text class="icon">📅</text>
+                            <text class="info-text">{{item.date}}</text>
+                        </view>
+                        <view class="desc-text">{{item.desc}}</view>
+                    </view>
+                    <view wx:if="{{item.isMajor}}" class="global-watermark">GLOBAL EVENT</view>
+                </view>
+            </view>
+        </view>
+    </view>
+</view>
