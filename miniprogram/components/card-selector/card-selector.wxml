@@ -1,2 +1,32 @@
-<!--components/card-selector/card-selector.wxml-->
-<text>components/card-selector/card-selector.wxml</text>
+<root-portal wx:if="{{show}}">
+    <view class="card-modal">
+        <view class="modal-mask" bindtap="onClose"></view>
+        <view class="modal-content {{show ? 'up' : ''}}">
+            <view class="search-box">
+                <view class="search-wrapper">
+                    <icon class="search-icon-left" type="search" size="14" color="rgba(255,255,255,0.4)"></icon>
+                    <input class="search-input" placeholder="搜索卡面..." bindinput="handleSearch" value="{{searchQuery}}" placeholder-style="color:rgba(255,255,255,0.3)" />
+                    <view class="clear-btn" wx:if="{{searchQuery.length > 0}}" bindtap="handleClearSearch">
+                        <icon type="clear" size="16" color="rgba(255,255,255,0.6)"></icon>
+                    </view>
+                </view>
+            </view>
+            <scroll-view scroll-y class="card-scroll" enable-flex lower-threshold="150" bindscrolltolower="loadMore">
+                <view class="card-grid-item {{!usePlayerCard ? 'active' : ''}}" bindtap="handleReset">
+                    <view class="card-thumb default-bg">
+                        <view class="icon-reset"></view>
+                    </view>
+                    <text class="card-label">原厂背景</text>
+                </view>
+                <view wx:for="{{displayCards}}" wx:key="uuid" class="card-grid-item {{usePlayerCard && currentCardUuid === item.uuid ? 'active' : ''}}" bindtap="handleSelect" data-card="{{item}}">
+                    <image class="card-thumb" src="{{item.largeArt}}" mode="aspectFill" lazy-load></image>
+                    <text class="card-label">{{item.displayName}}</text>
+                    <view class="active-dot" wx:if="{{currentCardUuid === item.uuid}}"></view>
+                </view>
+                <view class="load-done" wx:if="{{displayCards.length >= fullList.length && fullList.length > 0}}">
+                    已加载全部卡面
+                </view>
+            </scroll-view>
+        </view>
+    </view>
+</root-portal>

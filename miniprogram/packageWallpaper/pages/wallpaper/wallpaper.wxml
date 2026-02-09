@@ -1,14 +1,14 @@
 <view class="container">
-    <view class="canvas-full-wrapper" style="{{canvasWrapperStyle}}">
+    <view class="canvas-full-wrapper base-wrapper" style="{{canvasWrapperStyle}}">
         <!-- <canvas type="2d" id="testCanvas" class="main-canvas"></canvas> -->
         <canvas type="2d" id="testCanvas" class="main-canvas" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" disable-scroll="true"></canvas>
         <!-- 左上：主要操作 -->
-        <view class="canvas-operation-left">
+        <view class="canvas-operation-left" style="z-index: 99999 !important; border: 2rpx solid red;">
             <view class="operation-container">
                 <button class="valo-btn valo-btn-primary" bindtap="togglePanel" data-type="hero">
                     <text>英雄</text>
                 </button>
-                <button class="valo-btn valo-btn-primary" bindtap="toggleCardsPanel" data-type="hero">
+                <button class="valo-btn valo-btn-primary" bindtap="openCardPanel" data-type="hero">
                     <text>背景</text>
                 </button>
                 <view class="weapon-group {{weaponMenuExpanded ? 'expanded' : ''}}">
@@ -26,7 +26,7 @@
             </view>
         </view>
         <!-- 右上：辅助操作 -->
-        <view class="canvas-operation-right">
+        <view class="canvas-operation-right" style="z-index: 99999 !important; border: 2rpx solid red;">
             <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
                 <text>⬆️</text>
             </button>
@@ -74,33 +74,7 @@
         </view>
     </root-portal>
     <!-- 背景选择 -->
-    <root-portal wx:if="{{showCardPanel}}">
-        <view class="card-modal">
-            <view class="modal-mask" bindtap="closeCardPanel"></view>
-            <view class="modal-content {{showCardPanel ? 'up' : ''}}">
-                <!-- <view class="modal-header">
-                    <text class="title">选择背景卡面</text>
-                    <view class="close-btn" bindtap="closeCardPanel">DONE</view>
-                </view> -->
-                <view class="search-box">
-                    <input class="search-input" placeholder="搜索卡面..." bindinput="onSearchCard" value="{{searchQuery}}" placeholder-style="color:rgba(255,255,255,0.3)" />
-                </view>
-                <scroll-view scroll-y class="card-scroll" enable-flex>
-                    <view class="card-grid-item {{!usePlayerCard ? 'active' : ''}}" bindtap="resetToHeroBg">
-                        <view class="card-thumb default-bg">
-                            <view class="icon-reset"></view>
-                        </view>
-                        <text class="card-label">原厂背景</text>
-                    </view>
-                    <view wx:for="{{filteredCards}}" wx:key="uuid" class="card-grid-item {{usePlayerCard && currentCard.uuid === item.uuid ? 'active' : ''}}" bindtap="selectPlayerCard" data-card="{{item}}">
-                        <image class="card-thumb" src="{{item.largeArt}}" mode="aspectFill" lazy-load></image>
-                        <text class="card-label">{{item.displayName}}</text>
-                        <view class="active-dot" wx:if="{{currentCard.uuid === item.uuid}}"></view>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>
-    </root-portal>
+    <card-selector show="{{showCardPanel}}" usePlayerCard="{{usePlayerCard}}" currentCardUuid="{{currentCard.uuid}}" bind:select="onCardSelect" bind:reset="onCardReset" bind:close="closeCardPanel" />
     <!-- 特工选择 -->
     <agent-selector show="{{showPopup && popupType === 'hero'}}" currentAgentUuid="{{currentAgent.uuid}}" bind:close="togglePanel" bind:select="selectAgent" />
     <root-portal wx:if="{{showSaveModal}}">

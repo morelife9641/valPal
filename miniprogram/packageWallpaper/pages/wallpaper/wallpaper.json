@@ -1,5 +1,6 @@
 {
   "usingComponents": {
-    "agent-selector": "/components/agent-selector/agent-selector"
+    "agent-selector": "/components/agent-selector/agent-selector",
+    "card-selector": "/components/card-selector/card-selector"
   }
 }
