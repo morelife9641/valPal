@@ -36,6 +36,7 @@ let ImageCache = {
 
 Page({
   data: {
+    activeCategory: "agent", // 默认展开英雄类
     showPopup: false,
     popupType: "hero",
     weaponTransform: {
@@ -225,6 +226,16 @@ Page({
       if (this.data.allWeapons.length === 0) wx.hideLoading();
     }
   },
+  toggleCategory(e) {
+    const cat = e.currentTarget.dataset.cat;
+    // 如果点的是已经展开的，就收起；否则展开新的
+    this.setData({
+      activeCategory: this.data.activeCategory === cat ? "" : cat,
+    });
+
+    // 震动反馈提升质感
+    // wx.vibrateShort({ type: 'light' });
+  },
 
   /**
    * 核心工具：下载云存储图片到本地（兼容所有版本）
@@ -372,288 +383,15 @@ Page({
     });
   },
 
-  async drawWithLocalFiles() {
-    const ctx = this.canvasCtx;
-    const { currentAgent, activeWeapons, systemInfo } = this.data;
-
-    if (!ctx || !this.canvasNode || !currentAgent) return;
-
-    const cw = systemInfo.windowWidth;
-    const ch = systemInfo.windowHeight;
-
-    try {
-      // --- 1. 准备加载任务队列 ---
-      const bgSrc = currentAgent.backgroundLocal || currentAgent.background;
-      const heroSrc =
-        currentAgent.bustPortraitLocal || currentAgent.bustPortrait;
-      const loadTasks = [];
-
-      // 背景图缓存检查
-      if (bgSrc !== ImageCache.lastBgSrc || !ImageCache.bg) {
-        loadTasks.push(
-          this.loadImage(bgSrc).then((img) => {
-            ImageCache.bg = img;
-            ImageCache.lastBgSrc = bgSrc;
-          }),
-        );
-      }
-
-      // 英雄图缓存检查
-      if (heroSrc !== ImageCache.lastHeroSrc || !ImageCache.hero) {
-        loadTasks.push(
-          this.loadImage(heroSrc).then((img) => {
-            ImageCache.hero = img;
-            ImageCache.lastHeroSrc = heroSrc;
-          }),
-        );
-      }
-
-      // 多武器图缓存检查：遍历 activeWeapons 数组
-      activeWeapons.forEach((w) => {
-        const wId = w.instanceId;
-        const wSrc = w.imageLocal || w.image;
-        // 如果这个实例没缓存，或者图片路径变了（切换了幻彩），则加载
-        if (
-          !ImageCache.weapons[wId] ||
-          ImageCache.weapons[wId].src.indexOf(w.imageLocal) === -1
-        ) {
-          loadTasks.push(
-            this.loadImage(wSrc).then((img) => {
-              ImageCache.weapons[wId] = img;
-            }),
-          );
-        }
-      });
-
-      // 等待所有新素材加载完成
-      if (loadTasks.length > 0) {
-        await Promise.all(loadTasks);
-      }
-
-      // --- 2. 开始物理绘制 ---
-      // 清空画布（由于图片已在内存，这一步之后立即绘制不会闪烁）
-      ctx.clearRect(0, 0, cw, ch);
-
-      // A. 绘制背景
-      if (ImageCache.bg) {
-        const bg = ImageCache.bg;
-        const bgScale = Math.max(cw / bg.width, ch / bg.height);
-        console.log("--- 背景计算参数 ---", {
-          原始宽: bg.width,
-          原始高: bg.height,
-          缩放后宽: bg.width * bgScale,
-          缩放后高: bg.height * bgScale,
-          绘制起点的X: (cw - bg.width * bgScale) / 2,
-          绘制起点的Y: (ch - bg.height * bgScale) / 2,
-        });
-        ctx.globalAlpha = 0.6;
-        ctx.drawImage(
-          bg,
-          (cw - bg.width * bgScale) / 2,
-          (ch - bg.height * bgScale) / 2,
-          bg.width * bgScale,
-          bg.height * bgScale,
-        );
-        ctx.globalAlpha = 1.0;
-      }
-
-      // B. 绘制英雄
-      if (ImageCache.hero) {
-        const hero = ImageCache.hero;
-        const pRenderH = ch * 0.85;
-        const pRatio = hero.width / hero.height;
-        const pRenderW = pRenderH * pRatio;
-        console.log("--- 英雄计算参数 ---", {
-          画布宽cw: cw,
-          画布高ch: ch,
-          渲染高度H: pRenderH,
-          渲染宽度W: pRenderW,
-          英雄比例Ratio: pRatio,
-          英雄绘制起点Y: ch - pRenderH,
-        });
-        ctx.drawImage(
-          hero,
-          (cw - pRenderW) / 2,
-          ch - pRenderH,
-          pRenderW,
-          pRenderH,
-        );
-      }
-
-      // C. 绘制所有武器 (遍历数组)
-      activeWeapons.forEach((w, index) => {
-        const wImg = ImageCache.weapons[w.instanceId];
-        if (wImg) {
-          ctx.save();
-          ctx.translate(w.x, w.y);
-
-          // 如果是当前选中的武器，可以加个简单的视觉反馈（可选）
-          if (index === this.data.selectedWeaponIndex) {
-            // ctx.shadowBlur = 15;
-            // ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
-          }
-
-          const scale = w.scale || 0.35;
-          const wW = wImg.width * scale;
-          const wH = wImg.height * scale;
-
-          // 居中绘制武器
-          ctx.drawImage(wImg, -wW / 2, -wH / 2, wW, wH);
-          ctx.restore();
-        }
-      });
-
-      console.log(`✅ [Canvas] 成功渲染英雄 + ${activeWeapons.length} 把武器`);
-    } catch (err) {
-      console.error("🔥 [Canvas] 绘制异常:", err);
-    }
-  },
-
-  async drawWithLocalFiles() {
-    const ctx = this.canvasCtx;
-    const {
-      currentAgent,
-      currentCard,
-      usePlayerCard,
-      activeWeapons,
-      systemInfo,
-    } = this.data;
-
-    // 基础检查：没有 Context 或英雄数据则无法绘制
-    if (!ctx || !this.canvasNode || !currentAgent) return;
-
-    const cw = systemInfo.windowWidth;
-    const ch = systemInfo.windowHeight;
-
-    try {
-      // --- 1. 动态确定素材来源 ---
-
-      // 背景来源：根据开关决定是使用英雄背景还是玩家卡面
-      let bgSrc = "";
-      if (usePlayerCard && currentCard) {
-        bgSrc = currentCard.localPath || currentCard.url;
-      } else {
-        bgSrc = currentAgent.backgroundLocal || currentAgent.background;
-      }
-
-      // 英雄立绘来源
-      const heroSrc =
-        currentAgent.bustPortraitLocal || currentAgent.bustPortrait;
-
-      const loadTasks = [];
-
-      // 背景图缓存与加载任务
-      if (bgSrc !== ImageCache.lastBgSrc || !ImageCache.bg) {
-        loadTasks.push(
-          this.loadImage(bgSrc).then((img) => {
-            ImageCache.bg = img;
-            ImageCache.lastBgSrc = bgSrc;
-          }),
-        );
-      }
-
-      // 英雄图缓存与加载任务
-      if (heroSrc !== ImageCache.lastHeroSrc || !ImageCache.hero) {
-        loadTasks.push(
-          this.loadImage(heroSrc).then((img) => {
-            ImageCache.hero = img;
-            ImageCache.lastHeroSrc = heroSrc;
-          }),
-        );
-      }
-
-      // 武器图缓存与加载任务 (遍历 activeWeapons)
-      activeWeapons.forEach((w) => {
-        const wId = w.instanceId;
-        const wSrc = w.imageLocal || w.image;
-        if (!ImageCache.weapons[wId] || ImageCache.weapons[wId].src !== wSrc) {
-          loadTasks.push(
-            this.loadImage(wSrc).then((img) => {
-              ImageCache.weapons[wId] = img;
-              ImageCache.weapons[wId].src = wSrc; // 标记来源用于比对
-            }),
-          );
-        }
-      });
-
-      // 等待所有素材进入内存
-      if (loadTasks.length > 0) {
-        await Promise.all(loadTasks);
-      }
-
-      // --- 2. 开始物理绘制流程 ---
-
-      // A. 清空画布
-      ctx.clearRect(0, 0, cw, ch);
-
-      // B. 绘制背景层
-      if (ImageCache.bg) {
-        const bg = ImageCache.bg;
-        // 使用 Aspect Fill 算法：确保图片覆盖全屏且不拉伸
-        const bgScale = Math.max(cw / bg.width, ch / bg.height);
-        const drawW = bg.width * bgScale;
-        const drawH = bg.height * bgScale;
-        const drawX = (cw - drawW) / 2;
-        const drawY = (ch - drawH) / 2;
-
-        ctx.save();
-        // 如果是卡面，100%不透明；如果是英雄背景，保持 0.6 透明度透出底部的渐变
-        ctx.globalAlpha = usePlayerCard ? 1.0 : 0.6;
-        ctx.drawImage(bg, drawX, drawY, drawW, drawH);
-        ctx.restore();
-      }
-
-      // C. 绘制英雄层 (叠加在背景之上)
-      if (ImageCache.hero) {
-        const hero = ImageCache.hero;
-        // 英雄立绘通常占据屏幕高度的 85%
-        const pRenderH = ch * 0.85;
-        const pRatio = hero.width / hero.height;
-        const pRenderW = pRenderH * pRatio;
-        const pX = (cw - pRenderW) / 2;
-        const pY = ch - pRenderH;
-
-        ctx.save();
-        // 如果背景是复杂的卡面，可以给英雄加一个微弱的投影增强立体感
-        if (usePlayerCard) {
-          ctx.shadowBlur = 30;
-          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        }
-        ctx.drawImage(hero, pX, pY, pRenderW, pRenderH);
-        ctx.restore();
-      }
-
-      // D. 绘制武器层 (最顶层)
-      activeWeapons.forEach((w, index) => {
-        const wImg = ImageCache.weapons[w.instanceId];
-        if (wImg) {
-          ctx.save();
-          // 移动坐标系到武器中心
-          ctx.translate(w.x, w.y);
-
-          // 选中的武器加光晕反馈
-          if (index === this.data.selectedWeaponIndex) {
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = "#ff4655";
-          }
-
-          const scale = w.scale || 0.35;
-          const wW = wImg.width * scale;
-          const wH = wImg.height * scale;
-
-          // 绘制武器（坐标已 offset，所以是 -wW/2）
-          ctx.drawImage(wImg, -wW / 2, -wH / 2, wW, wH);
-          ctx.restore();
-        }
-      });
-
-      console.log(
-        `🎨 [Canvas] 渲染成功: ${usePlayerCard ? "卡面背景" : "英雄背景"}`,
-      );
-    } catch (err) {
-      console.error("❌ [Canvas] 绘制失败:", err);
-      wx.showToast({ title: "画布渲染异常", icon: "none" });
-    }
+  toggleBgBlur() {
+    this.setData(
+      {
+        isBgBlurred: !this.data.isBgBlurred,
+      },
+      () => {
+        this.drawWithLocalFiles(); // 切换后立刻重绘
+      },
+    );
   },
 
   async drawWithLocalFiles() {
@@ -672,20 +410,18 @@ Page({
     const cw = systemInfo.windowWidth;
     const ch = systemInfo.windowHeight;
 
+    // 2. 确定背景与英雄路径
+    const bgSrc =
+      usePlayerCard && currentCard
+        ? currentCard.localPath || currentCard.url
+        : currentAgent.backgroundLocal || currentAgent.background;
+    const heroSrc = currentAgent.bustPortraitLocal || currentAgent.bustPortrait;
+
     try {
-      // --- 准备素材路径 ---
-      let bgSrc =
-        usePlayerCard && currentCard
-          ? currentCard.localPath || currentCard.url
-          : currentAgent.backgroundLocal || currentAgent.background;
-
-      const heroSrc =
-        currentAgent.bustPortraitLocal || currentAgent.bustPortrait;
-      const loadTasks = [];
-
-      // --- 异步加载/缓存检查 ---
+      // 3. 异步素材预加载
+      const tasks = [];
       if (bgSrc !== ImageCache.lastBgSrc || !ImageCache.bg) {
-        loadTasks.push(
+        tasks.push(
           this.loadImage(bgSrc).then((img) => {
             ImageCache.bg = img;
             ImageCache.lastBgSrc = bgSrc;
@@ -693,7 +429,7 @@ Page({
         );
       }
       if (heroSrc !== ImageCache.lastHeroSrc || !ImageCache.hero) {
-        loadTasks.push(
+        tasks.push(
           this.loadImage(heroSrc).then((img) => {
             ImageCache.hero = img;
             ImageCache.lastHeroSrc = heroSrc;
@@ -706,7 +442,7 @@ Page({
           !ImageCache.weapons[w.instanceId] ||
           ImageCache.weapons[w.instanceId].src !== wSrc
         ) {
-          loadTasks.push(
+          tasks.push(
             this.loadImage(wSrc).then((img) => {
               ImageCache.weapons[w.instanceId] = img;
               ImageCache.weapons[w.instanceId].src = wSrc;
@@ -715,23 +451,43 @@ Page({
         }
       });
 
-      if (loadTasks.length > 0) await Promise.all(loadTasks);
+      if (tasks.length > 0) await Promise.all(tasks);
 
-      // --- 2. 物理绘制流程 (顺序决定层级) ---
+      // 4. 清除画布并开始绘制
       ctx.clearRect(0, 0, cw, ch);
 
       // 【第一层：背景】
       if (ImageCache.bg) {
-        ctx.save(); // 保存初始状态
+        ctx.save();
         const bg = ImageCache.bg;
         const bgScale = Math.max(cw / bg.width, ch / bg.height);
         const dW = bg.width * bgScale;
         const dH = bg.height * bgScale;
 
-        // 如果是卡面，全显；如果是原厂背景，半透明透出底部的渐变
-        ctx.globalAlpha = usePlayerCard ? 1.0 : 0.6;
-        ctx.drawImage(bg, (cw - dW) / 2, (ch - dH) / 2, dW, dH);
-        ctx.restore(); // 恢复状态，确保 alpha 不影响后续绘制
+        /**
+         * 核心修复逻辑：
+         * 1. 使用 0.75 透明度。这是实测既能保持足够清晰度，
+         * 又能强制微信引擎保持 WebView UI（按钮）不被剔除的临界点。
+         * 2. 结合容器背景色 #000，视觉上会接近 1.0 的质感。
+         *
+         *
+         */
+
+        ctx.globalAlpha = usePlayerCard ? 0.75 : 0.6;
+
+        // 使用 9 参数法，严格锁定图像采样，规避同层渲染溢出
+        ctx.drawImage(
+          bg,
+          0,
+          0,
+          bg.width,
+          bg.height,
+          (cw - dW) / 2,
+          (ch - dH) / 2,
+          dW,
+          dH,
+        );
+        ctx.restore();
       }
 
       // 【第二层：英雄立绘】
@@ -742,10 +498,10 @@ Page({
         const pRatio = hero.width / hero.height;
         const pRenderW = pRenderH * pRatio;
 
-        // 可以在这里给英雄加一个微弱的投影，使其从背景中脱离出来
+        // 英雄在卡面模式下加投影提升立体感
         if (usePlayerCard) {
           ctx.shadowBlur = 40;
-          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+          ctx.shadowColor = "rgba(0,0,0,0.5)";
         }
 
         ctx.drawImage(
@@ -758,31 +514,37 @@ Page({
         ctx.restore();
       }
 
-      // 【第三层：所有武器】
+      // 【第三层：武器配件】
       activeWeapons.forEach((w, index) => {
         const wImg = ImageCache.weapons[w.instanceId];
         if (wImg) {
           ctx.save();
           ctx.translate(w.x, w.y);
 
-          // 选中态反馈
+          // 选中态光晕
           if (index === this.data.selectedWeaponIndex) {
             ctx.shadowBlur = 25;
             ctx.shadowColor = "#ff4655";
           }
 
-          const scale = w.scale || 0.35;
-          const wW = wImg.width * scale;
-          const wH = wImg.height * scale;
-
-          ctx.drawImage(wImg, -wW / 2, -wH / 2, wW, wH);
+          const s = w.scale || 0.35;
+          ctx.drawImage(
+            wImg,
+            -(wImg.width * s) / 2,
+            -(wImg.height * s) / 2,
+            wImg.width * s,
+            wImg.height * s,
+          );
           ctx.restore();
         }
       });
 
-      console.log("✅ Canvas 层级绘制完成");
+      console.log(
+        "✅ [RENDER] 绘制完成，当前背景 Alpha:",
+        usePlayerCard ? 0.75 : 0.6,
+      );
     } catch (err) {
-      console.error("❌ Canvas 绘制异常:", err);
+      console.error("❌ [RENDER] 绘制失败:", err);
     }
   },
 
@@ -1502,113 +1264,65 @@ Page({
     });
     this.drawWithLocalFiles();
   },
+  onCardReset() {
+    const agent = this.data.currentAgent;
+    let gradientStyle = "background-color: #000;"; // 默认保底色
 
-  // 选中玩家卡面
-  async onCardSelect(e) {
-    console.log("=== [DEBUG] 1. 收到选中事件 ===");
-    console.log("Event Detail:", e.detail);
-
-    const card = e.detail.card;
-    if (!card) {
-      console.error("❌ 错误：未获取到 card 对象");
-      return;
+    // 如果当前英雄有渐变色配置，重新计算它
+    if (agent && agent.backgroundGradientColors?.length > 0) {
+      const colors = agent.backgroundGradientColors.map((color) => {
+        const r = parseInt(color.substr(0, 2), 16),
+          g = parseInt(color.substr(2, 2), 16),
+          b = parseInt(color.substr(4, 2), 16),
+          a = parseInt(color.substr(6, 2), 16) / 255;
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+      });
+      gradientStyle = `background: linear-gradient(to bottom, ${colors.join(", ")});`;
     }
 
-    // 先把弹窗关掉，排除 Portal 干扰
-    this.setData({ showCardPanel: false });
-    console.log("=== [DEBUG] 2. 弹窗已尝试关闭 ===");
-
-    wx.showLoading({ title: "加载背景...", mask: true });
-
-    try {
-      console.log("=== [DEBUG] 3. 开始下载卡面 ===", card.largeArt);
-      const localPath = await this.downloadFileToLocal(card.largeArt);
-      console.log("=== [DEBUG] 4. 下载完成, 本地路径:", localPath);
-
-      if (localPath) {
-        // 记录一下 setData 之前，操作区依赖的几个核心变量
-        console.log("=== [DEBUG] 5. 准备 setData 渲染前检查 ===");
-        console.log("当前 Agent:", this.data.currentAgent);
-        console.log("当前武器数:", this.data.activeWeapons.length);
-
-        const newWrapperStyle =
-          "height: 100vh; width: 100vw; position: relative; background: #000;";
-
-        this.setData(
-          {
-            usePlayerCard: true,
-            currentCard: { ...card, localPath },
-            showCardPanel: false,
-            // canvasWrapperStyle: newWrapperStyle,
-            canvasWrapperStyle: "background-color: #000000;",
-          },
-          () => {
-            console.log("=== [DEBUG] 6. setData 回调执行，开始绘图 ===");
-            this.drawWithLocalFiles();
-          },
-        );
-      } else {
-        console.error("❌ 错误：localPath 为空，下载可能失败了");
-      }
-    } catch (err) {
-      console.error("❌ [DEBUG] 捕获到异常:", err);
-    } finally {
-      wx.hideLoading();
-    }
+    this.setData(
+      {
+        usePlayerCard: false,
+        currentCard: null,
+        showCardPanel: false,
+        // 关键：把样式还原回英雄的渐变色
+        canvasWrapperStyle: gradientStyle,
+      },
+      () => {
+        // 重新触发绘制，此时 drawWithLocalFiles 内部会因为 usePlayerCard 为 false 而去画英雄背景
+        this.drawWithLocalFiles();
+      },
+    );
   },
 
   async onCardSelect(e) {
     const card = e.detail.card;
-    console.log("=== [STEP 1] 选中卡面:", card.displayName);
-
-    // 1. 先记录当前的 UI 状态
-    const query = wx.createSelectorQuery().in(this);
-    query.select(".canvas-operation-left").boundingClientRect();
-    query.exec((res) => {
-      console.log("=== [STEP 2] setData 前操作区状态:", res[0]);
-    });
-
     this.setData({ showCardPanel: false });
-    wx.showLoading({ title: "加载背景...", mask: true });
+    wx.showLoading({ title: "同步背景数据...", mask: true });
 
+    // 1. 下载卡面原图 (模拟 agent.background 的下载)
     const localPath = await this.downloadFileToLocal(card.largeArt);
 
     if (localPath) {
-      console.log("=== [STEP 3] 准备更新背景并渲染 ===");
+      // 2. 【关键】模拟 agent 的 gradient 逻辑
+      // 既然背景被卡面占满了，我们将 gradient 设置为一个纯色或者透明，但保持 CSS 结构一致
+      const simulatedGradient =
+        "background-color: #000; height: 100vh; width: 100vw; position: relative;";
 
-      // 我们在这里做 setData
+      // 3. 将卡面信息注入 currentCard，同时保持 usePlayerCard 开关
       this.setData(
         {
           usePlayerCard: true,
-          currentCard: { ...card, localPath },
-          canvasWrapperStyle:
-            "height: 100vh; width: 100vw; position: relative; background: #000;",
+          currentCard: {
+            ...card,
+            localPath,
+          },
+          // 使用模拟的样式，而不是简单的 background: #000
+          canvasWrapperStyle: simulatedGradient,
         },
         () => {
-          // --- 关键探测：setData 渲染后的 DOM 状态 ---
-          const nextQuery = wx.createSelectorQuery().in(this);
-          nextQuery.select(".canvas-operation-left").boundingClientRect();
-          nextQuery.select(".main-canvas").boundingClientRect();
-          nextQuery.exec((res) => {
-            const opRes = res[0];
-            const cvRes = res[1];
-
-            console.log("=== [STEP 4] 渲染后操作区 DOM 信息 ===", opRes);
-            console.log("=== [STEP 4] 渲染后 Canvas DOM 信息 ===", cvRes);
-
-            if (!opRes || opRes.height === 0) {
-              console.error(
-                "❌ 警告：操作区节点高度为 0 或不存在，可能被 wx:if 卸载或样式坍塌",
-              );
-            } else if (opRes.top < 0 || opRes.top > 800) {
-              console.error(
-                "❌ 警告：操作区位置异常，发生了位移，当前 top 为:",
-                opRes.top,
-              );
-            }
-
-            this.drawWithLocalFiles();
-          });
+          // 4. 调用已经验证过正常的绘制流程
+          this.drawWithLocalFiles();
         },
       );
     }

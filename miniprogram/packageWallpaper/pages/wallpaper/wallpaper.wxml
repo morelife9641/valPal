@@ -2,8 +2,7 @@
     <view class="canvas-full-wrapper base-wrapper" style="{{canvasWrapperStyle}}">
         <!-- <canvas type="2d" id="testCanvas" class="main-canvas"></canvas> -->
         <canvas type="2d" id="testCanvas" class="main-canvas" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" disable-scroll="true"></canvas>
-        <!-- 左上：主要操作 -->
-        <view class="canvas-operation-left" style="z-index: 99999 !important; border: 2rpx solid red;">
+        <!-- <view class="canvas-operation-left" style="z-index: 99999 !important; border: 2rpx solid red;">
             <view class="operation-container">
                 <button class="valo-btn valo-btn-primary" bindtap="togglePanel" data-type="hero">
                     <text>英雄</text>
@@ -25,7 +24,6 @@
                 </view>
             </view>
         </view>
-        <!-- 右上：辅助操作 -->
         <view class="canvas-operation-right" style="z-index: 99999 !important; border: 2rpx solid red;">
             <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
                 <text>⬆️</text>
@@ -42,6 +40,47 @@
             <button class="valo-btn valo-btn-secondary" bindtap="openSaveModal">
                 <text>上传</text>
             </button>
+        </view> -->
+        <view class="ui-screen">
+            <view class="action-menu">
+                <view class="menu-group {{activeCategory === 'agent' ? 'active' : ''}}">
+                    <view class="category-label" bindtap="toggleCategory" data-cat="agent">
+                        <view class="label-en">AGENT</view>
+                        <view class="label-cn">英雄</view>
+                    </view>
+                    <scroll-view scroll-x class="sub-options">
+                        <view class="opt-item" bindtap="togglePanel" data-type="hero">切换英雄</view>
+                        <view class="opt-item" bindtap="handleReset">位置重置</view>
+                        <view class="opt-item" bindtap="resetCanvas">清空全部</view>
+                    </scroll-view>
+                </view>
+                <view class="menu-group {{activeCategory === 'cosmetic' ? 'active' : ''}}">
+                    <view class="category-label" bindtap="toggleCategory" data-cat="cosmetic">
+                        <view class="label-en">GEAR</view>
+                        <view class="label-cn">装饰</view>
+                    </view>
+                    <scroll-view scroll-x class="sub-options">
+                        <view class="opt-item" bindtap="openCardPanel">背景卡面</view>
+                        <view class="opt-item" bindtap="togglePanel" data-type="weapon">添加武器</view>
+                        <view class="opt-item" bindtap="showStickerPanel">添加贴纸</view>
+                        <view class="opt-item {{isBgBlurred ? 'active-status' : ''}}" bindtap="toggleBgBlur">
+                            背景模糊
+                        </view>
+                        <view class="opt-item" bindtap="onCardReset">还原默认</view>
+                    </scroll-view>
+                </view>
+                <view class="menu-group {{activeCategory === 'system' ? 'active' : ''}}">
+                    <view class="category-label" bindtap="toggleCategory" data-cat="system">
+                        <view class="label-en">SYSTEM</view>
+                        <view class="label-cn">操作</view>
+                    </view>
+                    <scroll-view scroll-x class="sub-options">
+                        <view class="opt-item highlight" bindtap="saveCanvas">保存图片</view>
+                        <view class="opt-item" bindtap="openSaveModal">上传素材</view>
+                        <view class="opt-item" bindtap="clearDecorations">清除装饰</view>
+                    </scroll-view>
+                </view>
+            </view>
         </view>
     </view>
     <!-- 拆 -->
