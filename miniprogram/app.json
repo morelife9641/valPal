@@ -5,14 +5,19 @@
     "pages/skins/index",
     "pages/tools/index",
     "pages/index/detail",
-    "components/card-selector/card-selector"
+    "pages/pro-settings/index",
+    "components/card-selector/card-selector",
+    "components/custom-loading/index",
+    "components/rank-picker/rank-picker"
   ],
   "subpackages": [
     {
       "root": "packageStrategy",
       "name": "strategyDetail",
       "pages": [
-        "pages/detail/detail"
+        "pages/detail/detail",
+        "pages/list/list",
+        "pages/add-point/add-point"
       ]
     },
     {

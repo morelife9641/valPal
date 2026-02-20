@@ -2,45 +2,6 @@
     <view class="canvas-full-wrapper base-wrapper" style="{{canvasWrapperStyle}}">
         <!-- <canvas type="2d" id="testCanvas" class="main-canvas"></canvas> -->
         <canvas type="2d" id="testCanvas" class="main-canvas" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" disable-scroll="true"></canvas>
-        <!-- <view class="canvas-operation-left" style="z-index: 99999 !important; border: 2rpx solid red;">
-            <view class="operation-container">
-                <button class="valo-btn valo-btn-primary" bindtap="togglePanel" data-type="hero">
-                    <text>英雄</text>
-                </button>
-                <button class="valo-btn valo-btn-primary" bindtap="openCardPanel" data-type="hero">
-                    <text>背景</text>
-                </button>
-                <view class="weapon-group {{weaponMenuExpanded ? 'expanded' : ''}}">
-                    <button class="valo-btn valo-btn-weapon" bindtap="toggleWeaponMenu">
-                        <text>装饰</text>
-                    </button>
-                    <view class="weapon-submenu-vertical">
-                        <button class="valo-sub-btn" bindtap="togglePanel" data-type="weapon">
-                            🔫
-                        </button>
-                        <button class="valo-sub-btn" bindtap="showStickerPanel">✨</button>
-                        <button class="valo-sub-btn" bindtap="clearDecorations">🗑️</button>
-                    </view>
-                </view>
-            </view>
-        </view>
-        <view class="canvas-operation-right" style="z-index: 99999 !important; border: 2rpx solid red;">
-            <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
-                <text>⬆️</text>
-            </button>
-            <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
-                <text>⬇️</text>
-            </button>
-            <button class="valo-btn valo-btn-tertiary" bindtap="resetCanvas">
-                <text>重置</text>
-            </button>
-            <button class="valo-btn valo-btn-secondary" bindtap="saveCanvas">
-                <text>保存</text>
-            </button>
-            <button class="valo-btn valo-btn-secondary" bindtap="openSaveModal">
-                <text>上传</text>
-            </button>
-        </view> -->
         <view class="ui-screen">
             <view class="action-menu">
                 <view class="menu-group {{activeCategory === 'agent' ? 'active' : ''}}">
@@ -60,13 +21,10 @@
                         <view class="label-cn">装饰</view>
                     </view>
                     <scroll-view scroll-x class="sub-options">
-                        <view class="opt-item" bindtap="openCardPanel">背景卡面</view>
-                        <view class="opt-item" bindtap="togglePanel" data-type="weapon">添加武器</view>
-                        <view class="opt-item" bindtap="showStickerPanel">添加贴纸</view>
-                        <view class="opt-item {{isBgBlurred ? 'active-status' : ''}}" bindtap="toggleBgBlur">
-                            背景模糊
-                        </view>
-                        <view class="opt-item" bindtap="onCardReset">还原默认</view>
+                        <view class="opt-item" bindtap="openCardPanel">卡面</view>
+                        <view class="opt-item" bindtap="togglePanel" data-type="weapon">枪械</view>
+                        <view class="opt-item" bindtap="showStickerPanel">贴纸</view>
+                        <view class="opt-item" bindtap="onCardReset">还原</view>
                     </scroll-view>
                 </view>
                 <view class="menu-group {{activeCategory === 'system' ? 'active' : ''}}">

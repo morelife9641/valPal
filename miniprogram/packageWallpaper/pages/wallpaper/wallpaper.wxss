@@ -25,52 +25,61 @@ canvas[canvas-id="testCanvas"] {
 
 /* 头部 */
 /* 容器定位 */
+/* 1. 基础容器：穿透点击但锁定交互区 */
+.ui-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  pointer-events: none;
+}
+
 .action-menu {
   position: absolute;
-  left: 24rpx;
-  top: 2vh; /* 位置稍微上移 */
+  left: 30rpx;
+  top: 2vh;
   display: flex;
   flex-direction: column;
-  gap: 16rpx; /* 间距缩小 */
-  pointer-events: auto;
+  gap: 20rpx;
+  pointer-events: auto; /* 恢复点击 */
 }
 
-/* 分类组基础样式 */
+/* 2. 菜单组：关键是利用动画改变 max-width */
 .menu-group {
   display: flex;
-  align-items: center;
-  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  width: 80rpx; /* 默认宽度显著缩小 */
-  height: 54rpx; /* 整体高度压缩约 50% */
+  height: 60rpx; /* 统一高度，约原 50% */
+  background: #0f1923; /* 纯黑底色，解决透明感 */
+  border: 1rpx solid #333;
+  width: 80rpx; /* 初始宽度 */
+  transition: width 0.3s ease-out;
   overflow: hidden;
-  white-space: nowrap;
-  background: #0f1923; /* 无畏契约标志性深色，不透明 */
-  border: 1rpx solid #333; /* 细微边框增强轮廓 */
+  box-sizing: border-box;
 }
 
-/* 激活状态宽度展开 */
+/* 展开状态：宽度直接拉长 */
 .menu-group.active {
-  width: 70vw;
-  border-color: #ff4655; /* 展开时高亮红色边框 */
+  width: 600rpx; /* 给一个足够展示 3-4 个按钮的定宽 */
+  border-color: #ff4655;
 }
 
-/* 左侧标签样式 */
+/* 3. 左侧固定标签 */
 .category-label {
-  min-width: 80rpx;
+  flex-shrink: 0; /* 绝对禁止压缩 */
+  width: 80rpx;
   height: 100%;
   background: #1f2326;
-  border-left: 4rpx solid #ff4655; /* 红色装饰线 */
+  border-left: 4rpx solid #ff4655;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative;
-  z-index: 10;
 }
 
 .label-en {
   color: #ff4655;
-  font-size: 14rpx; /* 极小字体，战术感 */
+  font-size: 14rpx;
   font-weight: 900;
   line-height: 1;
 }
@@ -79,39 +88,27 @@ canvas[canvas-id="testCanvas"] {
   color: #ece8e1;
   font-size: 18rpx;
   font-weight: bold;
-  margin-top: 2rpx;
 }
 
-/* 子选项滚动区域 */
+/* 4. 滚动区域：核心修复点 */
 .sub-options {
-  flex: 1;
+  width: 520rpx; /* (600 - 80) */
   height: 100%;
-  background: #0f1923;
-  padding: 0 16rpx;
-  /* 关键修复：确保展开后子容器填满剩余空间 */
-  width: 100%;
-  pointer-events: auto;
+  white-space: nowrap; /* 强制内容不换行 */
 }
 
-/* 按钮内部横向排列修正 */
-.sub-options-content {
-  display: inline-flex; /* 改为 inline-flex 确保宽度随内容撑开 */
-  align-items: center;
-  height: 100%;
-  padding-right: 40rpx; /* 给末尾留点空间 */
-}
-
-/* 具体子按钮 */
+/* 5. 按钮项：显式定宽解决点不动 */
 .opt-item {
-  display: inline-block;
-  padding: 0 24rpx; /* 增加点击热区 */
+  display: inline-flex; /* 配合 nowrap 排成一排 */
+  align-items: center;
+  justify-content: center;
+  width: 130rpx; /* 显式定宽，保证点击热区 */
+  height: 60rpx;
   color: #ece8e1;
   font-size: 20rpx;
-  line-height: 54rpx;
-  height: 54rpx;
-  position: relative;
-  z-index: 5; /* 确保它在 scroll-view 之上 */
-  pointer-events: auto; /* 强制开启点击 */
+  border-right: 1rpx solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  vertical-align: top;
 }
 
 .opt-item:active {
@@ -119,18 +116,11 @@ canvas[canvas-id="testCanvas"] {
   color: #fff;
 }
 
-/* 特殊高亮按钮（如保存） */
+/* 特殊高亮 */
 .opt-item.highlight {
   color: #ff4655;
   font-weight: bold;
 }
-
-/* 激活状态文字（如模糊开启） */
-.opt-item.active-status {
-  background: rgba(255, 70, 85, 0.2);
-  color: #ff4655;
-}
-
 /* 按钮 */
 .base-wrapper {
   position: relative !important;
@@ -146,98 +136,6 @@ canvas[canvas-id="testCanvas"] {
   left: 30rpx;
   z-index: 100 !important;
   pointer-events: auto; /* 确保能点到 */
-}
-
-/* 右上辅助操作区 */
-.canvas-operation-right {
-  position: absolute;
-  top: 40rpx; /* 根据你的导航栏高度调整，避免被胶囊按钮挡住 */
-  right: 20rpx;
-
-  display: flex;
-  flex-direction: row; /* 关键：横向排列 */
-  align-items: center;
-  pointer-events: auto !important; /* 确保能点到 */
-  z-index: 100 !important; /* 确保层级高于 Canvas */
-}
-
-.operation-container {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.85) 0%,
-    rgba(20, 20, 20, 0.9) 100%
-  );
-  backdrop-filter: blur(15rpx);
-  border-radius: 12rpx;
-  padding: 15rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 10rpx;
-  box-shadow:
-    0 4rpx 20rpx rgba(0, 0, 0, 0.5),
-    0 0 0 1rpx rgba(255, 70, 85, 0.3);
-}
-
-.valo-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 64rpx;
-  padding: 0 16rpx;
-  border-radius: 12rpx;
-  background: rgba(15, 25, 35, 0.9); /* 瓦罗兰特深蓝黑 */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  font-size: 24rpx;
-  white-space: nowrap; /* 防止文字换行 */
-  margin: 0; /* 清除默认 margin */
-}
-.valo-btn-icon {
-  padding: 0;
-  width: 64rpx; /* 宽高相等 */
-  height: 64rpx;
-  font-size: 32rpx; /* 图标稍微大一点 */
-  background: rgba(15, 25, 35, 0.8);
-}
-
-/* 按钮点击态 */
-.valo-btn-hover {
-  opacity: 0.8;
-  transform: scale(0.95);
-}
-
-.valo-btn:active {
-  transform: scale(0.95);
-  box-shadow: inset 0 0 20rpx rgba(255, 70, 85, 0.3);
-}
-
-.valo-btn-primary {
-  background: linear-gradient(135deg, #ff4655 0%, #ff1744 100%);
-}
-
-.valo-btn-weapon {
-  background: rgba(40, 40, 40, 0.95);
-  border: 1rpx solid rgba(255, 70, 85, 0.4);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.expand-icon {
-  font-size: 20rpx;
-  color: #ff4655;
-  transition: transform 0.3s;
-  margin-left: 10rpx;
-}
-
-.valo-btn-secondary {
-  background: rgba(40, 40, 40, 0.9);
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
-}
-
-.valo-btn-tertiary {
-  background: rgba(50, 50, 50, 0.85);
-  border: 1rpx solid rgba(255, 255, 255, 0.15);
 }
 
 /* 武器装饰组 - 纵向展开 */
@@ -264,28 +162,6 @@ canvas[canvas-id="testCanvas"] {
 
 .weapon-group.expanded .expand-icon {
   transform: rotate(180deg);
-}
-
-/* 子按钮 */
-.valo-sub-btn {
-  width: 100%;
-  height: 60rpx;
-  padding: 0;
-  background: rgba(30, 30, 30, 0.95);
-  border: 1rpx solid rgba(255, 70, 85, 0.6);
-  border-radius: 8rpx;
-  font-size: 32rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  box-shadow: 0 0 15rpx rgba(255, 70, 85, 0.2);
-}
-
-.valo-sub-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 25rpx rgba(255, 70, 85, 0.6);
-  background: rgba(255, 70, 85, 0.2);
 }
 
 /* 英雄卡片优化 */

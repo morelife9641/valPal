@@ -1,0 +1,183 @@
+/* --- 基础页面重置 --- */
+page {
+  background-color: #0f1923;
+  color: #ece8e1;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+.add-container {
+  min-height: 100vh;
+  background-color: #0f1923;
+}
+
+/* --- Header 样式 --- */
+.page-header {
+  padding: 60rpx 40rpx 40rpx;
+}
+
+.title {
+  font-size: 24rpx;
+  font-weight: 900;
+  color: #ff4655;
+  letter-spacing: 4rpx;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.subtitle {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #ece8e1;
+  display: block;
+}
+
+/* --- 表单公共样式 --- */
+.form-group {
+  padding: 0 40rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 20rpx;
+  color: #768079;
+  font-weight: 900;
+  margin-bottom: 20rpx;
+  text-transform: uppercase;
+  letter-spacing: 2rpx;
+}
+
+/* --- 核心：统一 Input 和 Select 样式 --- */
+/* 我们将所有输入类容器的高度锁定在 100rpx，
+   并统一背景、边框、字体、颜色 
+*/
+.custom-input,
+.custom-select,
+.readonly-value {
+  width: 100%;
+  height: 100rpx;
+  background: #161f28;
+  border: 1rpx solid #313b44 !important;
+  color: #ece8e1;
+  padding: 0 30rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  border-radius: 4rpx;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* 特殊处理文本域，高度根据内容定但风格保持一致 */
+.custom-textarea {
+  width: 100%;
+  height: 200rpx;
+  background: #161f28;
+  border: 1rpx solid #313b44;
+  color: #ece8e1;
+  padding: 24rpx 30rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  border-radius: 4rpx;
+}
+
+/* --- Placeholder 颜色对齐 --- */
+/* 1. 针对 input/textarea 的系统占位符类 */
+.ph-style {
+  color: #4b5563 !important;
+}
+
+/* 2. 针对我们模拟的选择框(View)的占位文字颜色 */
+.custom-select.placeholder .picker-inner-text {
+  color: #4b5563;
+}
+
+/* --- 选择器内部结构 --- */
+.custom-select picker {
+  width: 100%;
+  height: 100%;
+}
+
+.picker-inner-text {
+  width: 100%;
+  height: 100rpx;
+  line-height: 100rpx; /* 确保文字垂直居中 */
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 下拉小三角 */
+.arrow-icon {
+  position: absolute;
+  right: 30rpx;
+  top: 50%;
+  transform: translateY(-50%); /* 绝对居中 */
+  width: 0;
+  height: 0;
+  border-left: 10rpx solid transparent;
+  border-right: 10rpx solid transparent;
+  border-top: 12rpx solid #313b44;
+  pointer-events: none;
+}
+
+/* --- 图片上传区域 --- */
+.upload-card-full {
+  width: 100%;
+  height: 400rpx;
+  background: #161f28;
+  border: 2rpx dashed #313b44;
+  border-radius: 4rpx;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-card-full image {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #4b5563;
+}
+
+.plus {
+  font-size: 60rpx;
+  margin-bottom: 10rpx;
+}
+
+/* --- 底部提交按钮 --- */
+.submit-bar {
+  padding: 40rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #0f1923 80%, transparent);
+}
+
+.btn-primary {
+  background: #ff4655;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+}
+
+.btn-inner {
+  color: white;
+  font-weight: 900;
+  font-size: 30rpx;
+  letter-spacing: 6rpx;
+}
+
+.footer-spacer {
+  height: 100rpx;
+}

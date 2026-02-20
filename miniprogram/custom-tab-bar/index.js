@@ -15,7 +15,7 @@ Component({
       },
       {
         pagePath: "pages/news/index",
-        text: "资讯",
+        text: "赛事",
         iconPath: "../assets/news.png",
         selectedIconPath: "../assets/news_active.png",
       },

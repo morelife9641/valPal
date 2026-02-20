@@ -1,0 +1,51 @@
+<view class="detail-container">
+    <view class="page-background">
+        <view class="empty-bg-portrait">
+            <image src="{{heroInfo.bustPortrait}}" mode="aspectFill" />
+            <view class="portrait-mask"></view>
+        </view>
+    </view>
+    <view class="content-wrapper">
+        <view class="list-header">
+            <view class="header-left">
+                <text class="hero-name-en">{{heroInfo.heroNameEn}}</text>
+                <text class="subtitle">{{heroInfo.heroName}} · 战术方案库</text>
+            </view>
+            <view class="header-action" bindtap="goToAddPoint">
+                <view class="btn-skew-bg"></view>
+                <view class="btn-content">
+                    <text class="txt">上传方案</text>
+                </view>
+            </view>
+        </view>
+        <scroll-view scroll-y class="strategy-list" wx:if="{{pointList.length > 0}}">
+            <view class="strategy-card" wx:for="{{pointList}}" wx:key="_id" bindtap="goToDetail" data-id="{{item._id}}">
+                <view class="card-visual">
+                    <image class="preview-img" src="{{item.resultImg}}" mode="aspectFill" />
+                    <view class="visual-overlay"></view>
+                    <view class="type-badge">{{item.mapName}}</view>
+                </view>
+                <view class="card-content">
+                    <view class="top-info">
+                        <text class="strategy-title">{{item.title}}</text>
+                        <text class="strategy-subtitle">TACTICAL RECORD</text>
+                    </view>
+                    <view class="bottom-info">
+                        <view class="author-box">
+                            <view class="status-dot"></view>
+                            <text>AUTHORIZED BY SYSTEM</text>
+                        </view>
+                        <view class="action-arrow"></view>
+                    </view>
+                </view>
+                <view class="card-deco"></view>
+            </view>
+            <view class="tabbar-placeholder"></view>
+        </scroll-view>
+        <view class="empty-content-box" wx:else>
+            <text class="err-title">NO STRATEGY</text>
+            <text class="err-hint">当前地图暂无该特工的战术记录</text>
+            <view class="empty-btn" bindtap="goToAddPoint">立即去贡献</view>
+        </view>
+    </view>
+</view>

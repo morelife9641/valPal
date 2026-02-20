@@ -1,36 +1,990 @@
-.map-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
-  height: 100vh;
-  padding: 20px 10px 140px 10px;
-}
-.map-card {
-  position: relative;
-  height: 240rpx;
-  border-radius: 8rpx;
+page {
+  background: #0f1923;
   overflow: hidden;
-  border: 1rpx solid #333;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-.map-splash {
+
+.tactical-container {
+  display: flex;
+  flex-direction: column;
+  /* height: 100vh; */
+  color: #ece8e1;
+  padding-bottom: 200rpx;
+}
+
+.tag-row {
+  display: flex;
+  align-items: center;
+  padding: 0 20rpx;
+  margin-bottom: 1rpx;
+}
+
+/* 赛季轮换标题 */
+.section-tag {
+  font-size: 28rpx;
+  color: #ff4655;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+/* 迷你赛季标签 */
+.season-badge {
+  margin-left: 12rpx;
+  background: #ff4655;
+  padding: 2rpx 10rpx; /* 极小的内边距 */
+  /* 简单的斜切平行四边形，视觉更稳 */
+  /* transform: skewX(-15deg); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.season-text {
+  font-size: 14rpx; /* 进一步缩小字号 */
+  color: #ffffff;
+  font-weight: 900;
+  letter-spacing: 1rpx;
+  line-height: 1;
+}
+
+/* --- 第一段：地图样式 --- */
+.header-section {
+  padding: 20rpx;
+  background: #161d24;
+  flex-shrink: 0;
+  padding-bottom: 0;
+}
+
+.map-grid-fixed {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10rpx 0rpx;
+  gap: 12rpx; /* 稍微缩小间距 */
+}
+
+.map-item {
+  position: relative;
+  flex: 0 0 calc(33.333% - 8rpx); /* 三列布局，考虑间距 */
+
+  height: 80rpx;
+  background: #1f2326;
+  /* 保持瓦式切角 */
+  /* clip-path: polygon(0 0, 100% 0, 100% 82%, 88% 100%, 0 100%); */
+  box-sizing: border-box;
+  transition: background 0.3s ease; /* 仅平滑过渡背景 */
+}
+
+.map-bg {
   width: 100%;
   height: 100%;
+  opacity: 0.5; /* 默认暗一点，更有质感 */
+  transition: opacity 0.3s ease;
 }
-.map-mask {
+
+.map-name {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #8b978f; /* 默认灰色 */
+  transition: color 0.3s ease;
+}
+
+/* --- 选中状态：绝无抖动的视觉方案 --- */
+
+.map-item.active {
+  background: #2d363d; /* 稍微提亮背景 */
+}
+
+.map-item.active .map-bg {
+  opacity: 0.9; /* 选中时图片亮起 */
+}
+
+.map-item.active .map-name {
+  color: #ffffff; /* 选中时文字变白 */
+}
+
+/* 方案：用一个内嵌的红色边框，不撑开容器 */
+.active-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 4rpx solid #ff4655;
+  z-index: 4;
+  pointer-events: none;
+  /* 同步主体的切角，防止溢出 */
+  /* clip-path: polygon(0 0, 100% 0, 100% 82%, 88% 100%, 0 100%); */
+}
+
+/* 方案：底部一个亮色小滑块，增加动感 */
+.active-indicator {
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  padding: 20rpx;
+  width: 40%;
+  height: 6rpx;
+  background: #ff4655;
+  z-index: 6;
+  box-shadow: 0 0 10rpx #ff4655;
 }
-.map-name {
+/* --- 第二段：英雄样式 --- */
+/* --- 英雄区域容器 --- */
+.hero-section {
+  background: #0f1923; /* 保持与背景一致 */
+  border-top: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- 职业 Tabs 统一风格 --- */
+.role-tabs {
+  display: flex;
+  padding: 0 20rpx;
+  margin-bottom: 30rpx;
+  gap: 12rpx;
+}
+
+.role-tab {
+  font-size: 20rpx;
+  padding: 8rpx 24rpx;
+  background: #161d24;
+  color: #8b978f;
+  /* 斜切平行四边形 */
+  /* clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%); */
+  transition: all 0.3s ease;
+}
+
+.role-tab.active {
+  background: #ff4655;
   color: #fff;
+  font-weight: bold;
+  text-shadow: 0 0 10rpx rgba(255, 255, 255, 0.5);
+}
+
+/* --- 英雄卡片列表 --- */
+.hero-scroll {
+  height: 180rpx;
+  white-space: nowrap;
+  padding-left: 20rpx;
+}
+
+.hero-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120rpx;
+  margin-right: 20rpx;
+  position: relative;
+  padding-top: 10rpx;
+}
+
+/* 英雄头像外框 - 改为方块斜切 */
+.hero-icon-wrap {
+  position: relative;
+  width: 100rpx;
+  height: 100rpx;
+  background: #161d24;
+  /* clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); */
+  transition: background 0.3s;
+}
+
+.hero-icon {
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+/* --- 选中状态：不使用 Scale，使用内嵌元素 --- */
+.hero-box.active .hero-icon-wrap {
+  background: #2d363d;
+}
+
+.hero-box.active .hero-icon {
+  opacity: 1;
+}
+
+/* 红色内边框，绝不抖动 */
+.hero-active-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 4rpx solid #ff4655;
+  z-index: 2;
+  pointer-events: none;
+  /* clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); */
+}
+
+.hero-name {
+  font-size: 20rpx;
+  margin-top: 12rpx;
+  color: #8b978f;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.hero-box.active .hero-name {
+  color: #fff;
+}
+
+/* 底部指示器：一个小横条或红点 */
+.hero-active-dot {
+  width: 30rpx;
+  height: 4rpx;
+  background: #ff4655;
+  margin-top: 8rpx;
+  box-shadow: 0 0 8rpx #ff4655;
+}
+
+/* --- 第三段：列表样式 --- */
+
+.callout-scroll {
+  height: 100%; /* 或者使用 flex: 1; */
+  width: 100%;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.header-left .title {
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #ece8e1;
+  display: block;
+  letter-spacing: 2rpx;
+}
+
+/* --- 紧凑型 Header 按钮 --- */
+
+.btn-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+.btn-content .plus {
+  font-size: 32rpx;
+  margin-right: 8rpx;
+  font-weight: bold;
+}
+
+.btn-content .txt {
+  font-size: 22rpx;
+  font-weight: bold;
+  letter-spacing: 1rpx;
+}
+
+.header-action:active {
+  transform: scale(0.95);
+}
+
+.header-action:active .btn-skew-bg {
+  background: #d13644;
+}
+
+/* --- 1. 列表区域基础容器 --- */
+.list-section {
+  width: 100%;
+  margin-top: 20rpx;
+  /* padding-bottom: 40rpx; */
+  flex: 1; /* 核心：告诉它占满剩余所有高度 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 防止外层溢出 */
+}
+
+.stats-table {
+  width: 100%;
+  background: rgba(15, 25, 35, 0.3);
+}
+
+/* 允许内容水平滚动 */
+.horizontal-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.horizontal-scroll {
+  flex: 1; /* 让它填满 list-section */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 4. 重点：垂直滚动的 tbody */
+.table-tbody {
+  /* 假设你上面的标题 + Swiper 总共占了 500rpx */
+  height: calc(100vh - 860rpx - env(safe-area-inset-bottom));
+}
+
+.table-content-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* 核心属性：由内容决定宽度，且最小宽度为100% */
+  width: max-content;
+  min-width: 100%;
+}
+
+/* --- 2. 行布局 (thead & tr) --- */
+.table-thead,
+.table-tr {
+  display: flex;
+  align-items: center;
+  padding: 0 10rpx;
+}
+
+.table-thead {
+  height: 80rpx;
+  background: #1f2326;
+  border-top: 1rpx solid rgba(255, 70, 85, 0.3);
+  position: sticky; /* 粘性表头（视基础库支持情况） */
+  top: 0;
+  z-index: 10;
+}
+
+.table-tr {
+  height: 100rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+/* 斑马纹 */
+.table-tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* 点击态 */
+.table-tr:active {
+  background: rgba(255, 70, 85, 0.05);
+}
+
+/* --- 3. 核心：列宽定义（解决对齐问题的关键） --- */
+
+/* 统一列宽分配 */
+.th,
+.td {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  box-sizing: border-box;
+}
+.th {
+  justify-content: center; /* 所有表头文字强制水平居中 */
+  color: #8b9196;
+  font-size: 20rpx;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2rpx;
+}
+
+/* 排名列：包含表头的 Rank Picker */
+.th.rank,
+.td.rank {
+  width: 120rpx;
+  justify-content: center;
+}
+
+/* 特工列：图标+名字 */
+.th.agent,
+.td.agent {
+  width: 220rpx;
+  padding-left: 10rpx;
+}
+.th.agent {
+  padding-left: 0; /* 清除左内边距，确保文字在 280rpx 范围内绝对居中 */
+}
+
+/* 胜率列 */
+.th.win,
+.td.win {
+  width: 120rpx;
+  justify-content: center;
+}
+
+/* KD列 */
+.th.kd,
+.td.kd {
+  width: 100rpx;
+  justify-content: center;
+}
+
+/* KDA列：三个数字，稍微宽一点 */
+.th.kda,
+.td.kda {
+  width: 180rpx;
+  justify-content: center;
+}
+
+/* ACS 评分 */
+.th.acs,
+.td.acs {
+  width: 120rpx;
+  justify-content: center;
+}
+
+/* 登场率 */
+.th.pick,
+.td.pick {
+  width: 120rpx;
+  justify-content: center;
+}
+
+/* 对局数 */
+.th.matches,
+.td.matches {
+  width: 140rpx;
+  justify-content: center;
+}
+
+/* --- 4. 文本样式微调 --- */
+
+.th {
+  color: #8b9196;
+  font-size: 20rpx;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+}
+
+.td {
+  color: #ece8e1;
+  font-size: 24rpx;
+}
+
+/* 示例：确保新字段宽度适中 */
+.th.nm-win,
+.td.nm-win {
+  width: 140rpx;
+  justify-content: center;
+}
+
+.th.matches,
+.td.matches {
+  width: 140rpx;
+  text-align: center;
+}
+
+/* 排名数字 */
+.rank-num {
+  color: #8b9196;
+  font-weight: bold;
+}
+
+/* 特工头像与职业图标 */
+.agent-avatar-box {
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.td-role-icon {
+  width: 32rpx;
+  height: 32rpx;
+  /* opacity: 0.6; */
+}
+
+.td-agent-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin: 0 4rpx;
+  background: #0f1923;
+  border-radius: 4rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.td-agent-name {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 颜色标记 */
+.text-green {
+  color: #00ffbb;
+}
+.text-red {
+  color: #ff4655;
+}
+
+/* --- 5. 表头 Rank Picker 样式 --- */
+.rank-picker-trigger {
+  background: rgba(255, 70, 85, 0.15);
+  border: 1rpx solid rgba(255, 70, 85, 0.4);
+  padding: 6rpx 12rpx;
+  border-radius: 2rpx;
+  display: flex;
+  align-items: center;
+}
+
+.rank-picker-trigger text {
+  color: #ff4655;
+  font-size: 18rpx;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* --- 6. 空状态与加载 --- */
+.empty-container {
+  padding: 100rpx 0;
+  text-align: center;
+}
+
+.empty-title {
+  color: #ece8e1;
+  font-size: 28rpx;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.empty-desc {
+  color: #8b9196;
+  font-size: 22rpx;
+}
+
+/* --- 7. 缺省图与滚动条隐藏 --- */
+.empty-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #101823;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.empty-icon {
+  width: 240rpx;
+  height: 240rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.2; /* 保持低调的瓦罗兰特风格 */
+  filter: grayscale(100%);
+}
+
+.empty-title {
   font-size: 30rpx;
   font-weight: bold;
-  display: block;
+  color: #ece8e1;
+  margin-bottom: 12rpx;
 }
-.map-coord {
-  color: #888;
+
+.empty-desc {
+  font-size: 24rpx;
+  color: #768079;
+}
+
+/* 入场动画，让切换更丝滑 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 隐藏自带的滚动条，保持界面简洁 */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+.tabbar-placeholder {
+  /* 100rpx(TabBar高) + 20px(padding上下) + 安全区 */
+  height: 100rpx;
+  width: 100%;
+  pointer-events: none; /* 确保不响应点击 */
+  /* border: none; */
+}
+
+.recommend-section {
+}
+
+/* header */
+/* 整个 Header 容器：高度压缩 */
+.map-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 30rpx; /* 极窄的上下边距 */
+  height: 60rpx; /* 固定高度，压缩垂直空间 */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* 红色指示条：高度随容器同步缩小 */
+.red-indicator {
+  width: 6rpx;
+  height: 28rpx;
+  background: #ff4655;
+  margin-right: 16rpx;
+}
+
+.title-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.map-main-title {
+  color: #ece8e1;
+  font-size: 28rpx; /* 稍微缩小字号 */
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 1rpx;
+}
+
+/* 标题中间的斜线或点，增加形式感 */
+.title-divider {
+  width: 1rpx;
+  height: 20rpx;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 16rpx;
+  transform: rotate(20deg);
+}
+
+.map-sub-title {
+  color: #ff4655;
   font-size: 20rpx;
+  font-weight: bold;
+  line-height: 1;
+  letter-spacing: 2rpx;
+  opacity: 0.9;
+}
+
+/* 右侧全部按钮 */
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.view-all {
+  font-size: 20rpx;
+  color: #8b9196;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.arrow-mini {
+  width: 8rpx;
+  height: 8rpx;
+  border-top: 2rpx solid #8b9196;
+  border-right: 2rpx solid #8b9196;
+  transform: rotate(45deg);
+  margin-left: 8rpx;
+}
+
+/* 前三名通用样式 */
+.top-three {
+  position: relative;
+  /* 背景使用深蓝色到透明的渐变，防止干扰文字阅读 */
+  background: linear-gradient(
+    90deg,
+    rgba(255, 70, 85, 0.08) 0%,
+    rgba(255, 70, 85, 0.02) 50%,
+    transparent 100%
+  ) !important;
+}
+
+/* 前三名左侧共用的发光切边 */
+.top-three::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10%;
+  height: 80%;
+  width: 4rpx;
+  z-index: 2;
+}
+
+/* 第一名：金/红 质感 */
+.top-1 {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 70, 85, 0.15) 0%,
+    rgba(255, 70, 85, 0.05) 60%,
+    transparent 100%
+  ) !important;
+}
+.top-1::before {
+  background: #ff4655; /* 瓦罗兰特红 */
+  box-shadow: 0 0 12rpx rgba(255, 70, 85, 0.8);
+}
+.top-1 .rank-num {
+  color: #ff4655 !important;
+  /* font-size: 32rpx; */
+}
+
+/* 第二名：银色/白光 质感 */
+.top-2 {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 60%,
+    transparent 100%
+  ) !important;
+}
+.top-2::before {
+  background: #ece8e1;
+  box-shadow: 0 0 10rpx rgba(236, 232, 225, 0.5);
+}
+
+/* 第三名：深铜/暗光 质感 */
+.top-3 {
+  background: linear-gradient(
+    90deg,
+    rgba(139, 145, 150, 0.1) 0%,
+    transparent 100%
+  ) !important;
+}
+.top-3::before {
+  background: #8b9196;
+}
+
+/* 强化前三名的名字显示 */
+.top-three .td-agent-name {
+  color: #ffffff;
+  text-shadow: 0 0 10rpx rgba(255, 255, 255, 0.2);
+}
+
+/* Swiper 修正适配 */
+
+/* --- 容器高度适配 --- */
+.spot-swiper {
+  width: 100%;
+  height: 240rpx; /* 统一总高度 */
+}
+
+/* 卡片主体 */
+.spot-card-modern {
+  width: calc(100% - 60rpx);
+  height: 200rpx; /* 卡片实际高度 */
+  margin: 0 auto; /* 水平居中 */
+  background: #1f2326;
+  display: flex;
+  position: relative;
+  border: 1rpx solid #383e44;
+  overflow: hidden;
+  box-sizing: border-box; /* 确保 border 不撑开高度 */
+}
+
+/* 左侧图片区 */
+.card-left {
+  width: 35%;
+  height: 100%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.inner-img {
+  width: 100%;
+  height: 100%;
+}
+
+.img-mask {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(115deg, transparent 60%, #1f2326 90%);
+}
+
+/* 右侧内容区 */
+.card-right {
+  flex: 1;
+  padding: 20rpx 25rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-tag {
+  font-size: 18rpx;
+  color: #ff4655;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+  margin-bottom: 8rpx;
+  text-transform: uppercase;
+}
+
+.spot-name {
+  color: #ece8e1;
+  font-size: 28rpx;
+  font-weight: bold;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 6rpx;
+}
+
+.spot-brief {
+  font-size: 20rpx;
+  color: #8b9196;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.side-deco {
+  position: absolute;
+  right: 0;
+  top: 20%;
+  width: 4rpx;
+  height: 40%;
+  background: #ff4655;
+}
+
+/* --- 指示点定制 --- */
+.spot-swiper .wx-swiper-dots {
+  bottom: 5rpx;
+}
+
+.spot-swiper .wx-swiper-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  margin: 0 6rpx;
+}
+
+.spot-swiper .wx-swiper-dot-active {
+  width: 24rpx;
+  border-radius: 4rpx;
+  background: #ff4655 !important;
+}
+
+/* --- 轮播缺省样式 (对齐 swiper) --- */
+.spot-empty-card {
+  width: calc(100% - 60rpx); /* 对齐 spot-card-modern 宽度 */
+  height: 200rpx; /* 对齐 spot-card-modern 高度 */
+  margin: 0 auto 40rpx; /* 底部留出 40rpx 占位，抵消 swiper 指示点高度 */
+  background: rgba(255, 255, 255, 0.02);
+  border: 1rpx dashed rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 40rpx;
+  overflow: hidden;
+  box-sizing: border-box; /* 确保 border 不撑开高度 */
+}
+
+.empty-card-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.empty-icon-box {
+  width: 100rpx;
+  height: 100rpx;
+  background: rgba(255, 70, 85, 0.05);
+  border: 1rpx solid rgba(255, 70, 85, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-right: 30rpx;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.empty-code {
+  font-size: 12rpx;
+  color: #ff4655;
+  transform: scale(0.8);
+  font-weight: bold;
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2rpx;
+  background: #ff4655;
+  box-shadow: 0 0 10rpx #ff4655;
+  animation: scanMove 2s infinite linear;
+}
+
+@keyframes scanMove {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.empty-text-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.empty-main {
+  color: #ece8e1;
+  font-size: 26rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+  letter-spacing: 2rpx;
+}
+
+.empty-sub {
+  color: #8b9196;
+  font-size: 20rpx;
+}
+
+.corner-deco {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20rpx;
+  height: 20rpx;
+  border-right: 4rpx solid rgba(255, 70, 85, 0.5);
+  border-bottom: 4rpx solid rgba(255, 70, 85, 0.5);
+}
+
+/* --- 切换动画核心 --- */
+.animate-fade-in {
+  animation: fadeInBlur 0.4s ease-out both;
+}
+
+@keyframes fadeInBlur {
+  0% {
+    opacity: 0;
+    transform: translateY(10rpx) scale(0.98);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
 }

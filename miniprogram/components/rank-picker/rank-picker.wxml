@@ -1,0 +1,14 @@
+<view class="popup-mask {{visible ? 'show' : ''}}" bindtap="close" catchtouchmove="prevent">
+    <view class="popup-content" catchtap="prevent">
+        <view class="p-header">
+            <text class="p-title">选择竞技段位</text>
+            <view class="p-close" bindtap="close">✕</view>
+        </view>
+        <scroll-view scroll-y class="rank-scroll" enable-flex="true">
+            <view class="rank-item {{index === activeIndex ? 'active' : ''}}" wx:for="{{rankList}}" wx:key="tier" bindtap="onSelect" data-index="{{index}}">
+                <image class="rank-img" src="../../assets/valorant_rank_icons/{{item.icon}}.png" mode="aspectFit" />
+                <text class="rank-txt">{{item.label}}</text>
+            </view>
+        </scroll-view>
+    </view>
+</view>

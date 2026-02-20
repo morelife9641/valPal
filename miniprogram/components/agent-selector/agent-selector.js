@@ -1,4 +1,4 @@
-import { AGENTS_CONFIG } from "../../config/agents_new";
+import { AGENTS_CONFIG } from "../../config/agents_merged";
 
 Component({
   properties: {

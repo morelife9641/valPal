@@ -1,9 +1,10 @@
 const db = wx.cloud.database();
-import { AGENTS_CONFIG } from "../../config/agents";
+import { AGENTS_CONFIG } from "../../config/agents_merged";
 import { availableTags } from "../../config/tags";
 
 Page({
   data: {
+    pageLoading: false,
     presets: [],
     page: 0,
     pageSize: 10,
@@ -76,8 +77,8 @@ Page({
 
     const db = wx.cloud.database();
     const { page, pageSize, presets, filterAgent, filterTag } = this.data;
-    wx.showLoading({ title: "加载中...", mask: true });
-
+    // wx.showLoading({ title: "加载中...", mask: true });
+    this.setData({ pageLoading: true }); // 开始加载
     try {
       // --- 步骤 1: 构建筛选条件并查询方案列表 ---
       let whereClause = {};
@@ -160,7 +161,8 @@ Page({
       console.error("fetchPresets 失败:", err);
       wx.showToast({ title: "加载失败", icon: "none" });
     } finally {
-      wx.hideLoading();
+      // wx.hideLoading();
+      this.setData({ pageLoading: false }); // 开始加载
       wx.stopPullDownRefresh();
     }
   },
@@ -176,8 +178,8 @@ Page({
     const { page, pageSize, presets, filterAgent, filterTag, isFavoriteOnly } =
       this.data;
 
-    wx.showLoading({ title: "加载中...", mask: true });
-
+    // wx.showLoading({ title: "加载中...", mask: true });
+    this.setData({ pageLoading: true }); // 开始加载
     try {
       // --- 步骤 1: 构建筛选基础条件 ---
       let whereClause = {};
@@ -206,7 +208,8 @@ Page({
         // 如果用户开启了“只看收藏”，但收藏库是空的，直接返回空列表
         if (allMyFavIds.length === 0) {
           this.setData({ presets: [], hasMore: false });
-          wx.hideLoading();
+          // wx.hideLoading();
+          this.setData({ pageLoading: false }); // 开始加载
           return;
         }
         // 这里的逻辑是：在已有的筛选基础上，增加 ID 必须在收藏列表中的限制
@@ -276,7 +279,8 @@ Page({
       console.error("fetchPresets 失败:", err);
       wx.showToast({ title: "加载失败", icon: "none" });
     } finally {
-      wx.hideLoading();
+      // wx.hideLoading();
+      this.setData({ pageLoading: false }); // 开始加载
       wx.stopPullDownRefresh();
     }
   },
@@ -292,8 +296,8 @@ Page({
     // 从 data 中解构筛选状态
     const { page, pageSize, presets, filterAgent, filterTag, isFavoriteOnly } =
       this.data;
-
-    wx.showLoading({ title: "加载中...", mask: true });
+    this.setData({ pageLoading: true }); // 开始加载
+    // wx.showLoading({ title: "加载中...", mask: true });
 
     try {
       // --- 步骤 1: 获取当前用户【所有的】收藏 ID (不分页) ---
@@ -325,7 +329,8 @@ Page({
         // 如果开启了只看收藏但没数据，直接提前返回
         if (allMyFavIds.length === 0) {
           this.setData({ presets: [], hasMore: false });
-          wx.hideLoading();
+          // wx.hideLoading();
+          this.setData({ pageLoading: false }); // 开始加载
           return;
         }
         // 核心修复：将主表的查询范围限制在我的收藏 ID 列表内
@@ -395,7 +400,8 @@ Page({
       console.error("fetchPresets Error:", err);
       wx.showToast({ title: "同步失败", icon: "none" });
     } finally {
-      wx.hideLoading();
+      // wx.hideLoading();
+      this.setData({ pageLoading: false }); // 开始加载
       wx.stopPullDownRefresh();
     }
   },

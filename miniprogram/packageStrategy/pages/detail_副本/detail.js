@@ -1,173 +1,35 @@
-const allAgents = require("./agents_processed");
 Page({
   data: {
-    isReady: false, // 控制页面整体显隐
-    allAgents: allAgents,
-    currentRole: "",
-    agentScrollLeft: 0, // 强制英雄列表回弹到最左侧
-    currentAgentName: "",
-    currentAbilities: [],
-    currentIconType: "", // 存储 slot 名
-    touchMode: "draw", // 'view' (缩放平移) 或 'draw' (战术绘制)
-    currentIconType: "attack",
-    pins: [], // 仅存储已确认的点位
-    iconList: [
-      { type: "attack", label: "进攻", url: "../../../assets/pinpoint.png" },
-      // { type: "defense", label: "防守", url: "/assets/icons/def.png" },
-      // { type: "smoke", label: "烟幕", url: "/assets/icons/smoke.png" },
-    ],
-  },
-
-  // 1. 解决卡顿的关键：非响应式变量，不走 setData
-  state: {
-    scale: 1,
-    offsetX: 0,
-    offsetY: 0,
-    lastX: 0,
-    lastY: 0,
-    lastDist: 0,
-    canvasRect: null,
-    isInitial: true,
-  },
-
-  // 存储 Image 对象
-  iconObjects: {},
-  mapImg: null,
-  tempLine: null, // 正在绘制的临时线条 {x, y, angle, len}
-
-  onLoad(options) {
-    if (allAgents && allAgents.length > 0) {
-      // 1. 定义你想要的排序顺序
-      const roleOrder = ["控场", "哨卫", "先锋", "决斗"];
-
-      // 2. 提取并排序角色
-      const rawRoles = [...new Set(allAgents.map((a) => a.roleName))];
-      const roles = roleOrder.filter((r) => rawRoles.includes(r));
-
-      // 3. 按角色归类英雄
-      const agentsByRole = {};
-      roles.forEach((role) => {
-        agentsByRole[role] = allAgents.filter((a) => a.roleName === role);
-      });
-
-      // 4. 默认选中“控场”及其下的第一个英雄
-      const defaultRole = "控场";
-      const defaultAgent = agentsByRole[defaultRole][0];
-
-      this.setData({
-        allAgents: allAgents,
-        roles: roles,
-        agentsByRole: agentsByRole,
-        currentRole: defaultRole, // 默认选中控场
-        currentAgentName: defaultAgent.displayName,
-        currentAbilities: defaultAgent.abilities,
-        currentIconType: defaultAgent.abilities[0].slot,
-      });
-
-      // 别忘了同步加载 Canvas 图片
-      this.loadAgentIcons(defaultAgent.abilities, defaultAgent.displayName);
-    }
-    this.setData({
-      mapName: decodeURIComponent(options.name || "地图详情"),
-      displayIcon: decodeURIComponent(options.icon),
-    });
+    pins: [], // 存储图钉：[{x, y, slot}]
+    isReady: false,
   },
 
   onReady() {
-    console.log(1);
-
     this.initCanvas();
+    this.abilityIcons = {}; // 初始化图标容器
   },
 
-  selectAgent(e) {
-    console.log(e);
-
-    const agent = e.currentTarget.dataset.agent;
-    if (this.data.currentAgentName === agent.displayName) return;
-
-    this.setData({
-      currentAgentName: agent.displayName,
-      currentAbilities: agent.abilities,
-      currentIconType: agent.abilities[0].slot,
-    });
-
-    // 检查 canvas 是否已初始化
-    if (this.canvas) {
-      this.loadAgentIcons(agent.abilities, agent.displayName);
-    }
-  },
-
-  initAgent(agent) {
-    this.setData({
-      currentAgentName: agent.displayName,
-      currentAbilities: agent.abilities,
-      currentIconType: agent.abilities[0].slot, // 默认选中第一个技能
-    });
-
-    // 重要：预加载该英雄的所有技能图标到 iconObjects 中
-    agent.abilities.forEach((ability) => {
-      if (!this.iconObjects[ability.slot]) {
-        // 避免重复加载
-        const img = this.canvas.createImage();
-        img.src = ability.displayIcon;
-        img.onload = () => {
-          this.mapImg = img;
-          this.autoCenter();
-          this.setData({ isReady: true });
-
-          // 强制增加一个重绘循环，确保 Canvas 刷新
-          setTimeout(() => {
-            if (this.canvas) this.draw();
-          }, 100);
-        };
-      }
-    });
-  },
-
-  selectIcon(e) {
-    const { type } = e.currentTarget.dataset;
-    this.setData({ currentIconType: type });
-  },
-
-  selectRole(e) {
-    console.log(e);
-
-    const role = e.currentTarget.dataset.role;
-    const filteredAgents = this.data.agentsByRole[role];
-
-    if (filteredAgents && filteredAgents.length > 0) {
-      const firstAgent = filteredAgents[0];
-
-      // 1. 同步更新角色、当前英雄、技能列表、以及默认选中的第一个技能槽位
-      this.setData({
-        currentRole: role,
-        currentAgentName: firstAgent.displayName,
-        currentAbilities: firstAgent.abilities,
-        currentIconType: firstAgent.abilities[0].slot, // 重置选中第一个技能
-      });
-
-      // 2. 必须联动加载 Canvas 图片，否则画图时找不到对应图标
-      this.loadAgentIcons(firstAgent.abilities, firstAgent.displayName);
-    } else {
-      // 防护：如果该分类下没英雄（虽然不太可能）
-      this.setData({ currentRole: role });
-    }
+  state: {
+    scale: 1, // 缩放倍率
+    offsetX: 0, // 水平平移
+    offsetY: 0, // 垂直平移
+    lastX: 0, // 用于处理拖拽
+    lastY: 0,
+    baseScale: 1, // 初始缩放（Contain 模式）
+    canvasRect: null, // 画布矩形信息
   },
 
   async initCanvas() {
-    console.log(1);
-
     const query = wx.createSelectorQuery();
     const res = await new Promise((r) =>
       query.select("#mapCanvas").fields({ node: true, size: true }).exec(r),
     );
 
-    if (!res || !res[0]) return;
-
     const canvas = res[0].node;
     const ctx = canvas.getContext("2d");
     const dpr = wx.getWindowInfo().pixelRatio;
 
+    // 解决 100% 宽高导致的模糊和偏移
     canvas.width = res[0].width * dpr;
     canvas.height = res[0].height * dpr;
     ctx.scale(dpr, dpr);
@@ -177,394 +39,394 @@ Page({
     this.canvasWidth = res[0].width;
     this.canvasHeight = res[0].height;
 
-    wx.createSelectorQuery()
-      .select("#mapCanvas")
-      .boundingClientRect((rect) => {
-        this.state.canvasRect = rect;
-      })
-      .exec();
-
-    // 增加一个 3 秒后的强制亮起，防止加载卡死
-    const timer = setTimeout(() => {
-      if (!this.data.isReady) {
-        console.warn("⚠️ 加载超时，强制亮起页面");
-        this.setData({ isReady: true });
-      }
-    }, 3000);
-
-    // --- 核心修复：底图加载 ---
-    const img = canvas.createImage();
-    // 确保从 options 或 data 中拿到正确的 URL
-    img.src = this.data.displayIcon;
-
-    img.onload = () => {
-      this.mapImg = img;
-      this.autoCenter();
-
-      // 只要底图加载完，立刻显示页面！
-      this.setData({ isReady: true });
-
-      // 异步加载其他资源，不阻塞主画面出现
-      this.loadAgentIcons(
-        this.data.currentAbilities,
-        this.data.currentAgentName,
-      );
-
-      // 加载通用图标 (进攻/防守图标)
-      if (this.data.iconList) {
-        this.data.iconList.forEach((item) => {
-          const icon = canvas.createImage();
-          icon.src = item.url;
-          icon.onload = () => {
-            this.iconObjects[item.type] = icon;
-            this.draw();
-          };
-        });
-      }
-    };
-
-    img.onerror = (err) => {
-      console.error("底图加载失败，检查路径:", this.data.displayIcon, err);
-      this.setData({ isReady: true }); // 即使失败也亮起，方便调试
-    };
+    // 开始加载本地 SVG 资源
+    this.loadMapLayers();
   },
 
-  loadAgentIcons(abilities, agentName) {
-    if (!this.canvas) return;
+  // detail.js
+  initView(img) {
+    const canvasW = this.canvasWidth;
+    const canvasH = this.canvasHeight;
+    const imgW = img.width;
+    const imgH = img.height;
 
-    abilities.forEach((ability) => {
-      // 关键修改：Key 变为 "盖可_Ability1"
-      const uniqueKey = `${agentName}_${ability.slot}`;
+    // 1. 计算 Cover/Contain 比例
+    // 取画布宽度与图片宽度、画布高度与图片高度比例的最小值，确保图片完整显示
+    const scale = Math.min(canvasW / imgW, canvasH / imgH);
 
-      if (!this.iconObjects[uniqueKey]) {
-        const img = this.canvas.createImage();
-        if (ability.displayIcon) {
-          img.src = ability.displayIcon;
-          img.onload = () => {
-            this.iconObjects[uniqueKey] = img;
-            this.draw();
-          };
-        }
-      }
+    // 2. 计算居中偏移量
+    // 目标是让 (图片宽度 * scale) 在画布水平居中
+    const offsetX = (canvasW - imgW * scale) / 2;
+    const offsetY = (canvasH - imgH * scale) / 2;
+
+    // 3. 写入状态
+    this.state.scale = scale;
+    this.state.offsetX = offsetX;
+    this.state.offsetY = offsetY;
+
+    // 记录一个初始缩放，方便后续限制缩放范围（比如最小不能小于初始缩放的 0.8 倍）
+    this.state.baseScale = scale;
+
+    this.draw(); // 立即重绘
+  },
+
+  async loadMapLayers() {
+    wx.showLoading({ title: "正在合成地图...", mask: true });
+
+    // 你的本地路径列表 (注意：微信小程序中加载本地资源建议使用绝对路径 /assets/...)
+    const layerPaths = [
+      "/assets/png_output/layout.png", // 底层轮廓
+      "/assets/png_output/defending_walls.png", // 中层墙体
+      "/assets/png_output/defending_labels.png", // 顶层报点文字
+    ];
+
+    try {
+      // 1. 并行加载所有图层
+      const images = await Promise.all(
+        layerPaths.map((path) => this.loadImage(path)),
+      );
+
+      this.mapLayers = images;
+
+      // 2. 初始化缩放比例（以第一张图为基准进行 Contain 适配）
+      this.calculateViewport(images[0]);
+
+      // 3. 绘制
+      this.draw();
+
+      this.initView(images[0]);
+
+      this.setData({ isReady: true });
+      wx.hideLoading();
+    } catch (err) {
+      console.error("加载 SVG 失败:", err);
+      wx.showToast({ title: "SVG渲染受限，建议转PNG", icon: "none" });
+    }
+  },
+
+  // 封装加载图片的 Promise
+  loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = this.canvas.createImage();
+      img.onload = () => resolve(img);
+      img.onerror = (e) => reject(e);
+      img.src = src;
     });
   },
 
-  // 2. 居中算法：根据图片比例计算初始位置
-  autoCenter() {
-    const baseSize = 300; // 假定底图渲染基准大小
-    const padding = 40;
-    const availableW = this.canvasWidth - padding;
-    const availableH = this.canvasHeight - padding;
+  // 计算地图在 Canvas 里的居中比例
+  calculateViewport(img) {
+    const scale = Math.min(
+      this.canvasWidth / img.width,
+      this.canvasHeight / img.height,
+    );
+    this.scale = scale;
+    this.offsetX = (this.canvasWidth - img.width * scale) / 2;
+    this.offsetY = (this.canvasHeight - img.height * scale) / 2;
+  },
 
-    // 计算缩放：使图片完整适应屏幕
-    const scale = Math.min(availableW / baseSize, availableH / baseSize);
+  state: {
+    scale: 1, // 缩放倍率
+    offsetX: 0, // 水平平移
+    offsetY: 0, // 垂直平移
+    lastX: 0, // 用于处理拖拽
+    lastY: 0,
+    baseScale: 1, // 初始缩放（Contain 模式）
+    canvasRect: null, // 画布矩形信息
+  },
 
-    this.state.scale = scale;
-    this.state.offsetX = (this.canvasWidth - baseSize * scale) / 2;
-    this.state.offsetY = (this.canvasHeight - baseSize * scale) / 2;
+  /**
+   * 点击画布放置图钉
+   */
+  handleTap(e) {
+    const { x, y } = e.detail; // 这里的 x,y 是相对于 canvas 容器的
+    const { scale, offsetX, offsetY } = this.state;
 
+    // 公式：原始坐标 = (点击坐标 - 偏移量) / 缩放比例
+    const mapX = (x - offsetX) / scale;
+    const mapY = (y - offsetY) / scale;
+
+    // 获取当前选中的技能（假设你界面上有个变量记录选中的技能 slot）
+    const selectedSlot = this.data.currentAbilitySlot || "E";
+
+    const newPin = {
+      x: mapX,
+      y: mapY,
+      slot: selectedSlot,
+    };
+
+    this.setData({
+      pins: [...this.data.pins, newPin],
+    });
     this.draw();
   },
 
-  // 3. 高性能渲染：使用 requestAnimationFrame
   draw() {
-    if (!this.canvas || !this.mapImg) return;
+    const ctx = this.ctx;
+    if (!this.mapLayers) return;
+
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    ctx.save();
+    // 全局变换：平移 + 缩放
+    ctx.translate(this.state.offsetX, this.state.offsetY);
+    ctx.scale(this.state.scale, this.state.scale);
+
+    // 1. 画地图底图层
+    this.mapLayers.forEach((img) => {
+      ctx.drawImage(img, 0, 0);
+    });
+
+    // 2. 画图钉 Pins
+    this.data.pins.forEach((pin) => {
+      // 我们假设你已经提前把技能图标加载到了 this.abilityIcons 对象里
+      const icon = this.abilityIcons[pin.slot];
+      if (icon) {
+        // 设置图标大小，比如 40 像素
+        // 注意：这里画在已经经过 scale 的坐标系中，图标会随地图放大
+        const size = 30 / this.state.scale; // 如果希望图标大小固定，可以除以 scale
+        ctx.drawImage(icon, pin.x - size / 2, pin.y - size / 2, size, size);
+      } else {
+        // 临时画个红点代替
+        ctx.beginPath();
+        ctx.arc(pin.x, pin.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "#FF4655";
+        ctx.fill();
+      }
+    });
+
+    ctx.restore();
+  },
+
+  draw() {
+    const ctx = this.ctx;
+    if (!this.mapLayers) return;
+
+    // 清空画布
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    // 性能优化：移动过程中降低图像平滑度，减少计算量
+    ctx.imageSmoothingEnabled = false;
+
+    ctx.save();
+    // 应用变换：平移 + 缩放
+    ctx.translate(this.state.offsetX, this.state.offsetY);
+    ctx.scale(this.state.scale, this.state.scale);
+
+    // 1. 批量绘制地图图层
+    for (let i = 0; i < this.mapLayers.length; i++) {
+      ctx.drawImage(this.mapLayers[i], 0, 0);
+    }
+
+    // 2. 绘制图钉 Pins
+    if (this.data.pins && this.data.pins.length > 0) {
+      // 图标大小随地图缩放反向调整，保持视觉尺寸一致
+      const size = 32 / this.state.scale;
+      this.data.pins.forEach((pin) => {
+        const icon = this.abilityIcons[pin.slot];
+        if (icon) {
+          ctx.drawImage(icon, pin.x - size / 2, pin.y - size / 2, size, size);
+        } else {
+          // 兜底红点
+          ctx.beginPath();
+          ctx.arc(pin.x, pin.y, 6 / this.state.scale, 0, Math.PI * 2);
+          ctx.fillStyle = "#FF4655";
+          ctx.fill();
+        }
+      });
+    }
+
+    ctx.restore();
+    // 绘图结束后恢复高品质（可选）
+    ctx.imageSmoothingEnabled = true;
+  },
+
+  requestDraw() {
+    if (isDrawing) return;
+    isDrawing = true;
 
     this.canvas.requestAnimationFrame(() => {
-      const ctx = this.ctx;
-      const { scale, offsetX, offsetY } = this.state;
-
-      ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-      ctx.save();
-
-      // 应用视图变换
-      ctx.translate(offsetX, offsetY);
-      ctx.scale(scale, scale);
-
-      // 画底图
-      ctx.drawImage(this.mapImg, 0, 0, 300, 300);
-
-      // 画所有已保存的战术点
-      this.data.pins.forEach((pin) => this.renderTacticalItem(pin));
-
-      // 画当前正在拉动的临时线
-      if (this.tempLine) {
-        this.renderTacticalItem({
-          ...this.tempLine,
-          type: this.data.currentIconType,
-        });
-      }
-
-      ctx.restore();
+      this.draw();
+      isDrawing = false;
     });
   },
 
-  renderTacticalItem(item) {
-    const ctx = this.ctx;
-    const s = this.state.scale;
-    const icon = this.iconObjects[item.type];
-    const iconSize = 28 / s; // 补偿缩放，让图标视觉大小恒定
-
-    // 1. 画图标
-    if (icon) {
-      ctx.drawImage(
-        icon,
-        item.x - iconSize / 2,
-        item.y - iconSize / 2,
-        iconSize,
-        iconSize,
-      );
-    }
-
-    // 2. 画动态长度的矢量线 (只有长度大于一定值才画)
-    if (item.len && item.len > 5) {
-      ctx.save();
-      ctx.translate(item.x, item.y);
-      ctx.rotate(item.angle);
-
-      ctx.strokeStyle = "#ff4655";
-      ctx.lineWidth = 2.5 / s;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(item.len, 0);
-      ctx.stroke();
-
-      // 箭头帽
-      ctx.fillStyle = "#ff4655";
-      const headLen = 10 / s;
-      ctx.beginPath();
-      ctx.moveTo(item.len, 0);
-      ctx.lineTo(item.len - headLen, -headLen / 2);
-      ctx.lineTo(item.len - headLen, headLen / 2);
-      ctx.fill();
-      ctx.restore();
-    }
-  },
-
-  // 4. 坐标转换公式
-  getLogicPos(clientX, clientY) {
-    const rect = this.state.canvasRect;
-    return {
-      x: (clientX - rect.left - this.state.offsetX) / this.state.scale,
-      y: (clientY - rect.top - this.state.offsetY) / this.state.scale,
-    };
-  },
-
-  // --- 手势处理 ---
-
   touchStart(e) {
-    const t = e.touches;
-    if (t.length >= 2) {
-      this.isMultiTouch = true;
-      this.state.lastDist = this.getDist(t);
-    } else {
-      this.isMultiTouch = false;
-      this.state.lastX = t[0].clientX;
-      this.state.lastY = t[0].clientY;
-
-      if (this.data.touchMode === "draw") {
-        const pos = this.getLogicPos(t[0].clientX, t[0].clientY);
-        this.tempLine = { x: pos.x, y: pos.y, angle: 0, len: 0 };
-      }
+    if (e.touches.length === 1) {
+      // 单指：记录起始点
+      this.state.lastX = e.touches[0].x;
+      this.state.lastY = e.touches[0].y;
+    } else if (e.touches.length >= 2) {
+      // 双指：记录初始距离
+      const dx = e.touches[1].x - e.touches[0].x;
+      const dy = e.touches[1].y - e.touches[0].y;
+      this.state.startDistance = Math.sqrt(dx * dx + dy * dy);
     }
   },
 
   touchMove(e) {
-    const t = e.touches;
+    if (e.touches.length === 1) {
+      // --- 单指拖拽 ---
+      const dx = e.touches[0].x - this.state.lastX;
+      const dy = e.touches[0].y - this.state.lastY;
 
-    // 无论什么模式，双指始终触发缩放
-    if (t.length >= 2) {
-      const dist = this.getDist(t);
-      if (this.state.lastDist > 0) {
-        const factor = dist / this.state.lastDist;
-        this.state.scale = Math.min(
-          Math.max(this.state.scale * factor, 0.3),
-          8,
-        );
+      this.state.offsetX += dx;
+      this.state.offsetY += dy;
+
+      this.state.lastX = e.touches[0].x;
+      this.state.lastY = e.touches[0].y;
+    } else if (e.touches.length >= 2) {
+      // --- 双指缩放 ---
+      const x1 = e.touches[0].x;
+      const y1 = e.touches[0].y;
+      const x2 = e.touches[1].x;
+      const y2 = e.touches[1].y;
+
+      // 1. 计算当前双指间的距离
+      const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+      // 2. 计算双指的中点（缩放中心）
+      const centerX = (x1 + x2) / 2;
+      const centerY = (y1 + y2) / 2;
+
+      if (this.state.startDistance > 0) {
+        // 3. 计算缩放倍率变化
+        const ratio = distance / this.state.startDistance;
+        const oldScale = this.state.scale;
+        let newScale = oldScale * ratio;
+
+        // 4. 缩放范围限制：最小不小于初始显示的 0.8 倍，最大 5 倍
+        const minScale = this.state.baseScale * 0.8;
+        const maxScale = 5;
+        if (newScale < minScale) newScale = minScale;
+        if (newScale > maxScale) newScale = maxScale;
+
+        // 5. 【核心】缩放中心点偏移补偿公式
+        // 逻辑：保持双指中点在地图上的“相对位置”不变
+        const realRatio = newScale / oldScale;
+        this.state.offsetX =
+          centerX - (centerX - this.state.offsetX) * realRatio;
+        this.state.offsetY =
+          centerY - (centerY - this.state.offsetY) * realRatio;
+
+        this.state.scale = newScale;
       }
-      this.state.lastDist = dist;
-      this.draw();
-      return;
+
+      this.state.startDistance = distance;
     }
 
-    // 单指逻辑分发
-    if (this.data.touchMode === "view") {
-      // 平移地图
-      this.state.offsetX += t[0].clientX - this.state.lastX;
-      this.state.offsetY += t[0].clientY - this.state.lastY;
-      this.state.lastX = t[0].clientX;
-      this.state.lastY = t[0].clientY;
-      this.draw();
-    } else if (this.data.touchMode === "draw" && this.tempLine) {
-      // 自由拉线
-      const pos = this.getLogicPos(t[0].clientX, t[0].clientY);
-      const dx = pos.x - this.tempLine.x;
-      const dy = pos.y - this.tempLine.y;
-      this.tempLine.angle = Math.atan2(dy, dx);
-      this.tempLine.len = Math.sqrt(dx * dx + dy * dy);
-      this.draw();
-    }
+    this.draw();
   },
 
-  touchEnd() {
-    if (this.tempLine) {
-      // 关键修改：存储时合成唯一 Key
-      const uniqueType = `${this.data.currentAgentName}_${this.data.currentIconType}`;
+  touchMove(e) {
+    if (e.touches.length === 1) {
+      // --- 单指拖拽：保持原样，不做实时限制，确保绝对丝滑 ---
+      const dx = e.touches[0].x - this.state.lastX;
+      const dy = e.touches[0].y - this.state.lastY;
+      this.state.offsetX += dx;
+      this.state.offsetY += dy;
+      this.state.lastX = e.touches[0].x;
+      this.state.lastY = e.touches[0].y;
+    } else if (e.touches.length >= 2) {
+      const x1 = e.touches[0].x,
+        y1 = e.touches[0].y;
+      const x2 = e.touches[1].x,
+        y2 = e.touches[1].y;
 
-      const finalPin = {
-        ...this.tempLine,
-        type: uniqueType, // 这里存的是 "盖可_Ability1"
-      };
+      const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const centerX = (x1 + x2) / 2;
+      const centerY = (y1 + y2) / 2;
 
-      this.setData({
-        pins: [...this.data.pins, finalPin],
-      });
-      this.tempLine = null;
-      this.draw();
-    }
-    this.state.lastDist = 0;
-  },
+      if (this.state.startDistance > 0) {
+        const ratio = distance / this.state.startDistance;
+        const oldScale = this.state.scale;
+        let newScale = oldScale * ratio;
 
-  getDist(t) {
-    const dx = t[0].clientX - t[1].clientX;
-    const dy = t[0].clientY - t[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  },
+        // --- 核心修复：放大上限逻辑 ---
+        const maxScale = 5.0; // 最大放大 5 倍
 
-  // 模式与图标切换
-  changeMode(e) {
-    this.setData({ touchMode: e.currentTarget.dataset.mode });
-  },
+        // 如果当前已经达到最大倍数，且用户还在做放大的动作（ratio > 1）
+        // 则强制将 newScale 锁定在 maxScale，且不进行后续的偏移计算
+        if (oldScale >= maxScale && ratio > 1) {
+          newScale = maxScale;
+        } else if (newScale > maxScale) {
+          newScale = maxScale;
+        }
 
-  clearPins() {
-    this.setData({ pins: [] }, () => this.draw());
-  },
-
-  undoPin() {
-    let pins = this.data.pins;
-    pins.pop();
-    this.setData({ pins }, () => this.draw());
-  },
-
-  async saveToAlbum() {
-    wx.showLoading({ title: "正在生成图片...", mask: true });
-    try {
-      const ctx = this.ctx;
-      const canvas = this.canvas;
-
-      // 1. 在导出前手动绘制背景色
-      ctx.save();
-      // destination-over 确保新画的颜色位于所有已有内容的“下方”
-      ctx.globalCompositeOperation = "destination-over";
-      ctx.fillStyle = "#0f1923"; // 瓦罗兰特主背景色，确保与 UI 风格统一
-      // 注意：这里使用 canvas 的原始物理像素宽高
-      ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-      ctx.restore();
-
-      // 2. 稍微等待硬件缓冲区刷新
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // 3. 生成临时文件
-      const tempFilePath = await new Promise((resolve, reject) => {
-        wx.canvasToTempFilePath({
-          canvas: this.canvas,
-          // 建议导出为 jpg，自带底色且兼容性最好，体积更小
-          fileType: "jpg",
-          quality: 0.9,
-          destWidth: this.canvasWidth * 2, // 保持高分辨率
-          destHeight: this.canvasHeight * 2,
-          success: (res) => resolve(res.tempFilePath),
-          fail: (err) => reject(err),
-        });
-      });
-
-      // 4. 权限检查逻辑（保持不变）
-      const auth = await wx.getSetting();
-      if (!auth.authSetting["scope.writePhotosAlbum"]) {
-        try {
-          await wx.authorize({ scope: "scope.writePhotosAlbum" });
-        } catch (e) {
-          wx.hideLoading();
-          wx.showModal({
-            title: "提示",
-            content: "需要授权保存图片到相册",
-            success: (res) => {
-              if (res.confirm) wx.openSetting();
-            },
-          });
-          return;
+        // 只有当缩放比例确实发生变化时，才计算偏移补偿
+        // 这样可以防止到达上限后地图还跟着手指位移
+        if (newScale !== oldScale) {
+          const realRatio = newScale / oldScale;
+          this.state.offsetX =
+            centerX - (centerX - this.state.offsetX) * realRatio;
+          this.state.offsetY =
+            centerY - (centerY - this.state.offsetY) * realRatio;
+          this.state.scale = newScale;
         }
       }
 
-      // 5. 保存到相册
-      await new Promise((resolve, reject) => {
-        wx.saveImageToPhotosAlbum({
-          filePath: tempFilePath,
-          success: () => resolve(),
-          fail: (err) => reject(err),
-        });
-      });
+      this.state.startDistance = distance;
+    }
+    this.draw();
+  },
 
-      // 6. 关键：保存完成后，重绘一次 Canvas 以恢复透明/原始状态
-      this.draw();
+  touchEnd() {
+    this.state.startDistance = 0;
+  },
 
-      wx.hideLoading();
-      wx.showToast({ title: "战术板已保存", icon: "success" });
-    } catch (error) {
-      console.error("保存失败", error);
-      wx.hideLoading();
-      wx.showToast({ title: "保存失败，请重试", icon: "none" });
+  touchEnd(e) {
+    this.state.startDistance = 0;
+
+    // --- 回弹检测逻辑 ---
+    const { scale, baseScale } = this.state;
+    let targetScale = scale;
+    let targetX = this.state.offsetX;
+    let targetY = this.state.offsetY;
+    let needSpring = false;
+
+    // 1. 如果缩得比 baseScale 还小，触发回弹
+    if (scale < baseScale) {
+      targetScale = baseScale;
+      // 计算居中坐标
+      const imgW = this.mapLayers[0].width * targetScale;
+      const imgH = this.mapLayers[0].height * targetScale;
+      targetX = (this.canvasWidth - imgW) / 2;
+      targetY = (this.canvasHeight - imgH) / 2;
+      needSpring = true;
+    }
+
+    // 2. 执行回弹动画
+    if (needSpring) {
+      this.animateSpring(targetScale, targetX, targetY);
     }
   },
 
-  // pages/strategy/detail/detail.js
+  /**
+   * 简易线性插值动画，让回弹更自然
+   */
+  animateSpring(tScale, tX, tY) {
+    const step = () => {
+      // 每次移动剩余距离的 20%，产生丝滑的减速感
+      const diffS = (tScale - this.state.scale) * 0.2;
+      const diffX = (tX - this.state.offsetX) * 0.2;
+      const diffY = (tY - this.state.offsetY) * 0.2;
 
-  // ... (其他代码)
+      this.state.scale += diffS;
+      this.state.offsetX += diffX;
+      this.state.offsetY += diffY;
 
-  // 新增一个异步方法来获取分享图片
-  async getShareImage() {
-    this.draw(); // 确保最新状态绘制
-    await new Promise((resolve) => setTimeout(resolve, 50)); // 短暂等待
+      this.draw();
 
-    return new Promise((resolve, reject) => {
-      wx.canvasToTempFilePath({
-        canvas: this.canvas,
-        x: 0,
-        y: 0,
-        width: this.canvasWidth,
-        height: this.canvasHeight,
-        destWidth: this.canvasWidth * 1.5, // 分享图不需要太高分辨率，适当放大
-        destHeight: this.canvasHeight * 1.5,
-        success: (res) => resolve(res.tempFilePath),
-        fail: (err) => reject(err),
-      });
-    });
-  },
-
-  onShareAppMessage() {
-    const pinsData = JSON.stringify(this.data.pins);
-    const title = `${this.data.mapName} 战术分享`;
-    const path = `/pages/strategy/detail/detail?mapName=${encodeURIComponent(this.data.mapName)}&displayIcon=${encodeURIComponent(this.data.displayIcon)}&pins=${encodeURIComponent(pinsData)}`;
-
-    return {
-      title,
-      path,
-      // 返回一个 Promise，等待图片生成
-      promise: this.getShareImage()
-        .then((imageUrl) => {
-          return { imageUrl };
-        })
-        .catch((err) => {
-          console.error("生成分享图片失败，使用默认图", err);
-          return { imageUrl: this.data.displayIcon }; // 失败时退回使用默认底图
-        }),
+      if (Math.abs(diffS) > 0.001 || Math.abs(diffX) > 0.1) {
+        this.canvas.requestAnimationFrame(step);
+      } else {
+        // 最终对齐
+        this.state.scale = tScale;
+        this.state.offsetX = tX;
+        this.state.offsetY = tY;
+        this.draw();
+      }
     };
-  },
-
-  // 3. 返回列表
-  goBack() {
-    wx.navigateBack({
-      delta: 1,
-    });
+    step();
   },
 });

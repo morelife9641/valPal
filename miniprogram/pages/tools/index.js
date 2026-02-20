@@ -14,6 +14,15 @@ Page({
     const data = require("../../assets/crosshairs.js");
     this.setData({ crosshairList: data });
   },
+  navTo(e) {
+    const url = e.currentTarget.dataset.url;
+    // 假设你的新页面路径是 pages/pro-settings/pro-settings
+    wx.navigateTo({
+      url: `/pages/${url}/${url}`,
+    });
+
+    if (wx.vibrateShort) wx.vibrateShort({ type: "medium" });
+  },
   copyCode: function (e) {
     const code = e.currentTarget.dataset.code;
     wx.setClipboardData({

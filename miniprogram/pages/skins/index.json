@@ -1,5 +1,6 @@
 {
   "usingComponents": {
+    "v-loading": "/components/custom-loading/index",
     "agent-selector": "/components/agent-selector/agent-selector"
   },
   "enablePullDownRefresh": true,

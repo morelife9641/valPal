@@ -1,60 +1,45 @@
-<view class="detail-container">
-    <view class="loading-mask" wx:if="{{!isReady}}">
-        <view class="valorant-loader"></view>
-        <view class="loading-text">正在部署战术地图</view>
+<view class="editor-container {{isReady ? 'ready' : ''}}">
+    <!-- <view class="tactical-header">
+        <view class="agent-badge">
+            <image src="{{currentAgent.displayIcon}}" mode="aspectFit" />
+            <view>
+                <text class="agent-name">{{currentAgent.displayName}}</text>
+                <text class="op-status">DATA UPLOADING...</text>
+            </view>
+        </view>
+        <view class="map-badge">{{currentMap.displayName}}</view>
+    </view> -->
+    <view class="canvas-wrap">
+        <canvas type="2d" id="mapCanvas" disable-scroll="true" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" bindtap="handleTap"></canvas>
+        <!-- <canvas type="2d" id="mapCanvas" bindtap="handleTap" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd"></canvas> -->
+        <!-- <view class="canvas-hint" wx:if="{{pins.length === 0}}">点击地图部署战术点</view> -->
     </view>
-    <view class="main-content {{isReady ? 'fade-in' : 'hidden'}}">
-        <view class="mode-switch">
-            <view class="mode-btn {{touchMode === 'view' ? 'active' : ''}}" bindtap="changeMode" data-mode="view">
-                🔍 观察/缩放
+    <view class="footer-panel">
+        <view class="tab-header">
+            <view class="tab-item {{currentTab === 'ability' ? 'active' : ''}}" bindtap="switchTab" data-tab="ability">
+                技能组
             </view>
-            <view class="mode-btn {{touchMode === 'draw' ? 'active' : ''}}" bindtap="changeMode" data-mode="draw">
-                ✏️ 绘制战术
-            </view>
-        </view>
-        <view class="canvas-area">
-            <canvas type="2d" id="mapCanvas" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd"></canvas>
-            <view class="side-tools" wx:if="{{touchMode === 'draw'}}">
-                <view class="tool-item" bindtap="undoPin" hover-class="tool-item-hover">
-                    <text class="icon">↩️</text>
-                    <text class="tool-label">撤销</text>
-                </view>
-                <view class="tool-divider"></view>
-                <view class="tool-item" bindtap="clearPins" hover-class="tool-item-hover">
-                    <text class="icon">🗑️</text>
-                    <text class="tool-label">清空</text>
-                </view>
+            <view class="tab-item {{currentTab === 'signal' ? 'active' : ''}}" bindtap="switchTab" data-tab="signal">
+                通用信号
             </view>
         </view>
-        <view class="icon-selector-container" wx:if="{{touchMode === 'draw'}}">
-            <view class="role-selector">
-                <view class="role-tab {{currentRole === item ? 'active' : ''}}" wx:for="{{roles}}" wx:key="*this" bindtap="selectRole" data-role="{{item}}">
-                    {{item}}
+        <scroll-view scroll-x class="icon-picker" enhanced show-scrollbar="{{false}}">
+            <block wx:if="{{currentTab === 'ability'}}">
+                <view class="icon-box {{selectedAbilityIdx === index ? 'active' : ''}}" wx:for="{{currentAgent.abilities}}" wx:key="slot" bindtap="selectAbility" data-idx="{{index}}">
+                    <image src="{{item.displayIcon}}" mode="aspectFit" />
+                    <view class="icon-label">{{item.displayName}}</view>
                 </view>
-            </view>
-            <view class="agent-selector">
-                <scroll-view scroll-x scroll-left="{{agentScrollLeft}}" class="agent-scroll">
-                    <view class="agent-item {{currentAgentName === item.displayName ? 'active' : ''}}" wx:for="{{agentsByRole[currentRole]}}" wx:key="displayName" bindtap="selectAgent" data-agent="{{item}}">
-                        <image src="{{item.displayIcon}}" mode="aspectFill"></image>
-                    </view>
-                </scroll-view>
-            </view>
-            <view class="ability-selector">
-                <scroll-view scroll-x class="ability-scroll">
-                    <view class="ability-item {{currentIconType === item.slot ? 'active' : ''}}" wx:for="{{currentAbilities}}" wx:key="slot" bindtap="selectIcon" data-type="{{item.slot}}" data-url="{{item.displayIcon}}">
-                        <image src="{{item.displayIcon}}" mode="aspectFit"></image>
-                        <text>{{item.displayName}}</text>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>
-        <view class="bottom-action-bar">
-            <button class="primary-btn save-btn" bindtap="saveToAlbum">
-                <text>保 存</text>
-            </button>
-            <button class="primary-btn share-btn" open-type="share">
-                <text>分 享</text>
-            </button>
+            </block>
+            <block wx:else>
+                <view class="icon-box">
+                    <!-- <image src="/assets/icons/attack.png" mode="aspectFit" /> -->
+                    <view class="icon-label">进攻</view>
+                </view>
+            </block>
+        </scroll-view>
+        <view class="global-actions">
+            <view class="action-btn undo" bindtap="undoPin">撤销上一步</view>
+            <view class="action-btn save" bindtap="submitData">保存方案</view>
         </view>
     </view>
 </view>

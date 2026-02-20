@@ -99,6 +99,7 @@
         </view>
     </scroll-view>
 </view>
+<v-loading show="{{pageLoading}}" color="#ff4400"></v-loading>
 <!-- 选英雄 -->
 <agent-selector show="{{showPopup && popupType === 'hero'}}" currentAgentUuid="{{filterAgent.uuid || ''}}" bind:close="togglePopup" bind:select="onFilterSelect" />
 <!-- 选tag -->

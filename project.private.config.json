@@ -22,11 +22,53 @@
     "miniprogram": {
       "list": [
         {
+          "name": "packageStrategy/pages/add-point/add-point",
+          "pathName": "packageStrategy/pages/add-point/add-point",
+          "query": "mapId=224b0a95-48b9-f703-1bd8-67aca101a61f&heroId=1dbf2edd-4729-0984-3115-daa5eed44993",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
+          "name": "packageStrategy/pages/detail/detail",
+          "pathName": "packageStrategy/pages/detail/detail",
+          "query": "mapId=d960549e-485c-e861-8d71-aa9d1aed12a2&mapName=%E9%9C%93%E8%99%B9%E7%94%BA&heroId=e370fa57-4757-3604-3648-499e1f642d3f&heroName=%E7%9B%96%E5%8F%AF",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/strategy/index",
+          "pathName": "pages/strategy/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/pro-settings/index",
+          "pathName": "pages/pro-settings/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/skins/index",
+          "pathName": "pages/skins/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/tools/index",
+          "pathName": "pages/tools/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/news/index",
           "pathName": "pages/news/index",
           "query": "",
-          "scene": null,
-          "launchMode": "default"
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "packageWallpaper/pages/wallpaper/wallpaper",

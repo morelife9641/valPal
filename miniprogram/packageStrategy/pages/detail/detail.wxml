@@ -1,60 +1,34 @@
-<view class="detail-container">
-    <view class="loading-mask" wx:if="{{!isReady}}">
-        <view class="valorant-loader"></view>
-        <view class="loading-text">正在部署战术地图</view>
-    </view>
-    <view class="main-content {{isReady ? 'fade-in' : 'hidden'}}">
-        <view class="mode-switch">
-            <view class="mode-btn {{touchMode === 'view' ? 'active' : ''}}" bindtap="changeMode" data-mode="view">
-                🔍 观察/缩放
+<view class="detail-page">
+    <view class="step-nav">
+        <view class="step-item {{current === index ? 'active' : ''}}" wx:for="{{steps}}" wx:key="index" bindtap="switchStep" data-index="{{index}}">
+            <text class="step-num">0{{index + 1}}</text>
+            <view class="step-info">
+                <text class="step-t">{{item.title}}</text>
+                <text class="step-s">{{item.sub}}</text>
             </view>
-            <view class="mode-btn {{touchMode === 'draw' ? 'active' : ''}}" bindtap="changeMode" data-mode="draw">
-                ✏️ 绘制战术
-            </view>
-        </view>
-        <view class="canvas-area">
-            <canvas type="2d" id="mapCanvas" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd"></canvas>
-            <view class="side-tools" wx:if="{{touchMode === 'draw'}}">
-                <view class="tool-item" bindtap="undoPin" hover-class="tool-item-hover">
-                    <text class="icon">↩️</text>
-                    <text class="tool-label">撤销</text>
-                </view>
-                <view class="tool-divider"></view>
-                <view class="tool-item" bindtap="clearPins" hover-class="tool-item-hover">
-                    <text class="icon">🗑️</text>
-                    <text class="tool-label">清空</text>
-                </view>
-            </view>
-        </view>
-        <view class="icon-selector-container" wx:if="{{touchMode === 'draw'}}">
-            <view class="role-selector">
-                <view class="role-tab {{currentRole === item ? 'active' : ''}}" wx:for="{{roles}}" wx:key="*this" bindtap="selectRole" data-role="{{item}}">
-                    {{item}}
-                </view>
-            </view>
-            <view class="agent-selector">
-                <scroll-view scroll-x scroll-left="{{agentScrollLeft}}" class="agent-scroll">
-                    <view class="agent-item {{currentAgentName === item.displayName ? 'active' : ''}}" wx:for="{{agentsByRole[currentRole]}}" wx:key="displayName" bindtap="selectAgent" data-agent="{{item}}">
-                        <image src="{{item.displayIcon}}" mode="aspectFill"></image>
-                    </view>
-                </scroll-view>
-            </view>
-            <view class="ability-selector">
-                <scroll-view scroll-x class="ability-scroll">
-                    <view class="ability-item {{currentIconType === item.slot ? 'active' : ''}}" wx:for="{{currentAbilities}}" wx:key="slot" bindtap="selectIcon" data-type="{{item.slot}}" data-url="{{item.displayIcon}}">
-                        <image src="{{item.displayIcon}}" mode="aspectFit"></image>
-                        <text>{{item.displayName}}</text>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>
-        <view class="bottom-action-bar">
-            <button class="primary-btn save-btn" bindtap="saveToAlbum">
-                <text>保 存</text>
-            </button>
-            <button class="primary-btn share-btn" open-type="share">
-                <text>分 享</text>
-            </button>
         </view>
     </view>
+    <view class="viewer-container">
+        <swiper class="image-swiper" current="{{current}}" bindchange="onSwiperChange" duration="300">
+            <swiper-item wx:for="{{detail.images}}" wx:key="*this">
+                <image src="{{item}}" mode="aspectFit" bindtap="previewImage" class="main-img" />
+            </swiper-item>
+        </swiper>
+        <view class="frame-corner lt"></view>
+        <view class="frame-corner rb"></view>
+    </view>
+    <scroll-view scroll-y class="desc-area">
+        <view class="title-section">
+            <view class="red-bar"></view>
+            <text class="detail-title">{{detail.title}}</text>
+        </view>
+        <view class="meta-tags">
+            <text class="tag">MAP: {{detail.mapName}}</text>
+            <text class="tag">AGENT: {{detail.heroName}}</text>
+        </view>
+        <view class="text-content">
+            <text class="label">战术详解 / DESCRIPTION</text>
+            <text class="description">{{detail.desc || '暂无详细描述资料。'}}</text>
+        </view>
+    </scroll-view>
 </view>

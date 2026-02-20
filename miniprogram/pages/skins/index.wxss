@@ -35,12 +35,12 @@ page {
   flex: 1; /* 核心：三个容器平分 */
   display: flex;
   align-items: center;
-  height: 90rpx;
+  height: 88rpx;
   padding: 0 15rpx;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative; /* 为 X 号定位 */
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
   transition: all 0.2s ease;
 }
 
@@ -106,8 +106,8 @@ page {
 /* 添加 */
 
 .add-btn-wrap {
-  width: 80rpx;
-  height: 80rpx;
+  width: 90rpx;
+  height: 90rpx;
   background: #ff4655;
   display: flex;
   align-items: center;

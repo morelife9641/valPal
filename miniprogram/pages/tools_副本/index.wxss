@@ -1,0 +1,73 @@
+/* 页面背景 */
+.container {
+  padding: 10rpx;
+  background-color: #f0f2f5;
+  display: flex;
+  flex-wrap: wrap; /* 允许换行 */
+  justify-content: flex-start;
+}
+
+/* 准星卡片容器 */
+.card {
+  width: 22%; /* 一行四个，减去间距大约占 22% */
+  margin: 1.5%;
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 准星展示区域（关键：模拟游戏背景色） */
+.avatar-container {
+  width: 100%;
+  height: 160rpx;
+  background-color: #2c3e50; /* 深色背景让准星更明显 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+}
+
+/* 信息区域 */
+.info {
+  padding: 10rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.name {
+  font-size: 24rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+  text-align: center;
+  /* 文本超长省略 */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 复制按钮自适应 */
+.copy-btn {
+  width: 90% !important;
+  font-size: 20rpx !important;
+  padding: 8rpx 0 !important;
+  background-color: #ff4655; /* 无畏契约标志性红色 */
+  color: white !important;
+  border-radius: 8rpx;
+  line-height: 1.5;
+  min-height: auto !important;
+}
+
+.copy-btn:active {
+  background-color: #cf3a46;
+}

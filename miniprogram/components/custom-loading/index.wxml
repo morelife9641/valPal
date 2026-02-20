@@ -1,0 +1,10 @@
+<view class="loading-container" wx:if="{{show}}">
+    <!-- <view class="loading-mask"></view> -->
+    <view class="waterfall" style="--primary: {{color}};">
+        <view></view>
+        <view></view>
+        <view></view>
+        <view></view>
+        <view></view>
+    </view>
+</view>

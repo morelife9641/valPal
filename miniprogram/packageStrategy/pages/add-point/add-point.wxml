@@ -1,0 +1,73 @@
+<view class="add-container">
+    <view class="page-header">
+        <text class="title">UPLOAD STRATEGY</text>
+        <text class="subtitle">上传战术方案</text>
+    </view>
+    <scroll-view scroll-y class="form-scroll" style="height: calc(100vh - 280rpx);">
+        <view class="form-content">
+            <view class="form-group">
+                <text class="label">方案标题 / TITLE</text>
+                <input class="custom-input" placeholder="描述该方案的核心逻辑..." placeholder-class="ph-style" bindinput="onInputChange" data-field="title" />
+            </view>
+            <view class="form-group">
+                <text class="label">选择地图 / MAP</text>
+                <view class="custom-select {{mapName ? '' : 'placeholder'}}">
+                    <picker bindchange="onMapChange" value="{{mapIndex}}" range="{{maps}}" range-key="displayName" style="width: 100%;">
+                        <text class="picker-inner-text">{{mapName || '请选择地图'}}</text>
+                    </picker>
+                    <view class="arrow-icon"></view>
+                </view>
+            </view>
+            <view class="form-group">
+                <text class="label">选择英雄 / AGENT</text>
+                <view class="custom-select {{heroName ? '' : 'placeholder'}}">
+                    <picker bindchange="onAgentChange" value="{{agentIndex}}" range="{{allAgents}}" range-key="displayName" style="width: 100%;">
+                        <text class="picker-inner-text">{{heroName || '请选择特工'}}</text>
+                    </picker>
+                    <view class="arrow-icon"></view>
+                </view>
+            </view>
+            <view class="form-group">
+                <text class="label">站位图片 / STANDING POSITION</text>
+                <!-- 仅保留上传点击事件，移除容器的长按事件 -->
+                <view class="upload-card-full" bindtap="uploadImg" data-type="standImg">
+                    <image wx:if="{{formData.standImg}}" src="{{formData.standImg}}" mode="aspectFill" bindtap="previewStandImg" data-src="{{formData.standImg}}" />
+                    <view class="upload-placeholder" wx:else>
+                        <view class="plus">+</view>
+                        <text>点击上传站位参考图</text>
+                    </view>
+                </view>
+            </view>
+            <view class="form-group">
+                <text class="label">瞄点细节 / AIMING DETAIL</text>
+                <view class="upload-card-full" bindtap="uploadImg" data-type="aimImg">
+                    <image wx:if="{{formData.aimImg}}" src="{{formData.aimImg}}" mode="aspectFill" />
+                    <view class="upload-placeholder" wx:else>
+                        <view class="plus">+</view>
+                        <text>点击上传准星参考图</text>
+                    </view>
+                </view>
+            </view>
+            <view class="form-group">
+                <text class="label">最终效果 / EFFECT</text>
+                <view class="upload-card-full" bindtap="uploadImg" data-type="resultImg">
+                    <image wx:if="{{formData.resultImg}}" src="{{formData.resultImg}}" mode="aspectFill" />
+                    <view class="upload-placeholder" wx:else>
+                        <view class="plus">+</view>
+                        <text>点击上传投掷效果图</text>
+                    </view>
+                </view>
+            </view>
+            <view class="form-group">
+                <text class="label">文字详解 / DESCRIPTION</text>
+                <textarea class="custom-textarea" placeholder="详细描述站位参考点或投掷技巧..." placeholder-class="ph-style" bindinput="onInputChange" data-field="desc" />
+            </view>
+            <view class="footer-spacer"></view>
+        </view>
+    </scroll-view>
+    <view class="submit-bar">
+        <view class="btn-primary" bindtap="submitForm">
+            <view class="btn-inner">提交方案</view>
+        </view>
+    </view>
+</view>

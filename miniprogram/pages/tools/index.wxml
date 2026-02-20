@@ -1,11 +1,41 @@
-<view class="container">
-    <view class="card" wx:for="{{crosshairList}}" wx:key="index">
-        <view class="avatar-container">
-            <image class="avatar" src="{{item.img_url}}" mode="aspectFit"></image>
+<view class="page-container">
+    <view class="user-card">
+        <view class="user-info">
+            <image class="avatar" src="{{userInfo.avatarUrl || '/assets/default-avatar.png'}}" />
+            <view class="text-info">
+                <text class="username">{{userInfo.nickName || '未登录用户'}}</text>
+                <view class="rank-tag">
+                    <text class="rank-icon">💎</text>
+                    <text>RADIANT VIP</text>
+                </view>
+            </view>
         </view>
-        <view class="info">
-            <text class="name">{{item.name}}</text>
-            <button class="copy-btn" bindtap="copyCode" data-code="{{item.code}}">复制</button>
+        <view class="card-bg-effect"></view>
+    </view>
+    <view class="section-title">战术工具箱 / TOOLS</view>
+    <view class="tools-grid">
+        <view class="tool-item" bindtap="navTo" data-url="crosshair">
+            <view class="tool-icon">✛</view>
+            <text>准星库</text>
         </view>
+        <view class="tool-item" bindtap="navTo" data-url="pro-settings">
+            <view class="tool-icon">🖱️</view>
+            <text>选手DPI</text>
+        </view>
+        <view class="tool-item" bindtap="navTo" data-url="maps">
+            <view class="tool-icon">🗺️</view>
+            <text>地图点位</text>
+        </view>
+        <view class="tool-item" bindtap="navTo" data-url="skins">
+            <view class="tool-icon">🔫</view>
+            <text>皮肤预览</text>
+        </view>
+    </view>
+    <view class="vip-banner" bindtap="openVip">
+        <view class="vip-text">
+            <text class="title">解锁高级功能</text>
+            <text class="desc">云端保存准星、导出选手配置、专属水印</text>
+        </view>
+        <view class="vip-btn">立即加入</view>
     </view>
 </view>
