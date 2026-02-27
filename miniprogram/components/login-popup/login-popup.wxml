@@ -1,0 +1,43 @@
+<view class="login-mask {{show ? 'show' : ''}}" wx:if="{{show}}" bindtap="onClose">
+    <view class="login-container" catchtap="stop">
+        <!-- <view class="bg-text">IDENTITY</view> -->
+        <view class="login-header">
+            <view class="header-left">
+                <view class="red-bar"></view>
+                <text class="title">授权特工档案</text>
+            </view>
+            <view class="close-btn" bindtap="onClose">×</view>
+        </view>
+        <view class="login-content">
+            <view class="desc-item">
+                <view class="dot"></view>
+                <text>解锁 4K 高清无水印壁纸导出</text>
+            </view>
+            <view class="desc-item">
+                <view class="dot"></view>
+                <text>同步战术点位收藏夹</text>
+            </view>
+            <view class="desc-item">
+                <view class="dot"></view>
+                <text>提交你的专属战术部署</text>
+            </view>
+        </view>
+        <form bindsubmit="onConfirm">
+            <view class="input-group">
+                <text class="label">头像</text>
+                <button class="avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+                    <image class="avatar" src="{{tempAvatarUrl || defaultAvatar}}" mode="aspectFill"></image>
+                    <view class="edit-icon">编辑</view>
+                </button>
+            </view>
+            <view class="input-group">
+                <text class="label">昵称</text>
+                <input type="nickname" name="nickname" class="nickname-input" placeholder="请输入特工代号" />
+            </view>
+            <button class="submit-btn" form-type="submit">
+                <text>激活档案</text>
+                <view class="btn-deco"></view>
+            </button>
+        </form>
+    </view>
+</view>

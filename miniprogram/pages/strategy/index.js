@@ -37,6 +37,8 @@ Page({
       盐海矿镇: "corrode",
     },
 
+    mapLoaded: true,
+
     rankList: [
       { tier: "all", label: "全部段位", icon: "0" }, // 对应 0.png
       { tier: "Iron", label: "黑铁", icon: "3" }, // 对应 3.png
@@ -72,6 +74,38 @@ Page({
     recommendPoints: [],
     currentMapIdx: 0,
     allData: [],
+    newsList: [
+      {
+        _id: "news_001",
+        title: "版本更新 8.11 // 特工平衡性调整",
+        desc: "雷兹与捷风的位移技能进行了重大重写，旨在提升竞技公平性。",
+        cover:
+          "https://picture.mval.qq.com/source/818/20260221/1771603214aedf116905866108.png", // 示例图
+        tag: "PATCH NOTES",
+        dateStr: "2026.02.24",
+        priority: "URGENT",
+      },
+      {
+        _id: "news_002",
+        title: "冠军巡回赛 // 首尔大师赛正式开赛",
+        desc: "全球顶尖战队集结首尔，争夺本赛季首个世界冠军头衔。",
+        cover:
+          "https://picture.mval.qq.com/source/818/20260221/17716032143937ffd59b84191e.jpg",
+        tag: "ESPORTS",
+        dateStr: "2026.02.22",
+        priority: "NORMAL",
+      },
+      {
+        _id: "news_003",
+        title: "深度档案 // 新地图「幽邃地窟」点位全解析",
+        desc: "如何在深渊之中占据地利？点击查阅各英雄最强点位推荐。",
+        cover:
+          "https://picture.mval.qq.com/source/818/20260221/1771603214b37eeeaa42b5be24.jpg",
+        tag: "STRATEGY",
+        dateStr: "2026.02.20",
+        priority: "HOT",
+      },
+    ],
   },
 
   async onLoad() {
@@ -113,6 +147,12 @@ Page({
     this.updateCallouts();
 
     this.fetchMapRecommendations();
+
+    if (typeof this.getTabBar === "function" && this.getTabBar()) {
+      this.getTabBar().setData({
+        selected: 0,
+      });
+    }
   },
 
   async initAgentIcons() {
@@ -336,10 +376,22 @@ Page({
 
   selectMap(e) {
     const idx = e.currentTarget.dataset.idx;
-    this.setData({ currentMapIdx: idx }, () => {
-      this.updateCallouts();
-      this.updateDisplayStats();
-      this.fetchMapRecommendations();
+    this.setData(
+      {
+        currentMapIdx: idx,
+        mapLoaded: false, // 切换时先重置状态，让图片变透明
+      },
+      () => {
+        this.updateCallouts();
+        this.updateDisplayStats();
+        this.fetchMapRecommendations();
+      },
+    );
+  },
+
+  onMapImgLoad() {
+    this.setData({
+      mapLoaded: true, // 图片就绪后再渐现，此时滤镜已同步生效
     });
   },
 
@@ -360,6 +412,41 @@ Page({
         });
       });
   },
+  fetchMapRecommendations() {
+    const currentMap = this.data.maps[this.data.currentMapIdx];
+    if (!currentMap) return;
+
+    const db = wx.cloud.database(); // 确保定义了 db
+
+    db.collection("points")
+      .where({
+        mapId: currentMap.uuid,
+      })
+      .limit(10) // 既然分了两行，建议把上限调到10，每行5个左右视觉更饱满
+      .orderBy("createTime", "desc")
+      .get()
+      .then((res) => {
+        const allPoints = res.data;
+
+        // 核心过滤逻辑：根据你数据库里的字段（假设字段名是 side）
+        // 如果你的字段名不同，请修改下面的 'atk' 和 'def'
+        const atkPoints = allPoints.filter(
+          (p) => p.side === "atk" || p.type === "进攻",
+        );
+        const defPoints = allPoints.filter(
+          (p) => p.side === "def" || p.type === "防守",
+        );
+
+        this.setData({
+          recommendPoints: allPoints, // 用于控制整体的 wx:if
+          atkPoints: atkPoints,
+          defPoints: defPoints,
+        });
+      })
+      .catch((err) => {
+        console.error("推荐点位加载失败", err);
+      });
+  },
 
   navToPointDetail(e) {
     const { id } = e.currentTarget.dataset;
@@ -374,6 +461,27 @@ Page({
     // 这里跳转到你之前写的 List 页面
     wx.navigateTo({
       url: `/packageStrategy/pages/list/list?mapId=${currentMap.uuid}&mapName=${encodeURIComponent(currentMap.displayName)}`,
+    });
+  },
+
+  navToCrosshair() {
+    wx.navigateTo({
+      // 注意：必须从根目录开始写，且包含分包名 packageTools
+      url: "/packageTools/pages/crosshair/list",
+      fail: (err) => {
+        console.error("分包页面跳转失败，请检查 app.json 配置:", err);
+        wx.showToast({ title: "模块载入中", icon: "none" });
+      },
+    });
+  },
+
+  navToProSettings() {
+    wx.navigateTo({
+      url: "/packageTools/pages/pro-settings/list",
+      fail: (err) => {
+        console.error("跳转失败", err);
+        wx.showToast({ title: "模块载入中", icon: "none" });
+      },
     });
   },
 

@@ -1,71 +1,174 @@
-.detail-page {
-  background: #0f1923; /* 瓦罗兰特极暗蓝 */
+.detail-container {
   min-height: 100vh;
-  padding: 0 40rpx;
+  background-color: #0f1923;
+  color: #ece8e1;
+  padding: 0 30rpx;
+  padding-bottom: 100rpx;
 }
 
-/* 顶部导航 */
-.step-nav {
+/* 预览水印 */
+.preview-header {
+  background: #ff4655;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 900;
+  text-align: center;
+  padding: 10rpx 0;
+  margin: 0 -30rpx 30rpx;
+  letter-spacing: 4rpx;
+}
+
+/* 头部样式 */
+.top-header {
+  padding: 40rpx 0;
+  border-bottom: 1rpx solid rgba(236, 232, 225, 0.1);
+}
+.title-row {
   display: flex;
   justify-content: space-between;
-  padding: 60rpx 0 40rpx;
+  align-items: flex-start;
+}
+.main-title {
+  font-size: 44rpx;
+  font-weight: 900;
+  font-style: italic;
+  color: #ff4655;
+  flex: 1;
+}
+.side-tag {
+  font-size: 18rpx;
+  padding: 4rpx 12rpx;
+  background: rgba(236, 232, 225, 0.1);
+  font-weight: 900;
+}
+.side-tag.atk {
+  color: #ff4655;
+  border-left: 4rpx solid #ff4655;
+}
+.side-tag.def {
+  color: #00eeff;
+  border-left: 4rpx solid #00eeff;
 }
 
-.step-item {
+.map-info-row {
+  margin-top: 15rpx;
+  display: flex;
+  justify-content: space-between;
+  font-size: 20rpx;
+  color: rgba(236, 232, 225, 0.4);
+}
+
+/* 模块标题 */
+.module-section {
+  margin-top: 50rpx;
+}
+.module-head {
   display: flex;
   align-items: center;
-  opacity: 0.3;
-  transition: all 0.3s;
+  margin-bottom: 25rpx;
+  font-size: 22rpx;
+  font-weight: 900;
+  color: rgba(236, 232, 225, 0.6);
 }
-
-.step-item.active {
-  opacity: 1;
-}
-
-.step-num {
-  font-size: 40rpx;
-  font-weight: bold;
-  color: #ff4655;
+.head-line {
+  width: 8rpx;
+  height: 24rpx;
+  background: #ff4655;
   margin-right: 15rpx;
-  font-family: "DIN Alternate", sans-serif;
 }
 
-.step-t {
-  display: block;
-  font-size: 24rpx;
-  color: #ece8e1;
+/* --- 地图标点核心容器 --- */
+.map-mark-container {
+  width: 100%;
+  height: 600rpx;
+  background: #05090d;
+  border: 1rpx solid rgba(236, 232, 225, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.map-area {
+  width: 100%;
+  height: 100%;
+}
+.map-touch-view {
+  width: 100%;
+  height: 100%;
+}
+.map-base-img {
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
 }
 
-.step-s {
-  font-size: 16rpx;
-  color: #8b9196;
+/* 标点样式复现 */
+.map-pointer {
+  position: absolute;
+  width: 24rpx;
+  height: 24rpx;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+}
+.pointer-core {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #fff;
+  border: 4rpx solid #ff4655;
+  box-sizing: border-box;
+}
+.map-pointer.def .pointer-core {
+  border-color: #00eeff;
 }
 
-/* 核心查看器 */
+.pointer-ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: #ff4655;
+  opacity: 0.3;
+  animation: ripple 1.5s infinite;
+}
+.map-pointer.def .pointer-ripple {
+  background: #00eeff;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* --- Swiper 图片浏览器 --- */
 .viewer-container {
   width: 100%;
-  height: 500rpx;
-  background: #1f2326;
+  height: 480rpx;
+  background: #000;
   position: relative;
-  border: 1rpx solid #383e44;
+  border: 1rpx solid rgba(236, 232, 225, 0.1);
 }
-
 .image-swiper {
   width: 100%;
   height: 100%;
 }
-
 .main-img {
   width: 100%;
   height: 100%;
 }
 
-/* 装饰角 */
 .frame-corner {
   position: absolute;
   width: 30rpx;
   height: 30rpx;
   border: 4rpx solid #ff4655;
+  z-index: 10;
 }
 .frame-corner.lt {
   top: -2rpx;
@@ -80,53 +183,43 @@
   border-top: none;
 }
 
-/* 文字说明 */
-.desc-area {
-  margin-top: 50rpx;
-  height: calc(100vh - 800rpx);
-}
-
-.title-section {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-
-.red-bar {
-  width: 10rpx;
-  height: 40rpx;
-  background: #ff4655;
-  margin-right: 20rpx;
-}
-
-.detail-title {
-  color: #ece8e1;
-  font-size: 36rpx;
-  font-weight: bold;
-}
-
-.meta-tags {
-  margin-bottom: 40rpx;
-}
-
-.tag {
-  font-size: 20rpx;
+.swiper-counter {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4rpx 15rpx;
+  font-size: 18rpx;
+  font-family: monospace;
   color: #ff4655;
-  border: 1rpx solid #ff4655;
-  padding: 4rpx 12rpx;
-  margin-right: 20rpx;
-  text-transform: uppercase;
+  z-index: 11;
 }
 
-.text-content .label {
-  display: block;
-  font-size: 20rpx;
-  color: #8b9196;
-  margin-bottom: 15rpx;
+/* 备注盒子 */
+.memo-box {
+  margin-top: 2rpx;
+  background: rgba(236, 232, 225, 0.03);
+  padding: 24rpx;
+  border-left: 2rpx solid rgba(255, 70, 85, 0.5);
+  display: flex;
+  gap: 15rpx;
 }
-
-.description {
-  color: #ece8e1;
-  font-size: 28rpx;
+.memo-deco {
+  width: 4rpx;
+  height: 30rpx;
+  background: #ff4655;
+  flex-shrink: 0;
+}
+.memo-text {
+  font-size: 26rpx;
   line-height: 1.6;
+  color: #ece8e1;
+}
+
+.desc-card {
+  background: rgba(236, 232, 225, 0.02);
+  border: 1rpx dashed rgba(236, 232, 225, 0.2);
+  padding: 30rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
 }

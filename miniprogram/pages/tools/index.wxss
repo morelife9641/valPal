@@ -1,116 +1,325 @@
-.page-container {
+/* 外层容器 */
+.container {
   min-height: 100vh;
-  background-color: #0f1923; /* 经典瓦色 */
-  padding: 30rpx;
-  color: #ece8e1;
-}
-
-/* 用户卡片 */
-.user-card {
-  position: relative;
-  background: #1f2326;
-  padding: 40rpx;
-  border-left: 10rpx solid #ff4655;
-  margin-bottom: 50rpx;
-  overflow: hidden;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  z-index: 2;
-  position: relative;
-}
-
-.avatar {
-  width: 120rpx;
-  height: 120rpx;
-  border: 4rpx solid #ff4655;
-  background: #333;
-}
-
-.text-info {
-  margin-left: 30rpx;
-}
-
-.username {
-  font-size: 36rpx;
-  font-weight: bold;
-  display: block;
-}
-
-.rank-tag {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(255, 70, 85, 0.2);
-  color: #ff4655;
-  font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  margin-top: 10rpx;
-  font-weight: 900;
-}
-
-/* 工具矩阵 */
-.section-title {
-  font-size: 24rpx;
-  color: #8b978f;
-  margin-bottom: 20rpx;
-  font-weight: bold;
-  letter-spacing: 2rpx;
-}
-
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20rpx;
-  margin-bottom: 50rpx;
-}
-
-.tool-item {
-  background: #1f2326;
-  height: 180rpx;
+  background-color: #0f1923; /* 最底层的深邃背景 */
+  padding: 0 20rpx 60rpx;
   display: flex;
   flex-direction: column;
+  align-items: center;
+}
+
+/* ================= 挂绳与卡片 ================= */
+.badge-wrapper {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 物理挂绳 (条纹设计) */
+.badge-strap {
+  width: 140rpx;
+  height: 120rpx;
+  /* 改为深灰(#1f2326)与瓦红(#ff4655)的斜纹渐变 */
+  background: repeating-linear-gradient(
+    45deg,
+    #1f2326,
+    #1f2326 15rpx,
+    #ff4655 15rpx,
+    #ff4655 20rpx
+  );
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.6);
+  position: relative;
+  z-index: 104;
+  /* 增加一个小细节：中间加个金属扣的视觉效果 */
+  border-bottom: 4rpx solid #383e44;
+}
+
+.stats-tab {
+  background: #1f2326;
+  color: #ece8e1;
+  display: inline-block;
+  padding: 6rpx 30rpx 6rpx 20rpx;
+  font-size: 20rpx;
+  font-weight: bold;
+  clip-path: polygon(0 0, calc(100% - 15rpx) 0, 100% 100%, 0 100%);
+}
+
+.id-card {
+  /* width: 100%; */
+  /* 换成瓦罗兰特 UI 里的中度灰色，更具金属感 */
+  background: #383e44;
+  position: relative;
+  /* padding: 40rpx 30rpx; */
+  box-sizing: border-box;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30rpx 60rpx rgba(0, 0, 0, 0.8);
+  border-radius: 20rpx;
+  margin: -10rpx 0 20rpx;
+  margin-top: -20rpx;
+}
+
+.stats-module {
+  width: 100%;
+  margin-top: 30rpx;
+  position: relative;
+  z-index: 5; /* 确保它盖在背景大字上方 */
+}
+
+.stats-body {
+  background: #0f1923; /* 改为极深色，在米白卡片上显得像一块液晶屏幕 */
+  color: #ece8e1; /* 文字改为浅色 */
+  display: flex;
+  padding: 24rpx 0;
+  clip-path: polygon(
+    15rpx 0,
+    100% 0,
+    100% calc(100% - 15rpx),
+    calc(100% - 15rpx) 100%,
+    0 100%,
+    0 15rpx
+  );
+}
+
+/* 四角十字 */
+.cross-mark {
+  position: absolute;
+  color: #8b9196;
+  font-size: 24rpx;
+  font-weight: 900;
+}
+.tl {
+  top: 20rpx;
+  left: 20rpx;
+}
+.tr {
+  top: 20rpx;
+  right: 20rpx;
+}
+.bl {
+  bottom: 40rpx;
+  left: 20rpx;
+}
+.br {
+  bottom: 40rpx;
+  right: 20rpx;
+}
+
+/* 左右两侧垂直大字 */
+.bg-text-vertical {
+  position: absolute;
+  writing-mode: vertical-rl;
+  font-size: 80rpx;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 10rpx;
+}
+.left-text {
+  left: 10rpx;
+  top: 50rpx;
+  color: #0f1923;
+  opacity: 0.1;
+  transform: rotate(180deg);
+}
+.right-text {
+  right: 10rpx;
+  top: 50rpx;
+  color: #ff4655; /* 右侧用亮色呼应图片 */
+}
+
+/* 工牌 */
+
+.inner-panel {
+  margin-top: -40rpx;
+  background: #1f2326;
+  position: relative;
+  z-index: 5;
+  padding: 60rpx; /* 增加内边距给名字留出遮挡空间 */
+  border: 1rpx solid rgba(236, 232, 225, 0.3);
+  box-sizing: border-box;
+  display: flex;
   justify-content: center;
   align-items: center;
-  border: 1rpx solid #333;
-  transition: all 0.2s;
+  height: 600rpx;
+  overflow: hidden; /* 必须加，防止巨大的背景字撑开容器 */
 }
 
-.tool-item:active {
+/* 1. 头像容器：负责描边和整体形状 */
+/* 1. 头像外框（红色描边层） */
+/* 1. 头像外框（描边层） */
+/* 1. 头像外框（描边层） */
+.avatar-box {
+  width: 400rpx;
+  height: 400rpx;
   background: #ff4655;
+  position: relative;
+  z-index: 2;
+  padding: 3rpx;
+  border: 1px solid red;
+  /* 调整后的深切梯形：短边变长，向内延伸更深 */
+  clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0);
 }
 
-.tool-icon {
-  font-size: 50rpx;
-  margin-bottom: 10rpx;
+/* 2. 内层背景 */
+.avatar-box::after {
+  content: "";
+  position: absolute;
+  top: 3rpx;
+  left: 3rpx;
+  right: 3rpx;
+  bottom: 3rpx;
+  background: #0f1923;
+  z-index: -1;
+  clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0);
 }
 
-/* 会员横幅 */
-.vip-banner {
-  background: linear-gradient(90deg, #ff4655, #bd3944);
-  padding: 30rpx;
+/* 3. 图片层 */
+.avatar {
+  image-rendering: -webkit-optimize-contrast;
+  /* 开启 GPU 加速，消除缩放产生的毛刺 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  filter: contrast(1.05) brightness(1.02);
+  /* 配合 clip-path 时，有时加这个可以改善锯齿 */
+  -webkit-backface-visibility: hidden;
+  width: 100%;
+  height: 100%;
+  display: block;
+  clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0);
+}
+
+.name-overlay {
+  position: absolute;
+  left: 11%;
+  top: 20%;
+  z-index: -2;
+  /* 强制不换行，防止文字变成细长条 */
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.nickname {
+  display: block;
+  /* writing-mode: vertical-rl; */
+  transform: rotate(-90deg);
+  transform-origin: center center;
+
+  /* 字体设置：超大粗体 */
+  font-size: 100rpx;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: 2rpx;
+
+  color: rgba(236, 232, 225, 0.12);
+  -webkit-text-stroke: 2rpx rgba(255, 70, 85, 0.4);
+
+  /* 增加一种“故障感”阴影，让字更有体积感 */
+  text-shadow: 8rpx 0rpx 0rpx rgba(255, 70, 85, 0.1);
+}
+
+/* ================= 统计数据面板 ================= */
+.stats-module {
+  width: 100%;
+  margin-top: 40rpx;
+}
+.stats-tab {
+  background: #1f2326;
+  color: #ece8e1;
+  display: inline-block;
+  padding: 6rpx 30rpx 6rpx 20rpx;
+  font-size: 22rpx;
+  font-weight: bold;
+  /* 右侧切角 */
+  clip-path: polygon(0 0, calc(100% - 15rpx) 0, 100% 100%, 0 100%);
+}
+.stats-body {
+  background: #ece8e1;
+  color: #0f1923;
+  display: flex;
+  padding: 20rpx 0;
+  /* 四角战术切边 */
+  clip-path: polygon(
+    15rpx 0,
+    100% 0,
+    100% calc(100% - 15rpx),
+    calc(100% - 15rpx) 100%,
+    0 100%,
+    0 15rpx
+  );
+}
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.s-num {
+  font-size: 32rpx;
+  font-weight: 900;
+}
+.s-lab {
+  font-size: 18rpx;
+  font-weight: bold;
+  color: #ff4655;
+  margin-top: 4rpx;
+}
+.s-divider {
+  width: 2rpx;
+  background: #8b9196;
+  opacity: 0.3;
+}
+.arrow {
+  color: #ff4655;
+  font-weight: 900;
+  margin-right: 6rpx;
+}
+
+/* ================= 底部菜单列表 ================= */
+.menu-module {
+  width: 100%;
+  margin-top: 40rpx;
+}
+.menu-group-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 24rpx;
+  color: #ece8e1;
+  font-weight: bold;
+  border-bottom: 2rpx solid #ff4655;
+  padding-bottom: 10rpx;
+  margin-bottom: 20rpx;
+}
+.heart {
+  color: #ff4655;
+  margin-right: 10rpx;
+}
+.right-desc {
+  color: #ff4655;
+  font-size: 18rpx;
+}
+
+.menu-row {
+  background: #1f2326;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  margin-bottom: 10rpx;
   border-radius: 4rpx;
 }
-
-.vip-text .title {
-  display: block;
-  font-size: 30rpx;
+.menu-row:active {
+  background: #383e44;
+}
+.m-title {
+  font-size: 26rpx;
+  color: #8b9196;
   font-weight: bold;
 }
-
-.vip-text .desc {
-  font-size: 20rpx;
-  opacity: 0.8;
-}
-
-.vip-btn {
-  background: #0f1923;
-  color: #fff;
-  font-size: 24rpx;
-  padding: 12rpx 24rpx;
-  font-weight: bold;
+.m-arrow {
+  color: #ece8e1;
+  font-weight: 900;
+  font-family: monospace;
 }

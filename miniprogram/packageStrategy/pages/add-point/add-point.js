@@ -3,48 +3,61 @@ import { AGENTS_CONFIG } from "../../../config/agents_merged.js";
 
 Page({
   data: {
+    isEditing: false, // 默认是“查看模式”，防止滑动地图时误触
     mapName: "",
     heroName: "",
     formData: {
       title: "",
-      standImg: "",
-      aimImg: "",
-      resultImg: "",
+      side: "atk",
+      mapId: "",
+      markPoints: [],
+      standImg: [], // [{url: '', memo: ''}]
+      enemyImg: [], // 修正后的变量名
       desc: "",
     },
   },
 
-  onLoad(options) {
+  onLoad() {
     // 1. 基础数据加载
     const maps = Array.isArray(mapsData) ? mapsData : mapsData.maps || [];
     const agents = Array.isArray(AGENTS_CONFIG)
       ? AGENTS_CONFIG
       : AGENTS_CONFIG.agents || [];
 
-    // 2. 解码 URL 参数 (防止出现 %E5%B9... 这种乱码)
-    const mapId = options.mapId;
-    const heroId = options.heroId;
-    const mapName = decodeURIComponent(options.mapName || "");
-    const heroName = decodeURIComponent(options.heroName || "");
+    // 2. 默认选中第一张地图
+    let defaultMap = null;
+    let mapIndex = -1;
+    let currentMapIcon = "";
 
-    // 3. 关键：计算 Picker 需要的索引 (Index)
-    // 如果不计算 index，picker 弹出来时会默认停在第一项，而不是你传回来的那一项
-    const mapIndex = maps.findIndex((item) => item.uuid === mapId);
-    const agentIndex = agents.findIndex((item) => item.uuid === heroId);
+    if (maps.length > 0) {
+      mapIndex = 0;
+      defaultMap = maps[0];
+      currentMapIcon = defaultMap.displayIcon; // 获取地图底图
+    }
 
-    // 4. 统一 setData
+    // 3. 统一 setData
     this.setData({
       maps: maps,
       allAgents: agents,
-      mapName: mapName,
-      heroName: heroName,
-      mapIndex: mapIndex !== -1 ? mapIndex : null,
-      agentIndex: agentIndex !== -1 ? agentIndex : null,
-      // 同时也同步到 formData 中，确保提交时有值
-      "formData.mapId": mapId,
-      "formData.agentId": heroId,
-      "formData.title": "", // 初始化其他表单项
+
+      // 地图相关初始化
+      mapIndex: mapIndex,
+      mapName: defaultMap ? defaultMap.displayName : "",
+      currentMapIcon: currentMapIcon,
+
+      // 初始化 formData
+      "formData.mapId": defaultMap ? defaultMap.uuid : "",
+      "formData.side": "atk", // 默认进攻方
+      "formData.markPoints": [],
+      "formData.standImg": [],
+      "formData.aimImg": [],
+      "formData.enemyImg": [],
+      "formData.resultImg": [],
     });
+
+    // 4. 关键：由于默认选了地图，需要初始化地图组件的状态
+    // 如果之前写了 initMapCanvas 等初始化方法，在这里调用
+    console.log("默认选中地图:", this.data.mapName);
   },
 
   onInputChange(e) {
@@ -54,66 +67,328 @@ Page({
     });
   },
 
-  onInputChange(e) {
-    const { field } = e.currentTarget.dataset;
+  toggleEditMode() {
+    const newStatus = !this.data.isEditing;
     this.setData({
-      [`formData.${field}`]: e.detail.value,
+      isEditing: newStatus,
+    });
+
+    // 增加交互反馈：震动一下
+    // wx.vibrateShort({ type: "medium" });
+
+    // 提示用户当前状态
+    wx.showToast({
+      title: newStatus ? "已进入战术部署模式" : "已进入地图查看模式",
+      icon: "none",
+      duration: 1000,
     });
   },
 
-  // 2. 选择器逻辑
+  clearMarks() {
+    if (this.data.formData.markPoints.length === 0) return;
+
+    wx.showModal({
+      title: "重置确认",
+      content: "是否清空当前所有地图标点？",
+      confirmColor: "#ff4655", // 使用瓦罗兰特红
+      success: (res) => {
+        if (res.confirm) {
+          this.setData({
+            "formData.markPoints": [],
+          });
+          // wx.vibrateShort({ type: "heavy" });
+        }
+      },
+    });
+  },
+
+  // 1. 切换阵营
+  onSideSelect(e) {
+    const { side } = e.currentTarget.dataset;
+
+    // 获取当前已有的点位
+    const updatedPoints = this.data.formData.markPoints.map((point) => {
+      return { ...point, side: side }; // 把所有点的阵营都更新为当前选中的
+    });
+
+    this.setData({
+      "formData.side": side,
+      "formData.markPoints": updatedPoints,
+    });
+
+    // wx.vibrateShort({ type: 'light' });
+  },
+
   onMapChange(e) {
     const idx = e.detail.value;
     const selected = this.data.maps[idx];
+    this.setData(
+      {
+        mapIndex: idx,
+        mapName: selected.displayName,
+        "formData.mapId": selected.uuid,
+        currentMapIcon: selected.displayIcon, // 核心：用于绘图
+      },
+      () => {
+        // 选完地图立即初始化 Canvas 并画底图
+        this.initMapCanvas();
+      },
+    );
+  },
+
+  onMapChange(e) {
+    const idx = e.detail.value;
+    const selected = this.data.maps[idx];
+
+    // 1. 清空旧标点（可选）：换地图通常意味着之前的标点失效了
+    // 2. 更新底图路径
     this.setData({
       mapIndex: idx,
       mapName: selected.displayName,
-      "formData.mapId": selected.uuid, // 使用数据中的 uuid 作为标识
+      "formData.mapId": selected.uuid,
+      currentMapIcon: selected.displayIcon, // 这张图会自动通过 WXML 的 <image> 显示出来
+      "formData.markPoints": [], // 建议换地图时清空点位，防止点位飘在空处
+    });
+
+    // 这里的 this.initMapCanvas(); 直接删掉
+  },
+
+  // 点击点位删除
+  removeMark(e) {
+    const { index } = e.currentTarget.dataset;
+    let list = this.data.formData.markPoints;
+    list.splice(index, 1);
+    this.setData({
+      "formData.markPoints": list,
     });
   },
 
-  // 英雄选择改变
-  onAgentChange(e) {
-    const idx = e.detail.value;
-    const selected = this.data.allAgents[idx];
-    this.setData({
-      agentIndex: idx,
-      heroName: selected.displayName,
-      "formData.agentId": selected.uuid, // 使用数据中的 uuid 作为标识
+  // 清空所有点
+  clearMarks() {
+    this.setData({ "formData.markPoints": [] });
+  },
+
+  // 初始化 Canvas 节点
+  initMapCanvas() {
+    const query = wx.createSelectorQuery();
+    query
+      .select("#mapCanvas")
+      .fields({ node: true, size: true })
+      .exec((res) => {
+        const canvas = res[0].node;
+        const ctx = canvas.getContext("2d");
+        const dpr = wx.getSystemInfoSync().pixelRatio;
+
+        // 处理高分屏模糊
+        canvas.width = res[0].width * dpr;
+        canvas.height = res[0].height * dpr;
+        ctx.scale(dpr, dpr);
+
+        this.canvasObj = canvas; // 存入实例供后续使用
+        this.ctx = ctx;
+        this.canvasSize = { w: res[0].width, h: res[0].height };
+
+        this.drawMapLayer(); // 画底图
+      });
+  },
+
+  navToPreview() {
+    const { formData, mapName, currentMapIcon } = this.data;
+    const app = getApp();
+
+    // 1. 基础校验（可选）：至少有个标题或者标点
+    if (!formData.title && formData.markPoints.length === 0) {
+      return wx.showToast({ title: "添加点内容再预览吧", icon: "none" });
+    }
+
+    // 2. 构造完整的临时数据结构
+    // 务必带上 currentMapIcon，否则详情页不知道底图是哪张
+    app.globalData.tempPreviewData = {
+      ...formData,
+      mapName: mapName,
+      mapIcon: currentMapIcon,
+      createTimeDisplay: "PREVIEW / 预览中",
+    };
+
+    // 3. 跳转到分包详情页，传入 mode=preview 标识
+    wx.navigateTo({
+      url: `/packageStrategy/pages/detail/detail?mode=preview`,
     });
+  },
+
+  drawMapLayer() {
+    const query = wx.createSelectorQuery();
+    query
+      .select("#mapCanvas")
+      .fields({ node: true, size: true })
+      .exec((res) => {
+        const canvas = res[0].node;
+        const ctx = canvas.getContext("2d");
+
+        // 清除画布
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制地图
+        const img = canvas.createImage();
+        img.src = this.data.currentMapIcon; // 你的 displayIcon 链接
+        img.onload = () => {
+          // 1. 画地图
+          ctx.drawImage(img, 0, 0, res[0].width, res[0].height);
+
+          // 2. 紧接着画标点
+          if (this.data.formData.markPos) {
+            const { x, y } = this.data.formData.markPos;
+            const color =
+              this.data.formData.side === "def" ? "#00eeff" : "#ff4655";
+
+            ctx.beginPath();
+            ctx.arc(x * res[0].width, y * res[0].height, 8, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = color;
+            ctx.fill();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        };
+      });
+  },
+
+  handleMapTouchEnd(e) {
+    // 核心优化：如果不是编辑模式，直接退出，不执行计算
+    if (!this.data.isEditing) return;
+
+    if (e.changedTouches.length !== 1) return;
+
+    const touch = e.changedTouches[0];
+    const pageX = touch.pageX;
+    const pageY = touch.pageY;
+
+    const query = wx.createSelectorQuery();
+    query
+      .select(".map-touch-view")
+      .boundingClientRect((rect) => {
+        if (!rect) return;
+
+        const relX = (pageX - rect.left) / rect.width;
+        const relY = (pageY - rect.top) / rect.height;
+
+        if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
+          const newPoint = {
+            x: relX,
+            y: relY,
+            side: this.data.formData.side || "atk",
+          };
+
+          this.setData({
+            "formData.markPoints": [...this.data.formData.markPoints, newPoint],
+          });
+
+          // wx.vibrateShort({ type: "light" });
+        }
+      })
+      .exec();
+  },
+
+  handleMapTouchEnd(e) {
+    if (!this.data.isEditing) return;
+    if (e.changedTouches.length !== 1) return;
+
+    const touch = e.changedTouches[0];
+    const { pageX, pageY } = touch;
+
+    const query = wx.createSelectorQuery();
+    // 关键：同时查询 view(当前缩放状态) 和 area(固定容器)
+    query.select(".map-touch-view").boundingClientRect();
+    query.select(".map-area").boundingClientRect();
+
+    query.exec((res) => {
+      const viewRect = res[0];
+      const areaRect = res[1];
+      if (!viewRect || !areaRect) return;
+
+      // 1. 计算点击位置相对于【当前缩放后的图片】的比例
+      let relX = (pageX - viewRect.left) / viewRect.width;
+      let relY = (pageY - viewRect.top) / viewRect.height;
+
+      // 2. 边界判定：必须在图片范围内
+      // 这里的 0 到 1 是相对于图片内容的逻辑坐标
+      if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
+        // 3. 核心限制：必须在【容器区域】内部点击才生效
+        // 防止用户点到容器外（如果图片溢出的话）
+        const isInArea =
+          pageX >= areaRect.left &&
+          pageX <= areaRect.right &&
+          pageY >= areaRect.top &&
+          pageY <= areaRect.bottom;
+
+        if (isInArea) {
+          const newPoint = {
+            x: relX,
+            y: relY,
+            side: this.data.formData.side || "atk",
+          };
+
+          this.setData({
+            "formData.markPoints": [...this.data.formData.markPoints, newPoint],
+          });
+
+          // wx.vibrateShort({ type: "light" });
+        }
+      }
+    });
+  },
+
+  // 刷新画布（底图 + 点）
+  refreshCanvas() {
+    // 简单的做法是重新调用 drawMapLayer，里面会顺便调 drawPointer
+    this.drawMapLayer();
+  },
+
+  // 绘制那个“战术点”
+  drawPointer() {
+    const { x, y } = this.data.formData.markPos;
+    const realX = x * this.canvasSize.w;
+    const realY = y * this.canvasSize.h;
+
+    // 阵营颜色
+    const color = this.data.formData.side === "def" ? "#00eeff" : "#ff4655";
+
+    this.ctx.save();
+    // 1. 画外圈光晕
+    this.ctx.beginPath();
+    this.ctx.arc(realX, realY, 12, 0, Math.PI * 2);
+    this.ctx.fillStyle = color + "33"; // 20% 透明度
+    this.ctx.fill();
+
+    // 2. 画实体圆点
+    this.ctx.beginPath();
+    this.ctx.arc(realX, realY, 6, 0, Math.PI * 2);
+    this.ctx.fillStyle = color;
+    this.ctx.strokeStyle = "#fff";
+    this.ctx.lineWidth = 2;
+    this.ctx.fill();
+    this.ctx.stroke();
+    this.ctx.restore();
   },
 
   // 图片上传
   uploadImg(e) {
     const { type } = e.currentTarget.dataset;
-    // 如果已有图片，点击时优先预览而非重新上传（更符合微信逻辑）
-    if (type === "standImg" && this.data.formData.standImg) {
-      this.previewStandImg(e);
-      return;
-    }
+    const currentList = this.data.formData[type];
 
-    // 调用微信选择图片API
     wx.chooseMedia({
-      count: 1, // 仅上传1张
+      count: 5 - currentList.length,
       mediaType: ["image"],
-      sourceType: ["album", "camera"],
       success: (res) => {
-        const tempFilePath = res.tempFiles[0].tempFilePath;
-        // 更新formData中的站位图片
+        const newItems = res.tempFiles.map((file) => ({
+          url: file.tempFilePath,
+          memo: "",
+        }));
         this.setData({
-          [`formData.${type}`]: tempFilePath,
+          [`formData.${type}`]: [...currentList, ...newItems],
         });
-        wx.showToast({
-          title: "图片上传成功",
-          icon: "success",
-        });
-      },
-      fail: (err) => {
-        wx.showToast({
-          title: "图片选择失败",
-          icon: "none",
-        });
-        console.error("选择图片失败：", err);
       },
     });
   },
@@ -140,128 +415,140 @@ Page({
       },
     });
   },
+  onMemoInput(e) {
+    const { type, index } = e.currentTarget.dataset;
+    const value = e.detail.value;
+    const list = this.data.formData[type];
+    list[index].memo = value;
+    this.setData({ [`formData.${type}`]: list });
+  },
 
-  /**
-   * 保存图片到相册（扩展功能）
-   */
-  saveImgToAlbum(imgUrl) {
-    wx.saveImageToPhotosAlbum({
-      filePath: imgUrl,
-      success: () => {
-        wx.showToast({
-          title: "保存到相册成功",
-          icon: "success",
-        });
-      },
-      fail: (err) => {
-        wx.showToast({
-          title: "保存失败，请开启相册权限",
-          icon: "none",
-        });
-        console.error("保存图片失败：", err);
-      },
+  // 删除图片逻辑
+  deleteImg(e) {
+    const { type, index } = e.currentTarget.dataset;
+    const list = this.data.formData[type];
+    list.splice(index, 1);
+    this.setData({ [`formData.${type}`]: list });
+  },
+
+  // 预览图片逻辑
+  previewImg(e) {
+    const { src, list } = e.currentTarget.dataset;
+    wx.previewImage({
+      current: src,
+      urls: list.map((item) => item.url), // 提取出 url 字符串数组
     });
   },
 
-  submitForm() {
-    const { formData } = this.data;
-    if (!formData.title || !formData.standImg) {
-      wx.showToast({ title: "请填写完整信息", icon: "none" });
-      return;
-    }
-
-    wx.showLoading({ title: "发布中..." });
-
-    // 模拟存入数据库逻辑
-    setTimeout(() => {
-      wx.hideLoading();
-      wx.showToast({ title: "发布成功" });
-      wx.navigateBack();
-    }, 1500);
-  },
-
   async submitForm() {
-    const { formData, mapName, heroName } = this.data;
+    const { formData, mapName } = this.data;
 
-    // 1. 基础校验 (瓦罗兰特点位没标题和图是没灵魂的)
+    // 1. 基础校验
     if (!formData.title)
       return wx.showToast({ title: "请输入方案标题", icon: "none" });
     if (!formData.mapId)
       return wx.showToast({ title: "请选择地图", icon: "none" });
-    if (!formData.standImg)
-      return wx.showToast({ title: "请上传站位图", icon: "none" });
+    if (formData.standImg.length === 0)
+      // return wx.showToast({ title: "请上传至少一张站位图", icon: "none" });
 
-    wx.showLoading({ title: "正在同步星际...", mask: true });
+      wx.showLoading({ title: "数据同步中...", mask: true });
 
     try {
-      // 2. 处理图片上传 (并行上传 3 张图)
-      // 过滤出存在的本地路径进行上传
-      const imgTypes = ["standImg", "aimImg", "resultImg"];
-      const uploadTasks = imgTypes.map((type) => {
-        if (
-          (formData[type] && formData[type].startsWith("http://tmp")) ||
-          formData[type].startsWith("wxfile://")
-        ) {
-          return this.uploadFilePromise(
-            `valorant/points/${Date.now()}_${type}.jpg`,
-            formData[type],
-          );
-        }
-        return Promise.resolve(formData[type]); // 如果已经是云路径或空，直接返回
-      });
+      const imgFields = ["standImg", "aimImg", "enemyImg", "resultImg"];
+      const finalFormData = { ...formData };
 
-      const [standUrl, aimUrl, resultUrl] = await Promise.all(uploadTasks);
+      for (const field of imgFields) {
+        const imgList = formData[field];
+        if (!imgList || imgList.length === 0) continue;
 
-      // 3. 构造最终存入数据库的对象
-      const finalData = {
-        ...formData,
-        standImg: standUrl,
-        aimImg: aimUrl,
-        resultImg: resultUrl,
-        mapName: mapName, // 冗余存储名称，方便展示无需联表
-        heroName: heroName,
+        const uploadPromises = imgList.map(async (item, index) => {
+          if (
+            item.url.startsWith("http://tmp") ||
+            item.url.startsWith("wxfile://")
+          ) {
+            const cloudPath = `valorant/points/${Date.now()}_${field}_${index}.jpg`;
+            const cloudUrl = await this.uploadFilePromise(cloudPath, item.url);
+            return { ...item, url: cloudUrl };
+          }
+          return item;
+        });
+        finalFormData[field] = await Promise.all(uploadPromises);
+      }
+
+      const submitData = {
+        ...finalFormData,
+        mapName: mapName,
         createTime: new Date(),
-        status: 1, // 1: 正常, 0: 隐藏
+        updateTime: new Date(),
+        status: 1,
+        _keywords: [formData.title, mapName].join(","),
       };
 
-      // 4. 调用云数据库 (以微信云开发为例)
       const db = wx.cloud.database();
-      await db.collection("points").add({
-        data: finalData,
-      });
+      await db.collection("points").add({ data: submitData });
 
       wx.hideLoading();
-      wx.showToast({
+
+      // --- 核心优化部分：交互弹窗 ---
+      wx.showModal({
         title: "部署成功",
-        icon: "success",
-        duration: 2000,
-        success: () => {
+        content: "该战术方案已同步至云端数据库。",
+        cancelText: "返回列表",
+        cancelColor: "#ece8e1",
+        confirmText: "继续添加",
+        confirmColor: "#ff4655",
+        success: (res) => {
+          // 无论选哪个，都先通知列表页刷新
           const eventChannel = this.getOpenerEventChannel();
           if (eventChannel && eventChannel.emit) {
             eventChannel.emit("refreshList");
           }
-          setTimeout(() => wx.navigateBack(), 2000);
+
+          if (res.confirm) {
+            // 路径 A：清空当前页面表单，准备下一次添加
+            this.resetForm();
+            // 滚动回顶部
+            wx.pageScrollTo({ scrollTop: 0, duration: 300 });
+          } else if (res.cancel) {
+            // 路径 B：返回上级列表
+            wx.navigateBack();
+          }
         },
       });
     } catch (err) {
-      console.error("上传失败：", err);
+      console.error("同步失败：", err);
       wx.hideLoading();
       wx.showModal({
-        title: "同步失败",
-        content: "辐射能干扰，请检查网络后重试",
+        title: "部署失败",
+        content: "网络环境不稳定，请检查重试",
         showCancel: false,
       });
     }
   },
 
   /**
-   * 封装上传 Promise (适配云开发)
+   * 配合方法：重置表单数据
    */
+  resetForm() {
+    // 建议保留 mapId, mapName, side 等高频复用项，只清空标题和图片，方便连续上传同一张图的点位
+    this.setData({
+      "formData.title": "",
+      "formData.markPoints": [],
+      "formData.standImg": [],
+      "formData.aimImg": [],
+      "formData.enemyImg": [],
+      "formData.resultImg": [],
+      "formData.desc": "",
+    });
+    wx.showToast({ title: "表单已重置", icon: "success" });
+  },
+
+  // 辅助方法：封装上传 Promise
   uploadFilePromise(cloudPath, filePath) {
     return new Promise((resolve, reject) => {
       wx.cloud.uploadFile({
-        cloudPath,
-        filePath,
+        cloudPath: cloudPath,
+        filePath: filePath,
         success: (res) => resolve(res.fileID),
         fail: (err) => reject(err),
       });

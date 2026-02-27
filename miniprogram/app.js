@@ -8,6 +8,12 @@ App({
       //   如不填则使用默认环境（第一个创建的环境）
       env: "cloud1-5gqun0xd80e8dd85",
     };
+    const localUser = wx.getStorageSync("userInfo");
+    if (localUser) {
+      this.globalData.isLogin = true;
+      this.globalData.userInfo = localUser;
+    }
+
     if (!wx.cloud) {
       console.error("请使用 2.2.3 或以上的基础库以使用云能力");
     } else {
@@ -16,5 +22,18 @@ App({
         traceUser: true,
       });
     }
+
+    wx.cloud
+      .callFunction({
+        name: "manageUser",
+        data: { action: "check" },
+      })
+      .then((res) => {
+        if (res.result && res.result.registered) {
+          this.globalData.isLogin = true;
+          this.globalData.userInfo = res.result.data;
+          wx.setStorageSync("userInfo", res.result.data);
+        }
+      });
   },
 });

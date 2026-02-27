@@ -1,183 +1,382 @@
-/* --- 基础页面重置 --- */
-page {
-  background-color: #0f1923;
-  color: #ece8e1;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
-}
-
+/* ==========================================
+   战术上传页面 - 核心布局
+   ========================================== */
 .add-container {
-  min-height: 100vh;
   background-color: #0f1923;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #ece8e1;
 }
 
-/* --- Header 样式 --- */
+/* 顶部标题区 */
 .page-header {
-  padding: 60rpx 40rpx 40rpx;
+  padding: 60rpx 40rpx 20rpx;
+  background: linear-gradient(to bottom, rgba(255, 70, 85, 0.1), transparent);
 }
 
 .title {
-  font-size: 24rpx;
+  font-size: 44rpx;
   font-weight: 900;
-  color: #ff4655;
   letter-spacing: 4rpx;
-  display: block;
-  margin-bottom: 8rpx;
+  color: #ff4655;
 }
 
-.subtitle {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #ece8e1;
-  display: block;
+/* 滚动区域：关键是 flex: 1 和 height: 1px */
+.form-scroll {
+  flex: 1;
+  height: 1px;
 }
 
-/* --- 表单公共样式 --- */
+.form-content {
+  padding: 0 40rpx 60rpx;
+}
+
 .form-group {
-  padding: 0 40rpx 40rpx;
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 40rpx;
 }
 
 .label {
-  font-size: 20rpx;
-  color: #768079;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #ece8e1;
+  margin-bottom: 15rpx;
+  display: block;
+  border-left: 6rpx solid #ff4655;
+  padding-left: 15rpx;
+  line-height: 1;
+}
+
+/* ==========================================
+   输入项与对齐补丁
+   ========================================== */
+
+/* 标题输入框强化：防止遮挡 & 视觉对齐 */
+.custom-input,
+.custom-select,
+.align-height {
+  height: 90rpx; /* 统一高度 */
+  background: rgba(236, 232, 225, 0.05);
+  border: 1rpx solid rgba(236, 232, 225, 0.2);
+  color: #ece8e1;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.title-input {
+  width: 100%;
+  padding: 0 24rpx;
+  border-bottom: 4rpx solid #ff4655; /* 强调输入项 */
+}
+
+/* 栅格化：一行两列 */
+.form-row-split {
+  display: flex;
+  gap: 20rpx;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* 阵营选择 */
+.side-selector {
+  display: flex;
+  gap: 10rpx;
+  background: transparent;
+  border: none;
+}
+
+.side-btn {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1f2326;
+  border: 1rpx solid rgba(236, 232, 225, 0.2);
+  transition: all 0.2s;
+}
+
+.side-text {
+  font-size: 24rpx;
   font-weight: 900;
-  margin-bottom: 20rpx;
-  text-transform: uppercase;
+  color: rgba(236, 232, 225, 0.3);
+}
+
+.side-btn.active.atk {
+  border-color: #ff4655;
+  background: rgba(255, 70, 85, 0.1);
+}
+.side-btn.active.atk .side-text {
+  color: #ff4655;
+}
+
+.side-btn.active.def {
+  border-color: #00eeff;
+  background: rgba(0, 238, 255, 0.1);
+}
+.side-btn.active.def .side-text {
+  color: #00eeff;
+}
+
+/* 地图选择 */
+.picker-inner-text {
+  width: 100%;
+  line-height: 88rpx;
+  padding: 0 20rpx;
+  font-size: 26rpx;
+}
+
+/* ==========================================
+   地图标点系统
+   ========================================== */
+.map-mark-container {
+  width: 100%;
+  height: 500rpx;
+  background-color: #05090d;
+  border: 1rpx solid rgba(236, 232, 225, 0.15);
+  margin-bottom: 40rpx;
+  position: relative;
+  overflow: hidden; /* 强制截断，不让放大后的地图流出容器 */
+}
+
+.map-mark-container.editing-active {
+  border-color: #ff4655;
+}
+
+.map-controls {
+  position: absolute;
+  top: 15rpx;
+  right: 15rpx;
+  z-index: 100;
+  display: flex;
+  gap: 12rpx;
+}
+
+.control-btn {
+  background: rgba(15, 25, 35, 0.9);
+  border: 1rpx solid rgba(236, 232, 225, 0.3);
+  padding: 8rpx 18rpx;
+  font-size: 18rpx;
+  color: #ece8e1;
+  font-weight: 900;
+  clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
+
+.control-btn.active {
+  background: #ff4655;
+  border-color: #ff4655;
+}
+
+.map-area,
+.map-touch-view {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transform-origin: center center;
+}
+.map-base-img {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: block;
+}
+
+/* 点位动画 */
+.map-pointer {
+  position: absolute;
+  width: 40rpx;
+  height: 40rpx;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+}
+.pointer-core {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  margin: 14rpx auto;
+  border: 4rpx solid #fff;
+}
+.atk .pointer-core {
+  background: #ff4655;
+  box-shadow: 0 0 15rpx #ff4655;
+}
+.def .pointer-core {
+  background: #00eeff;
+  box-shadow: 0 0 15rpx #00eeff;
+}
+
+/* ==========================================
+   纵向列表：图片与备注
+   ========================================== */
+.vertical-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+.tactical-item {
+  background: rgba(236, 232, 225, 0.02);
+  border-left: 2rpx solid rgba(255, 70, 85, 0.2);
+  padding: 15rpx;
+}
+
+.fixed-size {
+  width: 100%;
+  height: 400rpx;
+  background: #1f2326;
+  position: relative;
+}
+
+.fixed-size image {
+  width: 100%;
+  height: 100%;
+}
+
+.item-del-btn {
+  position: absolute;
+  top: 15rpx;
+  right: 15rpx;
+  background: #ff4655;
+  color: #fff;
+  font-size: 18rpx;
+  padding: 6rpx 18rpx;
+  font-weight: 900;
+  clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
+
+.item-textarea {
+  width: 100%;
+  min-height: 80rpx;
+  background: rgba(0, 0, 0, 0.2);
+  color: #ece8e1;
+  font-size: 26rpx;
+  padding: 15rpx;
+  box-sizing: border-box;
+}
+
+/* 空状态占位与追加按钮 */
+.placeholder-border {
+  border: 2rpx dashed rgba(236, 232, 225, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plus-icon {
+  font-size: 60rpx;
+  color: rgba(236, 232, 225, 0.2);
+}
+
+.add-next-bar {
+  width: 100%;
+  height: 80rpx;
+  background: rgba(236, 232, 225, 0.05);
+  border: 1rpx solid rgba(236, 232, 225, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  font-weight: 900;
+  color: #ff4655;
   letter-spacing: 2rpx;
 }
 
-/* --- 核心：统一 Input 和 Select 样式 --- */
-/* 我们将所有输入类容器的高度锁定在 100rpx，
-   并统一背景、边框、字体、颜色 
-*/
-.custom-input,
-.custom-select,
-.readonly-value {
-  width: 100%;
-  height: 100rpx;
-  background: #161f28;
-  border: 1rpx solid #313b44 !important;
-  color: #ece8e1;
-  padding: 0 30rpx;
-  box-sizing: border-box;
-  font-size: 28rpx;
-  border-radius: 4rpx;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-/* 特殊处理文本域，高度根据内容定但风格保持一致 */
 .custom-textarea {
   width: 100%;
   height: 200rpx;
-  background: #161f28;
-  border: 1rpx solid #313b44;
+  background: rgba(236, 232, 225, 0.05);
+  border: 1rpx solid rgba(236, 232, 225, 0.2);
+  padding: 20rpx;
   color: #ece8e1;
-  padding: 24rpx 30rpx;
-  box-sizing: border-box;
   font-size: 28rpx;
-  border-radius: 4rpx;
+  box-sizing: border-box;
 }
 
-/* --- Placeholder 颜色对齐 --- */
-/* 1. 针对 input/textarea 的系统占位符类 */
-.ph-style {
-  color: #4b5563 !important;
+/* ==========================================
+   底部双按钮栏
+   ========================================== */
+.submit-bar {
+  padding: 30rpx 40rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  background: #0f1923;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 20rpx;
 }
 
-/* 2. 针对我们模拟的选择框(View)的占位文字颜色 */
-.custom-select.placeholder .picker-inner-text {
-  color: #4b5563;
-}
-
-/* --- 选择器内部结构 --- */
-.custom-select picker {
-  width: 100%;
-  height: 100%;
-}
-
-.picker-inner-text {
-  width: 100%;
+.btn-secondary {
+  width: 180rpx;
   height: 100rpx;
-  line-height: 100rpx; /* 确保文字垂直居中 */
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 下拉小三角 */
-.arrow-icon {
-  position: absolute;
-  right: 30rpx;
-  top: 50%;
-  transform: translateY(-50%); /* 绝对居中 */
-  width: 0;
-  height: 0;
-  border-left: 10rpx solid transparent;
-  border-right: 10rpx solid transparent;
-  border-top: 12rpx solid #313b44;
-  pointer-events: none;
-}
-
-/* --- 图片上传区域 --- */
-.upload-card-full {
-  width: 100%;
-  height: 400rpx;
-  background: #161f28;
-  border: 2rpx dashed #313b44;
-  border-radius: 4rpx;
-  position: relative;
-  overflow: hidden;
+  border: 2rpx solid #ff4655;
+  color: #ff4655;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.upload-card-full image {
-  width: 100%;
-  height: 100%;
-}
-
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #4b5563;
-}
-
-.plus {
-  font-size: 60rpx;
-  margin-bottom: 10rpx;
-}
-
-/* --- 底部提交按钮 --- */
-.submit-bar {
-  padding: 40rpx;
-  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, #0f1923 80%, transparent);
+  font-weight: 900;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
 }
 
 .btn-primary {
-  background: #ff4655;
+  flex: 1;
   height: 100rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+  background: #ff4655;
+  clip-path: polygon(5% 0, 100% 0, 100% 75%, 95% 100%, 0 100%, 0 25%);
 }
 
 .btn-inner {
-  color: white;
+  line-height: 100rpx;
+  text-align: center;
+  color: #fff;
   font-weight: 900;
-  font-size: 30rpx;
-  letter-spacing: 6rpx;
+  letter-spacing: 8rpx;
 }
 
 .footer-spacer {
-  height: 100rpx;
+  height: 80rpx;
+}
+.ph-style {
+  color: rgba(236, 232, 225, 0.2);
+}
+
+/* 1. 统一容器盒子模型 */
+.custom-input,
+.custom-textarea {
+  width: 100%;
+  box-sizing: border-box; /* 必须：包含边框和内边距 */
+  background: rgba(236, 232, 225, 0.05);
+  border: 1rpx solid rgba(236, 232, 225, 0.2);
+  color: #ece8e1;
+  font-size: 28rpx;
+  padding: 24rpx !important; /* 强制统一内边距 */
+  margin: 0; /* 清除可能的外部间距 */
+  display: block; /* 确保块级显示 */
+}
+
+/* 2. 解决标题 Input 的高度 */
+.title-input {
+  height: 90rpx;
+  min-height: 90rpx;
+  border-bottom: 4rpx solid #ff4655; /* 瓦罗兰特红底边 */
+}
+
+/* 3. 解决 Textarea 的原生偏移 */
+.custom-textarea {
+  height: 220rpx;
+  /* 微信原生 textarea 默认会有一些内边距，这里尝试抵消 */
+  padding-left: 20rpx !important;
+  padding-right: 20rpx !important;
+}
+
+/* 4. 强制 Placeholder 颜色和字体一致 */
+.ph-style {
+  color: rgba(236, 232, 225, 0.2) !important;
+  font-size: 28rpx !important; /* 确保和输入文字大小一致 */
+  font-family: inherit;
+}
+
+/* 针对部分机型 textarea 的 placeholder 偏移补丁 */
+textarea.custom-textarea {
+  margin-left: 0;
 }

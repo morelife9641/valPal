@@ -1,0 +1,194 @@
+/* 页面容器 */
+.pro-page {
+  min-height: 100vh;
+  background-color: #0f1923;
+  padding: 30rpx;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.grid-bg {
+  position: fixed;
+  top: -100%;
+  left: -100%;
+  right: -100%;
+  bottom: -100%;
+  z-index: 0;
+  pointer-events: none;
+  transform: rotate(45deg);
+
+  /* 1. 基础灰色底线：静止不动 */
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2rpx, transparent 0),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.05) 2rpx, transparent 0);
+  background-size: 400rpx 400rpx;
+}
+
+.grid-bg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* 流光层：保持与底图完全一致的 2rpx 线条 */
+  background-image:
+    linear-gradient(90deg, #ff4655 2rpx, transparent 0),
+    linear-gradient(0deg, #ff4655 2rpx, transparent 0);
+
+  background-size: 400rpx 400rpx;
+
+  /* 优化遮罩：使用重复遮罩实现断续流光，确保遮罩也能无缝循环 */
+  -webkit-mask-image: radial-gradient(
+    circle at center,
+    white 20%,
+    transparent 60%
+  );
+  /* 遮罩尺寸也必须是 400rpx 的倍数（这里设为 800rpx，即每两个格子出现一个光点） */
+  -webkit-mask-size: 800rpx 800rpx;
+  -webkit-mask-repeat: repeat;
+
+  /* 使用 linear 匀速动画，这是无缝循环的前提 */
+  animation: strokeFlow 10s linear infinite;
+}
+
+@keyframes strokeFlow {
+  0% {
+    /* 起始位置 */
+    background-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  100% {
+    /* 重点：位移距离必须是 size 的整数倍 */
+    /* background-size 是 400，所以位移 400 */
+    /* mask-size 是 800，所以位移 800 */
+    background-position: 400rpx 400rpx;
+    -webkit-mask-position: 800rpx 800rpx;
+  }
+}
+
+/* 确保内容在背景之上 */
+.team-group {
+  position: relative;
+  z-index: 1;
+}
+
+/* 战队头部 */
+.team-group {
+  margin-bottom: 60rpx;
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 2rpx solid #383e44;
+  padding-bottom: 15rpx;
+  margin-bottom: 30rpx;
+}
+
+.team-prefix {
+  display: block;
+  font-size: 18rpx;
+  color: #ff4655;
+  font-weight: 900;
+  margin-bottom: 4rpx;
+}
+
+.team-name {
+  font-size: 44rpx;
+  font-weight: 900;
+  color: #ece8e1;
+  text-transform: uppercase;
+}
+
+.team-count {
+  font-size: 20rpx;
+  color: #8b9196;
+  font-family: monospace;
+}
+
+/* 选手卡片 */
+.pro-card {
+  height: 160rpx;
+  background: #1f2326;
+  margin-bottom: 20rpx;
+  display: flex;
+  border: 1rpx solid #383e44;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-side {
+  width: 160rpx;
+  height: 160rpx;
+  position: relative;
+  background: #111417;
+}
+
+.pro-img {
+  width: 100%;
+  height: 100%;
+}
+
+.role-tag {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: #ff4655;
+  color: #fff;
+  font-size: 14rpx;
+  padding: 2rpx 8rpx;
+  font-weight: bold;
+}
+
+.info-side {
+  flex: 1;
+  padding: 20rpx 25rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.pro-name {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #ece8e1;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 8rpx;
+  height: 8rpx;
+  background: #00b8a1;
+  margin-left: 15rpx;
+  border-radius: 50%;
+  box-shadow: 0 0 8rpx #00b8a1;
+}
+
+.gear-preview {
+  font-size: 18rpx;
+  color: #8b9196;
+  width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 装饰编号 */
+.card-deco {
+  position: absolute;
+  top: 10rpx;
+  right: 15rpx;
+  font-size: 24rpx;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.05);
+  font-family: monospace;
+}

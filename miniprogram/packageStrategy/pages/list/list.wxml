@@ -1,51 +1,69 @@
 <view class="detail-container">
-    <view class="page-background">
-        <view class="empty-bg-portrait">
-            <image src="{{heroInfo.bustPortrait}}" mode="aspectFill" />
-            <view class="portrait-mask"></view>
+    <view class="filter-sticky-bar">
+        <view class="filter-row">
+            <picker class="filter-item flex-2" bindchange="onMapFilterChange" value="{{mapIndex}}" range="{{maps}}" range-key="displayName">
+                <view class="filter-inner">
+                    <text class="label">地图</text>
+                    <text class="value">{{maps[mapIndex].displayName || '全部'}}</text>
+                    <view class="arrow-down"></view>
+                </view>
+            </picker>
+            <view class="filter-item flex-1" bindtap="toggleSideFilter">
+                <view class="filter-inner">
+                    <text class="label">阵营</text>
+                    <text class="value {{sideFilter}}">
+                        {{sideFilter === 'all' ? '全部' : (sideFilter === 'atk' ? '进攻' : '防守')}}
+                    </text>
+                </view>
+            </view>
         </view>
     </view>
-    <view class="content-wrapper">
-        <view class="list-header">
-            <view class="header-left">
-                <text class="hero-name-en">{{heroInfo.heroNameEn}}</text>
-                <text class="subtitle">{{heroInfo.heroName}} · 战术方案库</text>
-            </view>
-            <view class="header-action" bindtap="goToAddPoint">
-                <view class="btn-skew-bg"></view>
-                <view class="btn-content">
-                    <text class="txt">上传方案</text>
-                </view>
-            </view>
-        </view>
-        <scroll-view scroll-y class="strategy-list" wx:if="{{pointList.length > 0}}">
-            <view class="strategy-card" wx:for="{{pointList}}" wx:key="_id" bindtap="goToDetail" data-id="{{item._id}}">
-                <view class="card-visual">
-                    <image class="preview-img" src="{{item.resultImg}}" mode="aspectFill" />
-                    <view class="visual-overlay"></view>
-                    <view class="type-badge">{{item.mapName}}</view>
-                </view>
-                <view class="card-content">
-                    <view class="top-info">
-                        <text class="strategy-title">{{item.title}}</text>
-                        <text class="strategy-subtitle">TACTICAL RECORD</text>
+    <view class="content-scroll-box">
+        <view class="strategy-list">
+            <view class="strategy-card" wx:for="{{filteredList}}" wx:key="_id" bindtap="goToDetail" data-id="{{item._id}}">
+                <view class="card-left">
+                    <image src="{{item.mapThumb}}" mode="aspectFill" class="map-preview-img" />
+                    <view class="side-tag-label {{item.side}}">
+                        <text>{{item.side === 'atk' ? 'ATTACK' : 'DEFEND'}}</text>
                     </view>
-                    <view class="bottom-info">
-                        <view class="author-box">
-                            <view class="status-dot"></view>
-                            <text>AUTHORIZED BY SYSTEM</text>
+                    <view class="side-indicator {{item.side}}"></view>
+                </view>
+                <view class="card-right">
+                    <view class="card-header">
+                        <view class="title-row">
+                            <text class="card-title">{{item.title}}</text>
                         </view>
-                        <view class="action-arrow"></view>
+                        <text class="card-map-name">{{item.mapName}}</text>
+                    </view>
+                    <view class="card-body">
+                        <view class="stat-group">
+                            <view class="stat-item">
+                                <text class="num">{{item.markPoints.length || 0}}</text>
+                                <text class="lab">MARKS</text>
+                            </view>
+                            <view class="stat-item">
+                                <text class="num">
+                                    {{item.standImg.length + (item.enemyImg ? item.enemyImg.length : 0)}}
+                                </text>
+                                <text class="lab">RECORDS</text>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="card-footer">
+                        <text class="date">{{item.dateDisplay}}</text>
+                        <view class="view-action">
+                            <text>DETAILS</text>
+                            <view class="arrow-mini"></view>
+                        </view>
                     </view>
                 </view>
-                <view class="card-deco"></view>
             </view>
-            <view class="tabbar-placeholder"></view>
-        </scroll-view>
-        <view class="empty-content-box" wx:else>
-            <text class="err-title">NO STRATEGY</text>
-            <text class="err-hint">当前地图暂无该特工的战术记录</text>
-            <view class="empty-btn" bindtap="goToAddPoint">立即去贡献</view>
         </view>
+        <view class="empty-hint" wx:if="{{filteredList.length === 0}}">
+            <text>未发现相关战术部署</text>
+        </view>
+    </view>
+    <view class="fab-btn" bindtap="goToAdd">
+        <text>+</text>
     </view>
 </view>

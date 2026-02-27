@@ -1,8 +1,11 @@
 <view class="tab-bar" wx:if="{{!isHidden}}">
-    <view class="tab-bar-border"></view>
-    <view wx:for="{{list}}" wx:key="index" class="tab-bar-item" data-path="{{item.pagePath}}" data-index="{{index}}" bindtap="switchTab">
-        <image class="tab-icon" src="{{selected === index ? item.selectedIconPath : item.iconPath}}"></image>
-        <view class="tab-text {{selected === index ? 'active' : ''}}">{{item.text}}</view>
+    <view wx:for="{{list}}" wx:key="index" class="tab-bar-item {{selected === index ? 'active' : ''}}" data-path="{{item.pagePath}}" data-index="{{index}}" bindtap="switchTab">
         <view class="active-line" wx:if="{{selected === index}}"></view>
+        <view class="active-glow" wx:if="{{selected === index}}"></view>
+        <image class="tab-icon" src="{{selected === index ? item.selectedIconPath : item.iconPath}}"></image>
+        <view class="tab-text">
+            {{item.text}}
+            <!-- <text class="deco-dots" wx:if="{{selected === index}}">//</text> -->
+        </view>
     </view>
 </view>

@@ -4,11 +4,10 @@
     "pages/news/index",
     "pages/skins/index",
     "pages/tools/index",
-    "pages/index/detail",
-    "pages/pro-settings/index",
     "components/card-selector/card-selector",
     "components/custom-loading/index",
-    "components/rank-picker/rank-picker"
+    "components/rank-picker/rank-picker",
+    "components/login-popup/login-popup"
   ],
   "subpackages": [
     {
@@ -23,18 +22,23 @@
     {
       "root": "packageWallpaper",
       "name": "wallpaperEditor",
+      "pages": ["pages/wallpaper/wallpaper", "pages/preview/preview"]
+    },
+    {
+      "root": "packageTools",
+      "name": "toolsWiki",
       "pages": [
-        "pages/wallpaper/wallpaper",
-        "pages/preview/preview"
+        "pages/crosshair/list",
+        "pages/pro-settings/list",
+        "pages/pro-settings/detail",
+        "pages/skins/list"
       ]
     }
   ],
   "preloadRule": {
     "pages/strategy/index": {
       "network": "all",
-      "packages": [
-        "packageStrategy"
-      ]
+      "packages": ["packageStrategy"]
     }
   },
   "window": {
@@ -70,7 +74,7 @@
       },
       {
         "pagePath": "pages/tools/index",
-        "text": "工具",
+        "text": "我的",
         "iconPath": "assets/pinpoint.png",
         "selectedIconPath": "assets/pinpoint_active.png"
       }

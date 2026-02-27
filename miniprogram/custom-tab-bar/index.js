@@ -27,7 +27,7 @@ Component({
       },
       {
         pagePath: "pages/tools/index",
-        text: "工具",
+        text: "我的",
         iconPath: "../assets/pinpoint.png",
         selectedIconPath: "../assets/pinpoint_active.png",
       },

@@ -1,71 +1,106 @@
 <view class="add-container">
     <view class="page-header">
-        <text class="title">UPLOAD STRATEGY</text>
-        <text class="subtitle">上传战术方案</text>
+        <text class="title">上传通用点位</text>
     </view>
-    <scroll-view scroll-y class="form-scroll" style="height: calc(100vh - 280rpx);">
+    <scroll-view scroll-y class="form-scroll" scroll-with-animation="{{true}}">
         <view class="form-content">
             <view class="form-group">
-                <text class="label">方案标题 / TITLE</text>
-                <input class="custom-input" placeholder="描述该方案的核心逻辑..." placeholder-class="ph-style" bindinput="onInputChange" data-field="title" />
+                <text class="label">方案标题 / STRATEGY TITLE</text>
+                <input class="custom-input title-input" placeholder="描述该方案的核心逻辑..." placeholder-class="ph-style" bindinput="onInputChange" data-field="title" value="{{formData.title}}" />
             </view>
-            <view class="form-group">
-                <text class="label">选择地图 / MAP</text>
-                <view class="custom-select {{mapName ? '' : 'placeholder'}}">
-                    <picker bindchange="onMapChange" value="{{mapIndex}}" range="{{maps}}" range-key="displayName" style="width: 100%;">
-                        <text class="picker-inner-text">{{mapName || '请选择地图'}}</text>
-                    </picker>
-                    <view class="arrow-icon"></view>
+            <view class="form-row-split">
+                <view class="form-group flex-1">
+                    <text class="label">阵营 / SIDE</text>
+                    <view class="side-selector align-height">
+                        <view class="side-btn atk {{formData.side === 'atk' ? 'active' : ''}}" bindtap="onSideSelect" data-side="atk">
+                            <text class="side-text">进攻</text>
+                        </view>
+                        <view class="side-btn def {{formData.side === 'def' ? 'active' : ''}}" bindtap="onSideSelect" data-side="def">
+                            <text class="side-text">防守</text>
+                        </view>
+                    </view>
+                </view>
+                <view class="form-group flex-1">
+                    <text class="label">地图 / MAP</text>
+                    <view class="custom-select align-height {{mapName ? '' : 'placeholder'}}">
+                        <picker bindchange="onMapChange" value="{{mapIndex}}" range="{{maps}}" range-key="displayName" style="width: 100%; height: 100%;">
+                            <view class="picker-inner-text">{{mapName || '选择地图'}}</view>
+                        </picker>
+                    </view>
                 </view>
             </view>
-            <view class="form-group">
-                <text class="label">选择英雄 / AGENT</text>
-                <view class="custom-select {{heroName ? '' : 'placeholder'}}">
-                    <picker bindchange="onAgentChange" value="{{agentIndex}}" range="{{allAgents}}" range-key="displayName" style="width: 100%;">
-                        <text class="picker-inner-text">{{heroName || '请选择特工'}}</text>
-                    </picker>
-                    <view class="arrow-icon"></view>
+            <view class="map-mark-container {{isEditing ? 'editing-active' : ''}}">
+                <view class="map-controls">
+                    <view class="control-btn {{isEditing ? 'active' : ''}}" bindtap="toggleEditMode">
+                        <text>{{isEditing ? '部署中' : '锁定中'}}</text>
+                    </view>
+                    <view class="control-btn" bindtap="clearMarks">清空</view>
                 </view>
+                <movable-area class="map-area">
+                    <movable-view class="map-touch-view" direction="all" scale="{{true}}" scale-min="1" scale-max="3" out-of-bounds="{{false}}" bindtouchend="handleMapTouchEnd">
+                        <image class="map-base-img" src="{{currentMapIcon}}" mode="aspectFit" />
+                        <view class="map-pointer {{item.side}}" wx:for="{{formData.markPoints}}" wx:key="index" style="left: {{item.x * 100}}%; top: {{item.y * 100}}%;" catchtap="removeMark" data-index="{{index}}">
+                            <view class="pointer-core"></view>
+                            <view class="pointer-ripple"></view>
+                        </view>
+                    </movable-view>
+                </movable-area>
             </view>
             <view class="form-group">
-                <text class="label">站位图片 / STANDING POSITION</text>
-                <!-- 仅保留上传点击事件，移除容器的长按事件 -->
-                <view class="upload-card-full" bindtap="uploadImg" data-type="standImg">
-                    <image wx:if="{{formData.standImg}}" src="{{formData.standImg}}" mode="aspectFill" bindtap="previewStandImg" data-src="{{formData.standImg}}" />
-                    <view class="upload-placeholder" wx:else>
-                        <view class="plus">+</view>
-                        <text>点击上传站位参考图</text>
+                <text class="label">站位详情 / POSITION DETAILS</text>
+                <view class="vertical-item-list">
+                    <view class="tactical-item" wx:for="{{formData.standImg}}" wx:key="index">
+                        <view class="item-img-box fixed-size">
+                            <image src="{{item.url}}" mode="aspectFill" bindtap="previewImg" data-list="{{formData.standImg}}" data-src="{{item.url}}" />
+                            <view class="item-del-btn" catchtap="deleteImg" data-type="standImg" data-index="{{index}}">
+                                删除
+                            </view>
+                        </view>
+                        <textarea class="item-textarea" placeholder="描述站位详情..." bindinput="onMemoInput" data-type="standImg" data-index="{{index}}" auto-height />
+                    </view>
+                    <view class="empty-placeholder" wx:if="{{formData.standImg.length === 0}}" bindtap="uploadImg" data-type="standImg">
+                        <view class="fixed-size placeholder-border">
+                            <text class="plus-icon">+</text>
+                        </view>
+                    </view>
+                    <view class="add-next-bar" wx:else bindtap="uploadImg" data-type="standImg">
+                        <text>+ 继续添加站位</text>
                     </view>
                 </view>
             </view>
             <view class="form-group">
-                <text class="label">瞄点细节 / AIMING DETAIL</text>
-                <view class="upload-card-full" bindtap="uploadImg" data-type="aimImg">
-                    <image wx:if="{{formData.aimImg}}" src="{{formData.aimImg}}" mode="aspectFill" />
-                    <view class="upload-placeholder" wx:else>
-                        <view class="plus">+</view>
-                        <text>点击上传准星参考图</text>
+                <text class="label">敌方视角 / ENEMY VIEW</text>
+                <view class="vertical-item-list">
+                    <view class="tactical-item" wx:for="{{formData.enemyImg}}" wx:key="index">
+                        <view class="item-img-box fixed-size">
+                            <image src="{{item.url}}" mode="aspectFill" bindtap="previewImg" data-list="{{formData.enemyImg}}" data-src="{{item.url}}" />
+                            <view class="item-del-btn" catchtap="deleteImg" data-type="enemyImg" data-index="{{index}}">
+                                删除
+                            </view>
+                        </view>
+                        <textarea class="item-textarea" placeholder="描述敌方视角..." bindinput="onMemoInput" data-type="enemyImg" data-index="{{index}}" auto-height />
+                    </view>
+                    <view class="empty-placeholder" wx:if="{{formData.enemyImg.length === 0}}" bindtap="uploadImg" data-type="enemyImg">
+                        <view class="fixed-size placeholder-border">
+                            <text class="plus-icon">+</text>
+                        </view>
+                    </view>
+                    <view class="add-next-bar" wx:else bindtap="uploadImg" data-type="enemyImg">
+                        <text>+ 继续添加视角</text>
                     </view>
                 </view>
             </view>
             <view class="form-group">
-                <text class="label">最终效果 / EFFECT</text>
-                <view class="upload-card-full" bindtap="uploadImg" data-type="resultImg">
-                    <image wx:if="{{formData.resultImg}}" src="{{formData.resultImg}}" mode="aspectFill" />
-                    <view class="upload-placeholder" wx:else>
-                        <view class="plus">+</view>
-                        <text>点击上传投掷效果图</text>
-                    </view>
-                </view>
-            </view>
-            <view class="form-group">
-                <text class="label">文字详解 / DESCRIPTION</text>
-                <textarea class="custom-textarea" placeholder="详细描述站位参考点或投掷技巧..." placeholder-class="ph-style" bindinput="onInputChange" data-field="desc" />
+                <text class="label">详细步骤说明 / DESCRIPTION</text>
+                <textarea class="custom-textarea" placeholder="描述投掷时机..." placeholder-class="ph-style" bindinput="onInputChange" data-field="desc" value="{{formData.desc}}" />
             </view>
             <view class="footer-spacer"></view>
         </view>
     </scroll-view>
     <view class="submit-bar">
+        <view class="btn-secondary" bindtap="navToPreview">
+            <text>预览</text>
+        </view>
         <view class="btn-primary" bindtap="submitForm">
             <view class="btn-inner">提交方案</view>
         </view>

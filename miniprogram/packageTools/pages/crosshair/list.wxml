@@ -1,0 +1,19 @@
+<view class="crosshair-page">
+    <view class="grid-bg"></view>
+    <view class="crosshair-list">
+        <view class="ch-card" wx:for="{{crosshairList}}" wx:key="index">
+            <view class="ch-preview">
+                <image class="ch-img" src="{{item.img_url}}" mode="aspectFit"></image>
+            </view>
+            <view class="ch-info">
+                <view class="ch-name-wrap">
+                    <view class="red-bar"></view>
+                    <text class="ch-name">{{item.name}}</text>
+                </view>
+                <view class="copy-btn" bindtap="copyCode" data-code="{{item.code}}" data-name="{{item.name}}">
+                    复制准星
+                </view>
+            </view>
+        </view>
+    </view>
+</view>

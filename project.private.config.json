@@ -22,11 +22,53 @@
     "miniprogram": {
       "list": [
         {
+          "name": "packageStrategy/pages/detail",
+          "pathName": "packageStrategy/pages/detail/detail",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
+          "name": "packageStrategy/pages/list/list",
+          "pathName": "packageStrategy/pages/list/list",
+          "query": "mapId=d960549e-485c-e861-8d71-aa9d1aed12a2&mapName=%25E9%259C%2593%25E8%2599%25B9%25E7%2594%25BA",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "packageStrategy/pages/add-point/add-point",
+          "pathName": "packageStrategy/pages/add-point/add-point",
+          "query": "mapId=d960549e-485c-e861-8d71-aa9d1aed12a2&mapName=%2525E9%25259C%252593%2525E8%252599%2525B9%2525E7%252594%2525BA&heroId=undefined&heroName=",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "packageStrategy/pages/list/list",
+          "pathName": "packageStrategy/pages/list/list",
+          "query": "mapId=d960549e-485c-e861-8d71-aa9d1aed12a2&mapName=%25E9%259C%2593%25E8%2599%25B9%25E7%2594%25BA",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "packageTools/pages/pro-settings/list",
+          "pathName": "packageTools/pages/pro-settings/list",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/tools/index",
+          "pathName": "pages/tools/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "packageStrategy/pages/add-point/add-point",
           "pathName": "packageStrategy/pages/add-point/add-point",
           "query": "mapId=224b0a95-48b9-f703-1bd8-67aca101a61f&heroId=1dbf2edd-4729-0984-3115-daa5eed44993",
-          "scene": null,
-          "launchMode": "default"
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "packageStrategy/pages/detail/detail",

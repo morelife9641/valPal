@@ -1,0 +1,119 @@
+.crosshair-page {
+  min-height: 100vh;
+  background-color: #0f1923;
+  padding: 10rpx;
+  position: relative;
+}
+
+/* 背景装饰网格 */
+.grid-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1rpx, transparent 1rpx),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1rpx, transparent 1rpx);
+  background-size: 40rpx 40rpx;
+  pointer-events: none;
+}
+
+.crosshair-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: 0 10rpx;
+}
+
+.ch-card {
+  width: 25%;
+  background: #1f2326;
+  border: 1rpx solid #383e44;
+  margin-bottom: 24rpx;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.ch-card:active {
+  transform: scale(0.98);
+}
+
+/* 准星预览区域 */
+.ch-preview {
+  width: 100%;
+  height: 140rpx; /* 缩小预览区高度 */
+  background: #111417;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1rpx solid #383e44;
+}
+
+.ch-img {
+  width: 120rpx;
+  height: 120rpx;
+}
+
+.ch-tag {
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  font-size: 16rpx;
+  color: #8b9196;
+  font-weight: 900;
+}
+
+/* 信息区域 */
+.ch-info {
+  padding: 10rpx 6rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ch-name-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10rpx;
+}
+
+.red-bar {
+  width: 4rpx;
+  height: 16rpx;
+  background: #ff4655;
+  margin-right: 6rpx;
+}
+
+.ch-name {
+  color: #ece8e1;
+  font-size: 22rpx;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 按钮重写：放弃原生button，用view模拟 */
+.copy-btn {
+  width: 100%;
+  height: 64rpx;
+  background: #ece8e1;
+  color: #0f1923;
+  font-size: 20rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 2rpx;
+  transition: all 0.2s;
+}
+
+.copy-btn:active {
+  background: #ff4655;
+  color: #fff;
+}

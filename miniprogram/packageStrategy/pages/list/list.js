@@ -1,92 +1,80 @@
-const db = wx.cloud.database();
+const mapsData = require("../../../config/maps_data.js");
 
 Page({
   data: {
-    heroInfo: {},
-    pointList: [],
-    mapId: "",
-    mapName: "",
-    isLoading: true,
+    allList: [], // 原始总列表
+    filteredList: [], // 筛选后的列表
+    maps: [{ uuid: "all", displayName: "全部地图" }],
+    mapIndex: 0,
+    sideFilter: "all", // all, atk, def
   },
 
-  onLoad(options) {
-    // 1. 解构并解码参数
-    const { mapId, heroId, mapName, heroName, heroNameEn, bustPortrait } =
-      options;
-    const portraitUrl = decodeURIComponent(bustPortrait || "");
-
-    // 2. 统一设置页面基础信息
-    this.setData({
-      heroInfo: {
-        heroId: heroId,
-        heroName: decodeURIComponent(heroName || ""),
-        heroNameEn: heroNameEn || "VALORANT",
-        bustPortrait: portraitUrl,
-      },
-      mapId: mapId,
-      mapName: decodeURIComponent(mapName || ""),
-    });
-
-    // 3. 初次执行查询
-    this.fetchPointList(mapId, heroId);
+  onLoad() {
+    // 合并地图配置
+    const rawMaps = Array.isArray(mapsData) ? mapsData : mapsData.maps || [];
+    this.setData({ maps: [...this.data.maps, ...rawMaps] });
   },
 
-  /**
-   * 核心查询逻辑
-   */
-  fetchPointList(mapId, heroId) {
-    // 兼容手动调用时不传参的情况
-    const mid = mapId || this.data.mapId;
-    const hid = heroId || this.data.heroInfo.heroId;
+  onShow() {
+    this.loadPointList();
+  },
 
-    this.setData({ isLoading: true });
-    wx.showLoading({ title: "同步档案...", mask: true });
-
+  loadPointList() {
+    const db = wx.cloud.database();
     db.collection("points")
-      .where({
-        mapId: mid,
-        agentId: hid,
-      })
+      .where({ status: 1 })
       .orderBy("createTime", "desc")
       .get()
       .then((res) => {
-        this.setData({
-          pointList: res.data,
-          isLoading: false,
+        const list = res.data.map((item) => {
+          const mapConfig = this.data.maps.find((m) => m.uuid === item.mapId);
+          return {
+            ...item,
+            mapThumb: mapConfig ? mapConfig.listViewIconTall : "",
+            dateDisplay: item.createTime
+              ? `${item.createTime.getMonth() + 1}/${item.createTime.getDate()}`
+              : "--",
+          };
         });
-        wx.hideLoading();
-      })
-      .catch((err) => {
-        console.error("查询失败:", err);
-        this.setData({ isLoading: false });
-        wx.hideLoading();
+        this.setData({ allList: list }, () => this.applyFilter());
       });
   },
 
-  /**
-   * 跳转到新增点位：增加事件监听
-   */
-  goToAddPoint() {
-    const { heroInfo, mapId, mapName } = this.data;
-    const url = `/packageStrategy/pages/add-point/add-point?mapId=${mapId}&mapName=${encodeURIComponent(mapName)}&heroId=${heroInfo.heroId}&heroName=${encodeURIComponent(heroInfo.heroName)}`;
-
-    wx.navigateTo({
-      url,
-      events: {
-        // --- 关键：监听来自 add-point 页面的 refreshList 信号 ---
-        refreshList: () => {
-          console.log("检测到新点位上传，正在刷新...");
-          this.fetchPointList(); // 触发刷新
-        },
-      },
-    });
+  // 切换地图筛选
+  onMapFilterChange(e) {
+    this.setData({ mapIndex: e.detail.value }, () => this.applyFilter());
   },
 
+  // 切换阵营筛选
+  toggleSideFilter() {
+    const modes = ["all", "atk", "def"];
+    let next = modes[(modes.indexOf(this.data.sideFilter) + 1) % 3];
+    this.setData({ sideFilter: next }, () => this.applyFilter());
+  },
+
+  // 执行筛选算法
+  applyFilter() {
+    const { allList, maps, mapIndex, sideFilter } = this.data;
+    const selectedMap = maps[mapIndex];
+
+    const filtered = allList.filter((item) => {
+      const mapMatch =
+        selectedMap.uuid === "all" || item.mapId === selectedMap.uuid;
+      const sideMatch = sideFilter === "all" || item.side === sideFilter;
+      return mapMatch && sideMatch;
+    });
+
+    this.setData({ filteredList: filtered });
+  },
+
+  goToAdd() {
+    wx.navigateTo({ url: "../add-point/add-point" });
+  },
   goToDetail(e) {
-    const { id } = e.currentTarget.dataset;
-    if (!id) return;
+    console.log(e);
+
     wx.navigateTo({
-      url: `/packageStrategy/pages/detail/detail?id=${id}`,
+      url: `/packageStrategy/pages/detail/detail?id=${e.currentTarget.dataset.id}`,
     });
   },
 });

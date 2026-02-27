@@ -1,0 +1,124 @@
+.detail-page {
+  min-height: 100vh;
+  background: #0f1923;
+  padding-bottom: 120rpx;
+}
+
+/* 头部视觉 */
+.pro-header {
+  position: relative;
+  height: 500rpx;
+  overflow: hidden;
+}
+.header-bg {
+  width: 100%;
+  height: 100%;
+  filter: grayscale(40%) brightness(0.7);
+}
+.header-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: linear-gradient(to top, #0f1923, transparent);
+}
+.header-content {
+  position: absolute;
+  bottom: 40rpx;
+  left: 40rpx;
+  z-index: 2;
+}
+.team-tag {
+  font-size: 24rpx;
+  color: #ff4655;
+  font-weight: 900;
+}
+.pro-full-name {
+  font-size: 72rpx;
+  font-weight: 900;
+  color: #fff;
+  display: block;
+  margin: 10rpx 0;
+}
+
+/* 标题规范 */
+.section-title {
+  padding: 30rpx 40rpx;
+  font-size: 24rpx;
+  color: #8b9196;
+  font-weight: 900;
+  letter-spacing: 4rpx;
+}
+
+/* 装备卡片 */
+.gear-scroll {
+  display: flex;
+  padding: 0 40rpx;
+  white-space: nowrap;
+}
+.gear-card {
+  width: 300rpx;
+  background: #1f2326;
+  margin-right: 20rpx;
+  padding: 20rpx;
+  border: 1rpx solid #383e44;
+  display: inline-block;
+  vertical-align: top;
+}
+.gear-img {
+  width: 100%;
+  height: 160rpx;
+  margin-bottom: 15rpx;
+}
+.gear-name {
+  font-size: 18rpx;
+  color: #ece8e1;
+  white-space: normal;
+  display: block;
+  height: 60rpx;
+}
+
+/* 参数网格 */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rpx;
+  background: #383e44;
+  border: 2rpx solid #383e44;
+  margin: 0 40rpx;
+}
+.setting-item {
+  background: #0f1923;
+  padding: 25rpx;
+  display: flex;
+  flex-direction: column;
+}
+.setting-label {
+  font-size: 16rpx;
+  color: #8b9196;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 8rpx;
+}
+.setting-value {
+  font-size: 26rpx;
+  color: #ff4655;
+  font-weight: 900;
+}
+
+/* 底部按钮 */
+.fixed-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 100rpx;
+  background: #ff4655;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 24rpx;
+  letter-spacing: 4rpx;
+}
