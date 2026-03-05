@@ -6,27 +6,29 @@
             <text class="team-tag">{{proInfo.team}}</text>
             <text class="pro-full-name">{{proInfo.name}}</text>
             <view class="info-row">
-                <text class="role-label">{{proInfo.role}}</text>
-                <text class="country-label">// {{proInfo.intro_fields.Country}}</text>
+                <!-- <text class="role-label">{{proInfo.role}}</text> -->
+                <!-- <text class="country-label">// {{proInfo.intro_fields.Country}}</text> -->
             </view>
         </view>
     </view>
-    <view class="section-title">PROMO GEAR //</view>
-    <scroll-view class="gear-scroll" scroll-x enable-flex>
+    <view class="section-title">选手装备</view>
+    <view class="gear-scroll" scroll-x enable-flex>
         <view class="gear-card" wx:for="{{proInfo.promo_gear}}" wx:key="gear_name">
             <image class="gear-img" src="{{item.local_path}}" mode="aspectFit" />
             <text class="gear-name">{{item.gear_name}}</text>
         </view>
-    </scroll-view>
-    <view class="section-title">TECHNICAL SETTINGS //</view>
+    </view>
+    <view class="section-title">选手设置</view>
     <view class="settings-grid">
         <view class="setting-item" wx:for="{{mainSettings}}" wx:key="key">
             <text class="setting-label">{{item.key}}</text>
             <text class="setting-value">{{item.value}}</text>
         </view>
     </view>
-    <view class="fixed-footer" bindtap="copyCrosshairCode">
-        <text>COPY CROSSHAIR CODE</text>
-        <view class="copy-icon"></view>
+    <view class="fixed-footer" bindtap="goBack">
+        <view class="back-btn-inner">
+            <view class="back-arrow"></view>
+            <text>返回</text>
+        </view>
     </view>
 </view>

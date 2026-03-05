@@ -12,7 +12,18 @@
         <view class="sk-scan"></view>
     </view>
 </view>
-<view class="preset-container" wx:else>
+<view class="preset-container {{isExiting ? 'page-exit' : ''}}" wx:else>
+    <view class="archive-header" wx:if="{{isFavoriteOnly && fromUserCenter}}">
+        <view class="header-title">
+            <text class="title-main">收藏档案库</text>
+        </view>
+        <view class="back-area" bindtap="navBackToUser">
+            <view class="back-text">
+                <text class="cn">返回</text>
+            </view>
+        </view>
+        <view class="header-line"></view>
+    </view>
     <view class="header-filter-row">
         <view class="filter-btns">
             <view class="filter-view-btn {{isFavoriteOnly ? 'active' : ''}}" bindtap="toggleFavoriteFilter">
@@ -45,7 +56,6 @@
         </view>
     </view>
     <scroll-view scroll-y class="preset-scroll" bindscrolltolower="loadMore" enhanced show-scrollbar="{{false}}">
-        <!-- <view wx:if="{{presets.length === 0}}" class="empty-tip">NO PRESETS FOUND / 暂无方案</view> -->
         <view wx:if="{{presets.length === 0}}" class="presets-empty-container">
             <view class="tactical-frame">
                 <view class="corner-t-l"></view>
@@ -60,13 +70,11 @@
             </view>
             <view class="text-group">
                 <text class="empty-main-title">暂无数据</text>
-                <!-- <text class="empty-sub-title">系统未检索到相关的方案数据</text> -->
                 <view class="deco-bar"></view>
             </view>
         </view>
         <view wx:for="{{presets}}" wx:key="_id" class="preset-card" bindtap="viewDetail" data-id="{{item._id}}">
             <image src="{{item.snapshot}}" mode="aspectFill" class="card-snapshot-bg" lazy-load></image>
-            <!-- <view class="card-overlay" style="background: linear-gradient(to top, #{{item.agent.backgroundGradientColors[0]}} 0%, #{{item.agent.backgroundGradientColors[1]}} 35%, #{{item.agent.backgroundGradientColors[2]}}66 60%, transparent 100%);"> -->
             <view class="card-overlay" style="background: linear-gradient(to right, #{{item.agent.backgroundGradientColors[0]}}ff 0%, #{{item.agent.backgroundGradientColors[1]}}cc 30%, #{{item.agent.backgroundGradientColors[2]}}44 60%, transparent 90%);">
                 <view class="card-top">
                     <view class="agent-badge">
@@ -87,8 +95,9 @@
                         </view>
                     </view>
                     <view class="meta-info">
-                        <text>EQUIPPED：{{item.weapons.length}}</text>
+                        <text>已装配：{{item.weapons.length}}</text>
                         <text>{{item.dateStr}}</text>
+                        <!-- <text>{{item.dateStr}}</text> -->
                     </view>
                 </view>
             </view>
@@ -99,7 +108,6 @@
         </view>
     </scroll-view>
 </view>
-<v-loading show="{{pageLoading}}" color="#ff4400"></v-loading>
 <!-- 选英雄 -->
 <agent-selector show="{{showPopup && popupType === 'hero'}}" currentAgentUuid="{{filterAgent.uuid || ''}}" bind:close="togglePopup" bind:select="onFilterSelect" />
 <!-- 选tag -->

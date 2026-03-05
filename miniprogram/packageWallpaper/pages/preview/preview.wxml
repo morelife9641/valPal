@@ -7,7 +7,7 @@
     <view class="bottom-bar" wx:if="{{!loading}}">
         <view class="info">
             <text class="name">{{preset.name}}</text>
-            <text class="author">by {{preset.agent.name}}</text>
+            <text class="author">By {{preset.userInfo.nickname}}</text>
         </view>
         <view class="btns">
             <view class="btn-back" bindtap="goBack">返回</view>

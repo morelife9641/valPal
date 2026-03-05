@@ -1,5 +1,5 @@
 // packageTools/pages/pro-settings/list.js
-const proDataFile = require("./pro_data.js");
+const proDataFile = require("./pro_data_updated.js");
 
 Page({
   data: {

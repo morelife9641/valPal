@@ -9,15 +9,16 @@ page {
 .tactical-container {
   display: flex;
   flex-direction: column;
-  /* height: 100vh; */
+  height: 100vh;
   color: #ece8e1;
-  padding-bottom: 200rpx;
+  overflow: hidden;
 }
 
 /* --- 1. 情报资讯层 (Intel Section) --- */
 .intel-section {
   padding: 20rpx 12rpx;
   background: linear-gradient(to bottom, rgba(255, 70, 85, 0.08), transparent);
+  padding-bottom: 8rpx;
 }
 
 .intel-swiper {
@@ -94,16 +95,16 @@ page {
 
   /* 核心：用渐变画出左侧的 4rpx 红色竖线，其余部分为深灰黑 */
   /* 逻辑：0-4rpx是红色，4rpx以后是深灰色 */
-  background: linear-gradient(
+  /* background: linear-gradient(
     to right,
     #ff4655 0%,
     #ff4655 6rpx,
     #1f2326 6rpx,
     #1a1e21 100%
-  );
+  ); */
 
   /* 细微的边框，增加金属质感 */
-  border: 1rpx solid #383e44;
+  border: 1rpx solid rgba(255, 255, 255, 0.853);
   /* 必须为 0，保持硬核直角 */
   border-radius: 0;
 
@@ -128,28 +129,6 @@ page {
 
 .nav-item:active text {
   color: #ffffff;
-}
-
-/* 重新调整图标符号在小按钮里的比例 */
-.icon-crosshair::after {
-  content: "⊹";
-  color: #ff4655;
-  font-size: 24rpx;
-}
-.icon-pro::after {
-  content: "◈";
-  color: #ff4655;
-  font-size: 22rpx;
-}
-.icon-skin::after {
-  content: "⬢";
-  color: #ff4655;
-  font-size: 22rpx;
-}
-.icon-wiki::after {
-  content: "≡";
-  color: #ff4655;
-  font-size: 24rpx;
 }
 
 /* --- 3. 地图选择区 (Header Section) --- */
@@ -297,44 +276,60 @@ page {
 /* --- 1. 列表区域基础容器 --- */
 .list-section {
   width: 100%;
-  /* margin-top: 20rpx; */
-  /* padding-bottom: 40rpx; */
+  min-height: 0;
   flex: 1; /* 核心：告诉它占满剩余所有高度 */
   display: flex;
   flex-direction: column;
   overflow: hidden; /* 防止外层溢出 */
 }
 
+.tabbar-placeholder {
+  /* 必须确保高度足够 */
+  height: calc(220rpx + env(safe-area-inset-bottom));
+  width: 100%;
+  flex-shrink: 0; /* 防止被压缩 */
+}
+
 .stats-table {
   width: 100%;
+  flex: 1; /* 🚩 必须填满 list-section */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   background: rgba(15, 25, 35, 0.3);
 }
 
-/* 允许内容水平滚动 */
 .horizontal-scroll {
-  width: 100%;
-  white-space: nowrap;
-}
-
-.horizontal-scroll {
-  flex: 1; /* 让它填满 list-section */
+  flex: 1; /* [cite: 38] */
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  width: 100%;
 }
 
 /* 4. 重点：垂直滚动的 tbody */
 .table-tbody {
   /* 假设你上面的标题 + Swiper 总共占了 500rpx */
-  height: calc(100vh - 860rpx - env(safe-area-inset-bottom));
+  flex: 1; /* 🚩 让它自动占据剩余的所有像素空间 */
+  height: 0; /* 🚩 绝招：高度设为0，强制让 flex-grow 决定其真实高度 */
+  width: 100%;
 }
 
 .table-content-wrap {
-  height: 100%;
+  flex: 1; /* 🚩 必须填满，否则内部滚动失效 */
   display: flex;
   flex-direction: column;
-  /* 核心属性：由内容决定宽度，且最小宽度为100% */
+  min-height: 0;
   width: max-content;
-  min-width: 100%;
+  min-width: 100%; /* [cite: 41] */
+}
+
+.tabbar-bottom-spacer {
+  /* 高度 = 你的自定义 TabBar 高度 + 安全区距离 [cite: 37] */
+  height: calc(120rpx + env(safe-area-inset-bottom));
+  width: 100%;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 /* --- 2. 行布局 (thead & tr) --- */
@@ -687,7 +682,7 @@ page {
 /* 1. 地图选择器 */
 .map-nav {
   padding: 0 12rpx;
-  margin-bottom: 16rpx;
+  /* margin-bottom: 4rpx; */
 }
 .map-scroll {
   display: flex;
@@ -735,7 +730,8 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  /* margin-bottom: 20rpx; */
+  margin: 4rpx 0;
+  margin-bottom: 12rpx;
 }
 .panel-tag {
   font-size: 18rpx;
@@ -878,17 +874,17 @@ page {
 }
 
 /* 进攻：青色系 */
-.side-label.atk {
+.side-label.def {
   background: rgba(0, 184, 161, 0.1);
   color: #00b8a1;
-  border-right: 4rpx solid #00b8a1;
+  /* border-right: 4rpx solid #00b8a1; */
 }
 
 /* 防守：橙色/红色系 */
-.side-label.def {
+.side-label.atk {
   background: rgba(255, 70, 85, 0.1);
   color: #ff4655;
-  border-right: 4rpx solid #ff4655;
+  /* border-right: 4rpx solid #ff4655; */
 }
 
 .inner-scroll {
@@ -902,44 +898,126 @@ page {
   padding: 10rpx 20rpx;
 }
 
+/* minicard */
+/* --- 基础卡片样式 --- */
 .mini-card {
-  width: 300rpx;
-  height: 180rpx;
-  background: #1f2326;
-  margin-right: 15rpx;
-  flex-shrink: 0;
   position: relative;
-  border: 1rpx solid #383e44;
+  width: 160rpx;
+  height: 156rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  background: #1f2326;
+  border: 1rpx solid rgba(236, 232, 225, 0.1); /* 极细边框 */
+  padding: 16rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden; /* 必须，裁剪溢出的多边形 */
 }
 
-.mini-img {
-  width: 100%;
-  height: 100%;
-  opacity: 0.7;
-}
-
-.mini-info {
+/* --- 核心：多边形装饰放大 (作为背景底纹) --- */
+.card-accent {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 10rpx;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  top: -20rpx;
+  right: -40rpx;
+  width: 160rpx; /* 放大 */
+  height: 160rpx;
+  transform: rotate(15deg); /* 改为小角度，更有工业感 */
+  opacity: 0.1; /* 保持低调 */
+  pointer-events: none;
+  z-index: 1;
 }
 
-.mini-name {
-  display: block;
+/* --- 方案：全背景渐变切换 --- */
+
+/* A区 - 琥珀金 */
+.type-a {
+  /* 明显的左上角渐变底色 */
+  /* background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, #1f2326 60%); */
+  /* border-left: 4rpx solid #ffb800; 保留细长色条增强辨识度 */
+}
+.type-a .site-label {
+  color: #ffb800;
+}
+.type-a .card-accent {
+  background: #ffb800;
+}
+
+/* B区 - 电光紫 */
+.type-b {
+  /* background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, #1f2326 60%); */
+  /* border-left: 4rpx solid #8b5cf6; */
+}
+.type-b .site-label {
+  color: #8b5cf6;
+}
+.type-b .card-accent {
+  background: #8b5cf6;
+}
+
+/* 其他 - 工业白 */
+.type-other {
+  /* background: linear-gradient(135deg, rgba(236, 232, 225, 0.1) 0%, #1f2326 60%); */
+  /* border-left: 4rpx solid #ece8e1; */
+}
+.type-other .site-label {
+  color: #ece8e1;
+}
+.type-other .card-accent {
+  background: #ece8e1;
+}
+
+/* --- 内部内容细节 --- */
+
+.mini-header {
+  position: relative;
+  z-index: 2; /* 确保在多边形之上 */
+}
+
+.site-label {
+  font-size: 16rpx;
+  font-weight: 900;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.mini-main {
+  position: relative;
+  z-index: 2;
+  margin-top: 10rpx;
+}
+
+.mini-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* 在标题前伪造一个编号感 */
+
+.mini-title {
   font-size: 22rpx;
   color: #ece8e1;
   font-weight: bold;
+  line-height: 1.2;
+  /* 强制两行，不够两行也占位，保持视觉对齐 */
+  min-height: 38rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-transform: uppercase; /* 英文标题时非常硬核 */
 }
 
-.mini-hero {
-  font-size: 16rpx;
-  color: #8b9196;
-  text-transform: uppercase;
+/* 空状态 */
+.row-empty-hint {
+  width: 100%;
+  padding: 40rpx 0;
+  text-align: center;
+  font-size: 20rpx;
+  color: rgba(236, 232, 225, 0.2);
+  letter-spacing: 4rpx;
 }
 
 .empty-frame {
@@ -999,16 +1077,16 @@ page {
   letter-spacing: 2rpx;
 }
 
-.side-label.atk {
+.side-label.def {
   background: rgba(0, 184, 161, 0.1);
   color: #00b8a1;
-  border-right: 2rpx solid #00b8a1;
+  /* border-right: 2rpx solid #00b8a1; */
 }
 
-.side-label.def {
+.side-label.atk {
   background: rgba(255, 70, 85, 0.1);
   color: #ff4655;
-  border-right: 2rpx solid #ff4655;
+  /* border-right: 2rpx solid #ff4655; */
 }
 
 .inner-scroll {
@@ -1022,22 +1100,6 @@ page {
   align-items: center; /* 垂直居中卡片 */
   height: 100%;
   padding: 0 20rpx;
-}
-
-.mini-card {
-  width: 280rpx;
-  height: 160rpx; /* 卡片高度要小于行高(240rpx) */
-  flex-shrink: 0;
-  margin-right: 16rpx;
-  background: #1f2326;
-  border: 1rpx solid #383e44;
-  position: relative;
-}
-
-.mini-img {
-  width: 100%;
-  height: 100%;
-  opacity: 0.6;
 }
 
 .mini-info {
@@ -1111,4 +1173,84 @@ page {
   background: radial-gradient(circle, transparent 10%, #0f1923 90%);
   z-index: 2;
   pointer-events: none;
+}
+
+/* 基础行样式重构 */
+.tactical-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0; /* 移除 padding，由内部撑开 */
+  margin-bottom: 2rpx; /* 微小的间隙增加精密感 */
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* 🚩 进攻方背景铺满：红黑渐变 */
+.tactical-row.atk-row {
+  /* 从左侧红色浸染到深色背景 */
+  /* background: linear-gradient(
+    90deg,
+    rgba(255, 70, 85, 0.12) 0%,
+    rgba(255, 70, 85, 0.04) 40%,
+    rgba(15, 25, 35, 0) 100%
+  ); */
+  background: rgba(255, 70, 85, 0.1);
+}
+
+/* 🚩 防守方背景铺满：青绿渐变 */
+.tactical-row.def-row {
+  background: rgba(0, 184, 161, 0.1);
+
+  /* background: linear-gradient(
+    90deg,
+    rgba(0, 184, 161, 0.12) 0%,
+    rgba(0, 184, 161, 0.04) 40%,
+    rgba(15, 25, 35, 0) 100%
+  ); */
+}
+
+/* 左侧 Label 保持细条感，起到颜色锚点的作用 */
+.side-label {
+  width: 60rpx;
+  height: 100%; /* 确保高度撑满 row */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 900;
+  writing-mode: vertical-lr;
+  text-align: center;
+  letter-spacing: 4rpx;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.side-label.atk {
+  color: #ff4655;
+  /* border-left: 6rpx solid #ff4655; 将边框移到最左侧，作为颜色起点 */
+}
+
+.side-label.def {
+  color: #00b8a1;
+  /* border-left: 6rpx solid #00b8a1; */
+}
+
+/* 🚩 增加高级感：右侧边缘装饰线 */
+.tactical-row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200rpx;
+  height: 1rpx;
+  background: linear-gradient(to left, rgba(236, 232, 225, 0.1), transparent);
+}
+
+/* 内部滚动区域微调 */
+.inner-scroll {
+  flex: 1;
+  height: 100%;
+  z-index: 1;
 }

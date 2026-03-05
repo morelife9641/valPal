@@ -5,7 +5,6 @@
     "pages/skins/index",
     "pages/tools/index",
     "components/card-selector/card-selector",
-    "components/custom-loading/index",
     "components/rank-picker/rank-picker",
     "components/login-popup/login-popup"
   ],
@@ -30,8 +29,7 @@
       "pages": [
         "pages/crosshair/list",
         "pages/pro-settings/list",
-        "pages/pro-settings/detail",
-        "pages/skins/list"
+        "pages/pro-settings/detail"
       ]
     }
   ],
@@ -42,7 +40,7 @@
     }
   },
   "window": {
-    "navigationBarTitleText": "瓦友友",
+    "navigationBarTitleText": "瓦库库",
     "navigationBarBackgroundColor": "#0F1923",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#0F1923"
@@ -56,15 +54,15 @@
     "list": [
       {
         "pagePath": "pages/strategy/index",
-        "text": "攻略",
+        "text": "首页",
         "iconPath": "assets/index.png",
         "selectedIconPath": "assets/index_active.png"
       },
       {
         "pagePath": "pages/news/index",
         "text": "资讯",
-        "iconPath": "assets/news.png",
-        "selectedIconPath": "assets/news_active.png"
+        "iconPath": "assets/公开比赛 (1).png",
+        "selectedIconPath": "assets/公开比赛.png"
       },
       {
         "pagePath": "pages/skins/index",
@@ -75,8 +73,8 @@
       {
         "pagePath": "pages/tools/index",
         "text": "我的",
-        "iconPath": "assets/pinpoint.png",
-        "selectedIconPath": "assets/pinpoint_active.png"
+        "iconPath": "assets/个人 (1).png",
+        "selectedIconPath": "assets/个人.png"
       }
     ]
   },

@@ -6,7 +6,7 @@
                 <text class="team-prefix">战队</text>
                 <text class="team-name">{{item.teamName}}</text>
             </view>
-            <view class="team-count">{{item.members.length}} PLAYERS</view>
+            <view class="team-count">{{item.members.length}}选手</view>
         </view>
         <view class="member-list">
             <view class="pro-card" wx:for="{{item.members}}" wx:for-item="member" wx:key="name" bindtap="navToDetail" data-item="{{member}}">
@@ -17,11 +17,11 @@
                 <view class="info-side">
                     <view class="name-row">
                         <text class="pro-name">{{member.name}}</text>
-                        <view class="status-dot"></view>
+                        <!-- <view class="status-dot"></view> -->
                     </view>
                     <view class="gear-preview">
                         <text wx:for="{{member.promo_gear}}" wx:for-item="gear" wx:key="gear_name">
-                            {{gear.gear_name}} /
+                            {{gear.gear_name}}
                         </text>
                     </view>
                 </view>

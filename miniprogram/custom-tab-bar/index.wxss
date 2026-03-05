@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   height: 100rpx;
-  background-color: #0f1923; /* 瓦式深青黑 */
+  background-color: #0f1923;
   backdrop-filter: blur(15px); /* 毛玻璃 */
   display: flex;
   padding: 10px 0;

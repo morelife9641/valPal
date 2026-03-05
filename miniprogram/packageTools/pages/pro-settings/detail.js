@@ -1,5 +1,5 @@
 // packageTools/pages/pro-settings/detail.js
-const proDataFile = require("./pro_data.js"); // 直接读同级 JS
+const proDataFile = require("./pro_data_updated.js"); // 直接读同级 JS
 
 Page({
   data: {
@@ -35,8 +35,14 @@ Page({
         mainSettings: mainSettings,
       });
 
-      wx.setNavigationBarTitle({ title: `${detail.name} // 档案` });
+      wx.setNavigationBarTitle({ title: `${detail.name}选手设置` });
     }
+  },
+
+  goBack: function () {
+    wx.navigateBack({
+      // delta: 1,
+    });
   },
 
   copyCrosshairCode: function () {

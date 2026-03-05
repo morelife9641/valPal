@@ -1,7 +1,10 @@
 .detail-page {
-  min-height: 100vh;
-  background: #0f1923;
-  padding-bottom: 120rpx;
+  width: 100%;
+  height: 100vh; /* 固定高度 */
+  overflow: hidden; /* 禁止整页滚动 */
+  background-color: #0f1923;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 头部视觉 */
@@ -44,7 +47,7 @@
 
 /* 标题规范 */
 .section-title {
-  padding: 30rpx 40rpx;
+  padding: 20rpx 40rpx;
   font-size: 24rpx;
   color: #8b9196;
   font-weight: 900;
@@ -54,13 +57,15 @@
 /* 装备卡片 */
 .gear-scroll {
   display: flex;
-  padding: 0 40rpx;
   white-space: nowrap;
+  box-sizing: border-box;
+  padding: 0 40rpx;
 }
 .gear-card {
-  width: 300rpx;
+  flex: 1;
+  /* width: 300rpx; */
   background: #1f2326;
-  margin-right: 20rpx;
+  /* margin-right: 20rpx; */
   padding: 20rpx;
   border: 1rpx solid #383e44;
   display: inline-block;
@@ -77,6 +82,7 @@
   white-space: normal;
   display: block;
   height: 60rpx;
+  text-align: center;
 }
 
 /* 参数网格 */

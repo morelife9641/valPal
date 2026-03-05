@@ -22,11 +22,25 @@
     "miniprogram": {
       "list": [
         {
-          "name": "packageStrategy/pages/detail",
-          "pathName": "packageStrategy/pages/detail/detail",
+          "name": "pages/skins/index",
+          "pathName": "pages/skins/index",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "packageStrategy/pages/list/list",
+          "pathName": "packageStrategy/pages/list/list",
+          "query": "mapId=d960549e-485c-e861-8d71-aa9d1aed12a2&mapName=%25E9%259C%2593%25E8%2599%25B9%25E7%2594%25BA",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "packageStrategy/pages/detail",
+          "pathName": "packageStrategy/pages/detail/detail",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "packageStrategy/pages/list/list",

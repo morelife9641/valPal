@@ -1,6 +1,7 @@
 const db = wx.cloud.database();
 import { AGENTS_CONFIG } from "../../config/agents_merged";
 import { availableTags } from "../../config/tags";
+import { toggleFavoriteStatus } from "../../utils/fav";
 
 Page({
   data: {
@@ -15,21 +16,88 @@ Page({
     showPopup: false,
     popupType: "", // 'hero' 或 'tag'
     popupList: [],
-
+    isFavoriteOnly: false,
     filterAgent: { displayName: "", uuid: "" },
     filterTag: "全部",
+    fromUserCenter: false,
   },
 
+  // async onShow() {
+  //   if (typeof this.getTabBar === "function" && this.getTabBar()) {
+  //     this.getTabBar().setData({
+  //       selected: 2, // 对应你 list 里的索引，skins 是第 3 个，所以是 2
+  //     });
+  //     await this.refreshPresets();
+  //     this.setData({ loading: false });
+  //   }
+
+  // },
   async onShow() {
+    // 1. 同步 TabBar (保持原有)
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
-      this.getTabBar().setData({
-        selected: 2, // 对应你 list 里的索引，skins 是第 3 个，所以是 2
-      });
-      await this.refreshPresets();
-      this.setData({ loading: false });
+      this.getTabBar().setData({ selected: 2 });
     }
 
-    // this.fetchPresets();
+    // 2. 获取参数
+    const pages = getCurrentPages();
+    const currentPage = pages[pages.length - 1];
+    const options = currentPage.options || {};
+
+    // 3. 逻辑判断
+    if (options.own === "1") {
+      // 只要标识存在，强制进入“只看收藏”状态
+      if (!this.data.isFavoriteOnly) {
+        this.toggleFavoriteFilter();
+        this.hideTabBar();
+        this.setData({
+          fromUserCenter: true,
+          isFavoriteOnly: true,
+          page: 0,
+          presets: [],
+        });
+      } else {
+        // 如果已经是收藏状态，手动触发一次刷新即可
+        this.refreshPresets();
+      }
+
+      // 🚩 重要：用完即焚，防止页面隐藏再显示时重复触发
+      currentPage.options.own = null;
+    } else {
+      // 正常进入页面，执行普通刷新
+      await this.refreshPresets();
+    }
+
+    this.setData({ loading: false });
+  },
+
+  navBackToUser() {
+    this.setData({ fromUserCenter: false, isFavoriteOnly: false }); // 重置标识
+    wx.switchTab({
+      url: "/pages/tools/index", // 替换成你真实的个人中心路径
+    });
+    this.showTabBar();
+  },
+
+  navBackToUser() {
+    // 🚩 1. 先触发动画效果
+    this.setData({ isExiting: true });
+
+    // 🚩 2. 延迟执行跳转，给动画留出 200-300ms 时间
+    setTimeout(() => {
+      this.setData({
+        fromUserCenter: false,
+        isFavoriteOnly: false,
+        isExiting: false, // 重置状态供下次使用
+      });
+
+      wx.switchTab({
+        url: "/pages/tools/index",
+        success: () => {
+          // 确保在目标页显示 TabBar
+          this.showTabBar();
+        },
+      });
+    }, 250);
   },
 
   onPullDownRefresh() {
@@ -68,109 +136,8 @@ Page({
     }
   },
 
-  // index.js (我的方案列表页)
-
   async fetchPresets(isLoadMore = false) {
-    // return;
     // 1. 状态拦截：如果没数据了且是加载更多，直接返回
-    if (isLoadMore && !this.data.hasMore) return;
-
-    const db = wx.cloud.database();
-    const { page, pageSize, presets, filterAgent, filterTag } = this.data;
-    // wx.showLoading({ title: "加载中...", mask: true });
-    this.setData({ pageLoading: true }); // 开始加载
-    try {
-      // --- 步骤 1: 构建筛选条件并查询方案列表 ---
-      let whereClause = {};
-      if (filterAgent && filterAgent.uuid)
-        whereClause["agent.uuid"] = filterAgent.uuid;
-      if (filterTag && filterTag !== "全部") whereClause.tags = filterTag;
-
-      const res = await db
-        .collection("user_presets")
-        .where(whereClause)
-        .orderBy("createTime", "desc")
-        .skip(page * pageSize)
-        .limit(pageSize)
-        .get();
-
-      const rawData = res.data;
-      if (rawData.length === 0) {
-        this.setData({ presets: isLoadMore ? presets : [], hasMore: false });
-        return;
-      }
-
-      // --- 步骤 2: 核心修复 - 只查询【当前用户】的收藏记录 ---
-      const ids = rawData.map((i) => i._id);
-      const favRes = await db
-        .collection("user_favorites")
-        .where({
-          presetId: db.command.in(ids),
-          // 关键：明确限制 openid。在小程序端，'{openid}' 会被自动替换为当前用户 ID
-          // 同时请确保 user_favorites 的数据库权限设置为“仅创建者可读写”
-          _openid: "{openid}",
-        })
-        .get();
-
-      // 提取出当前用户真正收藏过的方案 ID 数组
-      const favIds = favRes.data.map((f) => f.presetId);
-
-      // --- 步骤 3: 批量获取图片的临时 HTTPS 链接 (解决显示失败) ---
-      const cloudPaths = [];
-      rawData.forEach((item) => {
-        if (item.snapshot && item.snapshot.startsWith("cloud://")) {
-          cloudPaths.push(item.snapshot);
-        }
-        const iconPath = `cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/${item.agent.uuid}.png`;
-        cloudPaths.push(iconPath);
-      });
-
-      let tempFiles = [];
-      if (cloudPaths.length > 0) {
-        const uniquePaths = [...new Set(cloudPaths)];
-        const tempRes = await wx.cloud.getTempFileURL({
-          fileList: uniquePaths,
-        });
-        tempFiles = tempRes.fileList;
-      }
-
-      // --- 步骤 4: 内存合并数据 ---
-      const newData = rawData.map((item) => {
-        const currentIconPath = `cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/${item.agent.uuid}.png`;
-
-        const foundSnap = tempFiles.find((f) => f.fileID === item.snapshot);
-        const foundIcon = tempFiles.find((f) => f.fileID === currentIconPath);
-
-        return {
-          ...item,
-          // 只有在当前用户的 favIds 数组里存在的，才标记为已收藏
-          isFavorite: favIds.includes(item._id),
-          snapshot: foundSnap ? foundSnap.tempFileURL : item.snapshot,
-          localAvatar: foundIcon ? foundIcon.tempFileURL : currentIconPath,
-          dateStr: item.createTime ? this.formatDate(item.createTime) : "刚刚",
-        };
-      });
-
-      // --- 步骤 5: 更新渲染 ---
-      this.setData({
-        presets: isLoadMore ? [...presets, ...newData] : newData,
-        page: page + 1,
-        hasMore: rawData.length === pageSize,
-      });
-    } catch (err) {
-      console.error("fetchPresets 失败:", err);
-      wx.showToast({ title: "加载失败", icon: "none" });
-    } finally {
-      // wx.hideLoading();
-      this.setData({ pageLoading: false }); // 开始加载
-      wx.stopPullDownRefresh();
-    }
-  },
-
-  // index.js
-
-  async fetchPresets(isLoadMore = false) {
-    // 1. 状态拦截
     if (isLoadMore && !this.data.hasMore) return;
 
     const db = wx.cloud.database();
@@ -178,178 +145,51 @@ Page({
     const { page, pageSize, presets, filterAgent, filterTag, isFavoriteOnly } =
       this.data;
 
-    // wx.showLoading({ title: "加载中...", mask: true });
-    this.setData({ pageLoading: true }); // 开始加载
-    try {
-      // --- 步骤 1: 构建筛选基础条件 ---
-      let whereClause = {};
-
-      // A. 处理特工筛选
-      if (filterAgent && filterAgent.uuid) {
-        whereClause["agent.uuid"] = filterAgent.uuid;
-      }
-
-      // B. 处理标签筛选
-      if (filterTag && filterTag !== "全部") {
-        whereClause.tags = filterTag;
-      }
-
-      // --- 步骤 2: 处理“只看收藏”逻辑 ---
-      // 在方案二下，必须先从收藏库拿到我收藏过的所有 ID
-      const myFavRes = await db
-        .collection("user_favorites")
-        .where({ _openid: "{openid}" })
-        .field({ presetId: true })
-        .get();
-
-      const allMyFavIds = myFavRes.data.map((f) => f.presetId);
-
-      if (isFavoriteOnly) {
-        // 如果用户开启了“只看收藏”，但收藏库是空的，直接返回空列表
-        if (allMyFavIds.length === 0) {
-          this.setData({ presets: [], hasMore: false });
-          // wx.hideLoading();
-          this.setData({ pageLoading: false }); // 开始加载
-          return;
-        }
-        // 这里的逻辑是：在已有的筛选基础上，增加 ID 必须在收藏列表中的限制
-        whereClause._id = _.in(allMyFavIds);
-      }
-
-      // --- 步骤 3: 查询方案主表 ---
-      const res = await db
-        .collection("user_presets")
-        .where(whereClause)
-        .orderBy("createTime", "desc")
-        .skip(page * pageSize)
-        .limit(pageSize)
-        .get();
-
-      const rawData = res.data;
-      if (rawData.length === 0) {
-        this.setData({
-          presets: isLoadMore ? presets : [],
-          hasMore: false,
-        });
-        return;
-      }
-
-      // --- 步骤 4: 批量获取图片的临时 HTTPS 链接 ---
-      const cloudPaths = [];
-      rawData.forEach((item) => {
-        if (item.snapshot && item.snapshot.startsWith("cloud://")) {
-          cloudPaths.push(item.snapshot);
-        }
-        const iconPath = `cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/${item.agent.uuid}.png`;
-        cloudPaths.push(iconPath);
-      });
-
-      let tempFiles = [];
-      if (cloudPaths.length > 0) {
-        const uniquePaths = [...new Set(cloudPaths)];
-        const tempRes = await wx.cloud.getTempFileURL({
-          fileList: uniquePaths,
-        });
-        tempFiles = tempRes.fileList;
-      }
-
-      // --- 步骤 5: 内存合并数据 (包含收藏状态匹配) ---
-      const newData = rawData.map((item) => {
-        const currentIconPath = `cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/${item.agent.uuid}.png`;
-        const foundSnap = tempFiles.find((f) => f.fileID === item.snapshot);
-        const foundIcon = tempFiles.find((f) => f.fileID === currentIconPath);
-
-        return {
-          ...item,
-          // 关键：即使没开“只看收藏”，我们也要标记出哪些是已收藏的，以便星星变色
-          isFavorite: allMyFavIds.includes(item._id),
-          snapshot: foundSnap ? foundSnap.tempFileURL : item.snapshot,
-          localAvatar: foundIcon ? foundIcon.tempFileURL : currentIconPath,
-          dateStr: item.createTime ? this.formatDate(item.createTime) : "刚刚",
-        };
-      });
-
-      // --- 步骤 6: 更新视图 ---
-      this.setData({
-        presets: isLoadMore ? [...presets, ...newData] : newData,
-        page: page + 1,
-        hasMore: rawData.length === pageSize,
-      });
-    } catch (err) {
-      console.error("fetchPresets 失败:", err);
-      wx.showToast({ title: "加载失败", icon: "none" });
-    } finally {
-      // wx.hideLoading();
-      this.setData({ pageLoading: false }); // 开始加载
-      wx.stopPullDownRefresh();
-    }
-  },
-
-  // index.js
-
-  async fetchPresets(isLoadMore = false) {
-    // 1. 状态拦截：如果没数据了且是加载更多，直接返回
-    if (isLoadMore && !this.data.hasMore) return;
-
-    const db = wx.cloud.database();
-    const _ = db.command;
-    // 从 data 中解构筛选状态
-    const { page, pageSize, presets, filterAgent, filterTag, isFavoriteOnly } =
-      this.data;
-    this.setData({ pageLoading: true }); // 开始加载
-    // wx.showLoading({ title: "加载中...", mask: true });
+    // --- 核心改动：换回原生 Loading ---
+    wx.showLoading({
+      title: isLoadMore ? "正在加载更多..." : "正在加载...",
+      mask: true,
+    });
 
     try {
-      // --- 步骤 1: 获取当前用户【所有的】收藏 ID (不分页) ---
-      // 这一步必须做，因为即使在全量模式下，我们也需要用它来点亮星星
+      // --- 步骤 1: 获取当前用户收藏 ID ---
       const favRes = await db
         .collection("user_favorites")
         .where({ _openid: "{openid}" })
-        .limit(1000) // 假设普通用户收藏不会超过1000个
+        .limit(1000)
         .field({ presetId: true })
         .get();
 
       const allMyFavIds = favRes.data.map((f) => f.presetId);
 
-      // --- 步骤 2: 构建主表查询的 where 条件 ---
+      // --- 步骤 2: 构建查询条件 ---
       let whereClause = {};
-
-      // A. 特工过滤
       if (filterAgent && filterAgent.uuid) {
         whereClause["agent.uuid"] = filterAgent.uuid;
       }
-
-      // B. 标签过滤
       if (filterTag && filterTag !== "全部") {
         whereClause.tags = filterTag;
       }
-
-      // C. 收藏模式过滤
       if (isFavoriteOnly) {
-        // 如果开启了只看收藏但没数据，直接提前返回
         if (allMyFavIds.length === 0) {
           this.setData({ presets: [], hasMore: false });
-          // wx.hideLoading();
-          this.setData({ pageLoading: false }); // 开始加载
-          return;
+          return; // 这里会直接跳到 finally 执行 hideLoading
         }
-        // 核心修复：将主表的查询范围限制在我的收藏 ID 列表内
-        // 这样主表的 skip(page * pageSize) 才能在正确的集合里生效
         whereClause._id = _.in(allMyFavIds);
       }
 
-      // --- 步骤 3: 查询方案主表 (这里是分页发生的地方) ---
+      // --- 步骤 3: 分页查询 ---
       const res = await db
         .collection("user_presets")
         .where(whereClause)
         .orderBy("createTime", "desc")
-        .skip(page * pageSize) // 这里的 page 已经在 onLoad 或下拉刷新时重置为 0
+        .skip(page * pageSize)
         .limit(pageSize)
         .get();
 
       const rawData = res.data;
 
-      // --- 步骤 4: 处理空数据情况 ---
+      // --- 步骤 4: 处理空数据 ---
       if (rawData.length === 0) {
         this.setData({
           presets: isLoadMore ? presets : [],
@@ -358,13 +198,15 @@ Page({
         return;
       }
 
-      // --- 步骤 5: 批量获取图片的临时链接 (CDN 优化) ---
+      // --- 步骤 5: 批量获取 CDN 临时链接 ---
       const cloudPaths = [];
+      const baseIconUrl =
+        "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/";
+
       rawData.forEach((item) => {
         if (item.snapshot?.startsWith("cloud://"))
           cloudPaths.push(item.snapshot);
-        const iconPath = `cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/${item.agent.uuid}.png`;
-        cloudPaths.push(iconPath);
+        cloudPaths.push(`${baseIconUrl}${item.agent.uuid}.png`);
       });
 
       let tempFiles = [];
@@ -376,15 +218,15 @@ Page({
         tempFiles = tempRes.fileList;
       }
 
-      // --- 步骤 6: 内存合并数据并渲染 ---
+      // --- 步骤 6: 数据合并 ---
       const newData = rawData.map((item) => {
-        const currentIconPath = `cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/${item.agent.uuid}.png`;
+        const currentIconPath = `${baseIconUrl}${item.agent.uuid}.png`;
         const foundSnap = tempFiles.find((f) => f.fileID === item.snapshot);
         const foundIcon = tempFiles.find((f) => f.fileID === currentIconPath);
 
         return {
           ...item,
-          isFavorite: allMyFavIds.includes(item._id), // 匹配收藏状态
+          isFavorite: allMyFavIds.includes(item._id),
           snapshot: foundSnap ? foundSnap.tempFileURL : item.snapshot,
           localAvatar: foundIcon ? foundIcon.tempFileURL : currentIconPath,
           dateStr: item.createTime ? this.formatDate(item.createTime) : "刚刚",
@@ -400,8 +242,126 @@ Page({
       console.error("fetchPresets Error:", err);
       wx.showToast({ title: "同步失败", icon: "none" });
     } finally {
-      // wx.hideLoading();
-      this.setData({ pageLoading: false }); // 开始加载
+      // --- 核心改动：统一关闭 Loading ---
+      wx.hideLoading();
+      wx.stopPullDownRefresh();
+    }
+  },
+
+  async fetchPresets(isLoadMore = false) {
+    // 1. 状态拦截：如果没数据了且是加载更多，直接返回
+    if (isLoadMore && !this.data.hasMore) return;
+
+    const db = wx.cloud.database();
+    const _ = db.command;
+    const { page, pageSize, presets, filterAgent, filterTag, isFavoriteOnly } =
+      this.data;
+
+    // --- 交互：换回原生 Loading ---
+    wx.showLoading({
+      title: isLoadMore ? "正在加载更多..." : "正在加载...",
+      mask: true,
+    });
+
+    try {
+      // --- 步骤 1: 获取当前用户收藏 ID (适配通用 fav.js) ---
+      const favRes = await db
+        .collection("user_favorites")
+        .where({
+          // _openid: "{openid}",
+          type: "preset", // 🚩 核心修改：只取“预设”类型的收藏
+        })
+        .limit(1000)
+        .field({ targetId: true }) // 🚩 核心修改：对应 fav.js 存入的字段名
+        .get();
+      console.log("当前数据库里的收藏记录:", favRes.data);
+
+      // 提取出当前业务的所有收藏 ID
+      const allMyFavIds = favRes.data.map((f) => f.targetId);
+      console.log("解析出的收藏ID列表:", allMyFavIds);
+      // --- 步骤 2: 构建查询条件 ---
+      let whereClause = {};
+      if (filterAgent && filterAgent.uuid) {
+        whereClause["agent.uuid"] = filterAgent.uuid;
+      }
+      if (filterTag && filterTag !== "全部") {
+        whereClause.tags = filterTag;
+      }
+      if (isFavoriteOnly) {
+        if (allMyFavIds.length === 0) {
+          this.setData({ presets: [], hasMore: false });
+          return;
+        }
+        // 这里的 _id 对应 user_presets 表里的主键
+        whereClause._id = _.in(allMyFavIds);
+      }
+
+      // --- 步骤 3: 分页查询主表 ---
+      const res = await db
+        .collection("user_presets")
+        .where(whereClause)
+        .orderBy("createTime", "desc")
+        .skip(page * pageSize)
+        .limit(pageSize)
+        .get();
+
+      const rawData = res.data;
+
+      // --- 步骤 4: 处理空数据情况 ---
+      if (rawData.length === 0) {
+        this.setData({
+          presets: isLoadMore ? presets : [],
+          hasMore: false,
+        });
+        return;
+      }
+
+      // --- 步骤 5: 批量获取 CDN 临时链接 (保持原有优化逻辑) ---
+      const cloudPaths = [];
+      const baseIconUrl =
+        "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/icons/";
+
+      rawData.forEach((item) => {
+        if (item.snapshot?.startsWith("cloud://"))
+          cloudPaths.push(item.snapshot);
+        cloudPaths.push(`${baseIconUrl}${item.agent.uuid}.png`);
+      });
+
+      let tempFiles = [];
+      if (cloudPaths.length > 0) {
+        const uniquePaths = [...new Set(cloudPaths)];
+        const tempRes = await wx.cloud.getTempFileURL({
+          fileList: uniquePaths,
+        });
+        tempFiles = tempRes.fileList;
+      }
+
+      // --- 步骤 6: 数据合并并点亮星星 ---
+      const newData = rawData.map((item) => {
+        const currentIconPath = `${baseIconUrl}${item.agent.uuid}.png`;
+        const foundSnap = tempFiles.find((f) => f.fileID === item.snapshot);
+        const foundIcon = tempFiles.find((f) => f.fileID === currentIconPath);
+
+        return {
+          ...item,
+          // 🚩 核心修改：利用 targetId 列表匹配当前 item 的 _id
+          isFavorite: allMyFavIds.includes(item._id),
+          snapshot: foundSnap ? foundSnap.tempFileURL : item.snapshot,
+          localAvatar: foundIcon ? foundIcon.tempFileURL : currentIconPath,
+          dateStr: item.createTime ? this.formatDate(item.createTime) : "刚刚",
+        };
+      });
+
+      this.setData({
+        presets: isLoadMore ? [...presets, ...newData] : newData,
+        page: page + 1,
+        hasMore: rawData.length === pageSize,
+      });
+    } catch (err) {
+      console.error("fetchPresets Error:", err);
+      wx.showToast({ title: "同步失败", icon: "none" });
+    } finally {
+      wx.hideLoading();
       wx.stopPullDownRefresh();
     }
   },
@@ -563,6 +523,9 @@ Page({
   },
 
   toggleFavoriteFilter() {
+    if (this.data.fromUserCenter) {
+      return;
+    }
     const newStatus = !this.data.isFavoriteOnly;
 
     this.setData(
@@ -635,6 +598,96 @@ Page({
         [`presets[${index}].isFavorite`]: isAlreadyFavorited,
       });
       wx.showToast({ title: "操作失败", icon: "none" });
+    }
+  },
+
+  async toggleFavorite(e) {
+    const presetId = e.currentTarget.dataset.id;
+    const presets = this.data.presets;
+    const index = presets.findIndex((p) => p._id === presetId);
+    if (index === -1) return;
+
+    // const itemId = e.currentTarget.dataset.id;
+    // const { filteredList } = this.data;
+    // const index = filteredList.findIndex((item) => item._id === itemId);
+
+    if (index === -1) return;
+
+    // 1. 获取旧状态
+    const oldStatus = presets[index].isFavorite;
+
+    // 2. 乐观更新 UI (先变色，提升用户体验)
+    this.setData({
+      [`presets[index].isFavorite`]: !oldStatus,
+    });
+
+    try {
+      // 3. 调用工具函数，传入业务类型 'point'
+      const res = await toggleFavoriteStatus(itemId, "preset");
+
+      // 4. 根据返回结果微调（如果后端返回状态与前端不一致）
+      if (res.isFavorite !== !oldStatus) {
+        this.setData({ [`presets[index].isFavorite`]: res.isFavorite });
+      }
+
+      wx.showToast({
+        title: res.msg,
+        icon: "none",
+      });
+    } catch (err) {
+      console.error("收藏失败:", err);
+      // 5. 失败回滚
+      this.setData({
+        [`presets[index].isFavorite`]: oldStatus,
+      });
+      wx.showToast({
+        title: "操作失败，请重试",
+        icon: "none",
+      });
+    }
+  },
+
+  async toggleFavorite(e) {
+    const presetId = e.currentTarget.dataset.id;
+    const presets = this.data.presets;
+    const index = presets.findIndex((p) => p._id === presetId);
+
+    if (index === -1) return;
+
+    // 1. 获取旧状态
+    const oldStatus = presets[index].isFavorite;
+
+    // 2. 乐观更新 UI
+    // 注意这里：一定要用反引号 ` ，并且变量 index 要写成 ${index}
+    this.setData({
+      [`presets[${index}].isFavorite`]: !oldStatus,
+    });
+
+    try {
+      // 3. 调用工具函数 (注意这里你的变量名是 presetId 而不是 itemId)
+      const res = await toggleFavoriteStatus(presetId, "preset");
+
+      // 4. 根据返回结果微调
+      if (res.isFavorite !== !oldStatus) {
+        this.setData({
+          [`presets[${index}].isFavorite`]: res.isFavorite,
+        });
+      }
+
+      wx.showToast({
+        title: res.isFavorite ? "收藏成功" : "已取消收藏",
+        icon: "none",
+      });
+    } catch (err) {
+      console.error("收藏失败:", err);
+      // 5. 失败回滚
+      this.setData({
+        [`presets[${index}].isFavorite`]: oldStatus,
+      });
+      wx.showToast({
+        title: "操作失败",
+        icon: "none",
+      });
     }
   },
 

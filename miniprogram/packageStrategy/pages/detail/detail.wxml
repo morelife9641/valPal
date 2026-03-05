@@ -1,21 +1,28 @@
 <view class="detail-container">
-    <view class="preview-header" wx:if="{{isPreview}}">TACTICAL PREVIEW / 战术预演模式</view>
+    <view class="preview-header" wx:if="{{isPreview}}">预览</view>
     <view class="top-header">
         <view class="title-row">
             <text class="main-title">{{detail.title}}</text>
-            <view class="side-tag {{detail.side}}">
-                {{detail.side === 'atk' ? '攻击方 / ATK' : '防守方 / DEF'}}
-            </view>
         </view>
+        <view class="side-tag {{detail.side}}">{{detail.side === 'atk' ? '攻击方' : '防守方'}}</view>
         <view class="map-info-row">
             <text class="map-name">{{detail.mapName}}</text>
-            <text class="date-label">{{detail.createTimeDisplay || 'ARCHIVE RECORD'}}</text>
+            <text class="date-label">{{detail.createTimeDisplay || ''}}</text>
+        </view>
+        <view class="contributor-row">
+            <view class="user-chip">
+                <image class="user-avatar" src="{{detail.creator.avatar || '../../../assets/default_icon.png'}}" mode="aspectFill" />
+                <view class="user-meta">
+                    贡献者：
+                    <text class="user-name">{{detail.creator.nickname || '未知特工'}}</text>
+                </view>
+            </view>
         </view>
     </view>
     <view class="module-section">
         <view class="module-head">
             <view class="head-line"></view>
-            <text>DEPLOYMENT / 部署位置</text>
+            <text>部署位置</text>
         </view>
         <view class="map-mark-container detail-mode">
             <movable-area class="map-area">
@@ -29,7 +36,7 @@
             </movable-area>
         </view>
     </view>
-    <block wx:for="{{[{key:'standImg', label:'POSITION / 站位详情', idx:'standIndex'}, {key:'aimImg', label:'AIMING / 瞄准点位', idx:'aimIndex'}, {key:'enemyImg', label:'ENEMY VIEW / 敌方视角', idx:'enemyIndex'}, {key:'resultImg', label:'EFFECT / 最终效果', idx:'resultIndex'}]}}" wx:key="key" wx:for-item="mod">
+    <block wx:for="{{[{key:'standImg', label:'站位详情', idx:'standIndex'}, {key:'aimImg', label:'瞄准点位', idx:'aimIndex'}, {key:'enemyImg', label:'敌方视角', idx:'enemyIndex'}, {key:'resultImg', label:'EFFECT / 最终效果', idx:'resultIndex'}]}}" wx:key="key" wx:for-item="mod">
         <view class="module-section" wx:if="{{detail[mod.key] && detail[mod.key].length > 0}}">
             <view class="module-head">
                 <view class="head-line"></view>
@@ -52,20 +59,17 @@
                 </view>
             </view>
             <view class="memo-box">
-                <view class="memo-deco"></view>
-                <view class="memo-content">
-                    <text class="memo-text" wx:if="{{mod.key === 'standImg'}}">
-                        {{detail.standImg[standIndex].memo || '暂无详细描述'}}
-                    </text>
-                    <text class="memo-text" wx:if="{{mod.key === 'aimImg'}}">
-                        {{detail.aimImg[aimIndex].memo || '暂无详细描述'}}
-                    </text>
-                    <text class="memo-text" wx:if="{{mod.key === 'enemyImg'}}">
-                        {{detail.enemyImg[enemyIndex].memo || '暂无详细描述'}}
-                    </text>
-                    <text class="memo-text" wx:if="{{mod.key === 'resultImg'}}">
-                        {{detail.resultImg[resultIndex].memo || '暂无详细描述'}}
-                    </text>
+                <view class="memo-content" wx:if="{{mod.key === 'standImg'}}">
+                    {{detail.standImg[standIndex].memo || '暂无详细描述'}}
+                </view>
+                <view class="memo-content" wx:if="{{mod.key === 'aimImg'}}">
+                    {{detail.aimImg[aimIndex].memo || '暂无详细描述'}}
+                </view>
+                <view class="memo-content" wx:if="{{mod.key === 'enemyImg'}}">
+                    {{detail.enemyImg[enemyIndex].memo || '暂无详细描述'}}
+                </view>
+                <view class="memo-content" wx:if="{{mod.key === 'resultImg'}}">
+                    {{detail.resultImg[resultIndex].memo || '暂无详细描述'}}
                 </view>
             </view>
         </view>
@@ -73,9 +77,21 @@
     <view class="module-section" wx:if="{{detail.desc}}">
         <view class="module-head">
             <view class="head-line"></view>
-            <text>DESCRIPTION / 战术总结</text>
+            <text>战术总结</text>
         </view>
         <view class="desc-card">{{detail.desc}}</view>
+    </view>
+    <view class="tactical-horizontal-widget {{isHideBar ? 'widget-hidden' : ''}}">
+        <view class="h-widget-bg"></view>
+        <view class="h-widget-item up {{userAction === 'up' ? 'active' : ''}}" bindtap="handleAssess" data-type="up">
+            <view class="h-icon">▲</view>
+            <text class="h-count">{{detail.stats.up || 0}}</text>
+        </view>
+        <view class="h-divider"></view>
+        <view class="h-widget-item down {{userAction === 'down' ? 'active' : ''}}" bindtap="handleAssess" data-type="down">
+            <text class="h-count">{{detail.stats.down || 0}}</text>
+            <view class="h-icon">▼</view>
+        </view>
     </view>
     <view class="footer-safe-area"></view>
 </view>

@@ -1,4 +1,4 @@
-import { PLAYER_CARDS } from "../../config/player_cards_index";
+import { PLAYER_CARDS } from "./player_cards_index";
 const PAGE_SIZE = 20; // 每次加载20条
 
 Component({

@@ -1,11 +1,103 @@
-/* 外层容器 */
 .container {
-  min-height: 100vh;
-  background-color: #0f1923; /* 最底层的深邃背景 */
-  padding: 0 20rpx 60rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
+  height: 100vh;
+  background-color: #0f1923; /* 确保背景底色一致 */
+  overflow: hidden;
+}
+
+/* 1. 基础背景容器 */
+.grid-bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  background-color: #0f1923; /* 瓦罗兰特底色 */
+  overflow: hidden;
+}
+
+/* 2. 静态底层：精密网格 */
+.grid-bg {
+  position: absolute;
+  width: 200%; /* 扩大范围以支持旋转 */
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  transform: rotate(-15deg); /* 稍微倾斜，比 45 度更具动感 */
+  opacity: 0.3;
+
+  /* 极细的红黑线 */
+  background-image:
+    linear-gradient(rgba(255, 70, 85, 0.1) 1rpx, transparent 1rpx),
+    linear-gradient(90deg, rgba(255, 70, 85, 0.1) 1rpx, transparent 1rpx);
+  background-size: 100rpx 100rpx;
+}
+
+/* 3. 动态扫描线：激光扫掠效果 */
+.grid-bg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%; /* 从屏幕外开始 */
+  width: 100%;
+  height: 100%;
+
+  /* 🚩 设计点：一条垂直的激光亮带 */
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 70, 85, 0) 30%,
+    rgba(255, 70, 85, 0.4) 50%,
+    /* 核心光线 */ rgba(255, 70, 85, 0) 70%,
+    transparent 100%
+  );
+
+  /* 🚩 动画：激光往复扫掠 */
+  /* 使用 ease-in-out 让扫描有节奏感，而不是死板的匀速 */
+  animation: laserScan 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 4. 辅助点阵：增加“库”的精密感 */
+.grid-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* 模拟电子屏幕的点阵感 */
+  background-image: radial-gradient(
+    rgba(255, 70, 85, 0.2) 1rpx,
+    transparent 1rpx
+  );
+  background-size: 50rpx 50rpx;
+}
+
+/* 🚩 扫描动画：只动 transform，流畅度拉满 */
+@keyframes laserScan {
+  0% {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+/* 🚩 确保原有内容层级在背景之上 */
+.badge-wrapper,
+.menu-module {
+  position: relative;
+  z-index: 1;
 }
 
 /* ================= 挂绳与卡片 ================= */
@@ -36,18 +128,8 @@
   border-bottom: 4rpx solid #383e44;
 }
 
-.stats-tab {
-  background: #1f2326;
-  color: #ece8e1;
-  display: inline-block;
-  padding: 6rpx 30rpx 6rpx 20rpx;
-  font-size: 20rpx;
-  font-weight: bold;
-  clip-path: polygon(0 0, calc(100% - 15rpx) 0, 100% 100%, 0 100%);
-}
-
 .id-card {
-  /* width: 100%; */
+  width: 88%;
   /* 换成瓦罗兰特 UI 里的中度灰色，更具金属感 */
   background: #383e44;
   position: relative;
@@ -58,28 +140,14 @@
   border-radius: 20rpx;
   margin: -10rpx 0 20rpx;
   margin-top: -20rpx;
+  height: 80vh;
 }
 
 .stats-module {
   width: 100%;
-  margin-top: 30rpx;
+  /* margin-top: 30rpx; */
   position: relative;
   z-index: 5; /* 确保它盖在背景大字上方 */
-}
-
-.stats-body {
-  background: #0f1923; /* 改为极深色，在米白卡片上显得像一块液晶屏幕 */
-  color: #ece8e1; /* 文字改为浅色 */
-  display: flex;
-  padding: 24rpx 0;
-  clip-path: polygon(
-    15rpx 0,
-    100% 0,
-    100% calc(100% - 15rpx),
-    calc(100% - 15rpx) 100%,
-    0 100%,
-    0 15rpx
-  );
 }
 
 /* 四角十字 */
@@ -90,20 +158,22 @@
   font-weight: 900;
 }
 .tl {
-  top: 20rpx;
-  left: 20rpx;
+  top: -30rpx;
+  left: 10rpx;
+  z-index: 200;
 }
 .tr {
-  top: 20rpx;
-  right: 20rpx;
+  top: -30rpx;
+  right: 10rpx;
+  z-index: 200;
 }
 .bl {
-  bottom: 40rpx;
-  left: 20rpx;
+  bottom: 10rpx;
+  left: 10rpx;
 }
 .br {
-  bottom: 40rpx;
-  right: 20rpx;
+  bottom: 10rpx;
+  right: 10rpx;
 }
 
 /* 左右两侧垂直大字 */
@@ -140,8 +210,8 @@
   box-sizing: border-box;
   display: flex;
   justify-content: center;
+  border-radius: 20rpx;
   align-items: center;
-  height: 600rpx;
   overflow: hidden; /* 必须加，防止巨大的背景字撑开容器 */
 }
 
@@ -154,7 +224,7 @@
   height: 400rpx;
   background: #ff4655;
   position: relative;
-  z-index: 2;
+  z-index: 10; /* 🚩 提高层级，压在文字上面 */
   padding: 3rpx;
   border: 1px solid red;
   /* 调整后的深切梯形：短边变长，向内延伸更深 */
@@ -191,38 +261,57 @@
 
 .name-overlay {
   position: absolute;
-  left: 11%;
-  top: 20%;
-  z-index: -2;
-  /* 强制不换行，防止文字变成细长条 */
-  white-space: nowrap;
+  /* 🚩 直接定位在头像框右侧，且允许它稍微超出边界被父级 overflow 裁切 */
+  right: 40rpx;
+  top: 50%;
+  transform: translateY(-50%); /* 仅垂直居中 */
+
+  display: flex;
+  flex-direction: column; /* 竖向排列 */
+  align-items: center;
+  z-index: 1;
   pointer-events: none;
 }
 
 .nickname {
   display: block;
-  /* writing-mode: vertical-rl; */
-  transform: rotate(-90deg);
-  transform-origin: center center;
-
-  /* 字体设置：超大粗体 */
-  font-size: 100rpx;
+  writing-mode: vertical-rl;
+  font-size: 160rpx;
   font-weight: 900;
+  line-height: 0.8;
   text-transform: uppercase;
-  line-height: 1;
-  letter-spacing: 2rpx;
+  white-space: nowrap;
+  letter-spacing: -8rpx;
 
-  color: rgba(236, 232, 225, 0.12);
-  -webkit-text-stroke: 2rpx rgba(255, 70, 85, 0.4);
+  /* 🚩 1. 增强底色：不再完全透明，给一个极淡的瓦色红 */
+  color: rgba(255, 70, 85, 0.08);
 
-  /* 增加一种“故障感”阴影，让字更有体积感 */
-  text-shadow: 8rpx 0rpx 0rpx rgba(255, 70, 85, 0.1);
+  /* 🚩 2. 强化描边：加粗线条并提升亮度 */
+  -webkit-text-stroke: 2rpx rgba(255, 70, 85, 0.6);
+
+  /* 🚩 3. 核心：外发光 (Glow) 效果，让字从背景中“跳”出来 */
+  /* 使用多层阴影，一层负责厚度，一层负责光晕 */
+  text-shadow:
+    4rpx 0rpx 0rpx rgba(255, 70, 85, 0.2),
+    /* 侧边厚度感 */ 0 0 15rpx rgba(255, 70, 85, 0.4); /* 红色背光感 */
+
+  /* 🚩 4. 增加微弱的渐变，让长文字有头尾变化 */
+  background: linear-gradient(
+    to bottom,
+    #ff4655 0%,
+    rgba(255, 70, 85, 0.3) 50%,
+    rgba(256, 232, 225, 0.8) 100%
+  );
+  -webkit-background-clip: text;
+
+  /* 解决某些机型 background-clip 导致描边消失的问题 */
+  /* 如果发现文字变黑了，请注释掉上面 background 两行 */
 }
 
 /* ================= 统计数据面板 ================= */
 .stats-module {
   width: 100%;
-  margin-top: 40rpx;
+  /* margin-top: 40rpx; */
 }
 .stats-tab {
   background: #1f2326;
@@ -235,11 +324,14 @@
   clip-path: polygon(0 0, calc(100% - 15rpx) 0, 100% 100%, 0 100%);
 }
 .stats-body {
-  background: #ece8e1;
+  /* background: #ece8e1; */
   color: #0f1923;
   display: flex;
-  padding: 20rpx 0;
-  /* 四角战术切边 */
+  flex-direction: column; /* 🚩 核心：改为垂直排列 */
+  padding: 10rpx; /* 给内部留一点缝隙，露出底色边框感 */
+  gap: 4rpx; /* 每一行之间的战术间隙 */
+
+  /* 保持你的四角战术切边 */
   clip-path: polygon(
     15rpx 0,
     100% 0,
@@ -248,6 +340,50 @@
     0 100%,
     0 15rpx
   );
+}
+
+.menu-row {
+  width: 100%; /* 🚩 宽度拉满 */
+  background: #1f2326; /* 深色行背景 */
+  display: flex; /* 内部内容水平排列 */
+  justify-content: space-between; /* 左右两端对齐 */
+  align-items: center;
+  padding: 30rpx 24rpx;
+  box-sizing: border-box;
+  /* 移除 margin-bottom，改用父级的 gap 统一控制 */
+}
+
+/* 针对第一行特殊的“点数”区域进行微调 */
+.point-display {
+  display: flex;
+  align-items: center;
+}
+
+.s-num {
+  font-family: monospace;
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #ff4655; /* 瓦红点亮数据 */
+  margin-right: 12rpx;
+}
+
+.s-lab {
+  font-size: 20rpx;
+  font-weight: 900;
+  color: rgba(236, 232, 225, 0.5);
+  text-transform: uppercase;
+}
+
+.m-title {
+  color: #ece8e1;
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.m-arrow {
+  color: #ff4655;
+  font-size: 24rpx;
+  font-weight: 900;
 }
 .stat-item {
   flex: 1;
@@ -278,8 +414,10 @@
 
 /* ================= 底部菜单列表 ================= */
 .menu-module {
+  box-sizing: border-box;
   width: 100%;
-  margin-top: 40rpx;
+  padding: 0 40rpx;
+  margin-top: 20rpx;
 }
 .menu-group-header {
   display: flex;
@@ -302,11 +440,11 @@
 }
 
 .menu-row {
+  flex: 1;
   background: #1f2326;
-  display: flex;
-  justify-content: space-between;
+  width: 100%;
   align-items: center;
-  padding: 30rpx;
+  padding: 10rpx;
   margin-bottom: 10rpx;
   border-radius: 4rpx;
 }

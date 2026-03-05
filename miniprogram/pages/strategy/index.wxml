@@ -44,7 +44,7 @@
             <view class="panel-info">
                 <view class="panel-title">
                     <text class="map-name">{{maps[currentMapIdx].displayName}}</text>
-                    <text class="map-label">点位推荐</text>
+                    <text class="map-label">通用点位</text>
                 </view>
             </view>
             <view class="panel-action" bindtap="navToAllPoints">
@@ -53,37 +53,45 @@
         </view>
         <view class="hub-content fixed-height">
             <block wx:if="{{recommendPoints.length > 0}}">
-                <view class="tactical-row">
+                <view class="tactical-row atk-row">
                     <view class="side-label atk">攻方</view>
                     <scroll-view class="inner-scroll" scroll-x enhanced show-scrollbar="{{false}}">
                         <view class="mini-card-group">
-                            <view class="mini-card" wx:for="{{atkPoints}}" wx:key="_id" bindtap="navToPointDetail" data-id="{{item._id}}">
-                                <image class="mini-img" src="{{item.resultImg}}" mode="aspectFill" />
-                                <view class="mini-info">
-                                    <text class="mini-name">{{item.title}}</text>
-                                    <text class="mini-hero">{{item.heroName}}</text>
+                            <view class="mini-card {{item.pointType === 'A' ? 'type-a' : (item.pointType === 'B' ? 'type-b' : 'type-other')}}" wx:for="{{atkPoints}}" wx:key="_id" bindtap="navToPointDetail" data-id="{{item._id}}">
+                                <view class="card-accent"></view>
+                                <view class="mini-header">
+                                    <view class="header-left">
+                                        <text class="site-label">{{item.pointType}}点</text>
+                                    </view>
+                                </view>
+                                <view class="mini-main">
+                                    <text class="mini-title">{{item.title}}</text>
                                 </view>
                             </view>
                             <view class="row-empty-hint" wx:if="{{atkPoints.length === 0}}">
-                                暂无数据
+                                <text>NOT_DEPLOYED</text>
                             </view>
                         </view>
                     </scroll-view>
                 </view>
                 <view class="row-divider"></view>
-                <view class="tactical-row">
+                <view class="tactical-row def-row">
                     <view class="side-label def">守方</view>
                     <scroll-view class="inner-scroll" scroll-x enhanced show-scrollbar="{{false}}">
                         <view class="mini-card-group">
-                            <view class="mini-card" wx:for="{{defPoints}}" wx:key="_id" bindtap="navToPointDetail" data-id="{{item._id}}">
-                                <image class="mini-img" src="{{item.resultImg}}" mode="aspectFill" />
-                                <view class="mini-info">
-                                    <text class="mini-name">{{item.title}}</text>
-                                    <text class="mini-hero">{{item.heroName}}</text>
+                            <view class="mini-card {{item.pointType === 'A' ? 'type-a' : (item.pointType === 'B' ? 'type-b' : 'type-other')}}" wx:for="{{defPoints}}" wx:key="_id" bindtap="navToPointDetail" data-id="{{item._id}}">
+                                <view class="card-accent"></view>
+                                <view class="mini-header">
+                                    <view class="header-left">
+                                        <text class="site-label">{{item.pointType}}点</text>
+                                    </view>
+                                </view>
+                                <view class="mini-main">
+                                    <text class="mini-title">{{item.title}}</text>
                                 </view>
                             </view>
-                            <view class="row-empty-hint" wx:if="{{defPoints.length === 0}}">
-                                暂无数据
+                            <view class="row-empty-hint" wx:if="{{atkPoints.length === 0}}">
+                                <text>NOT_DEPLOYED</text>
                             </view>
                         </view>
                     </scroll-view>
@@ -141,6 +149,7 @@
                             </view>
                         </scroll-view>
                     </view>
+                    <view class="tabbar-bottom-spacer"></view>
                 </scroll-view>
             </block>
             <view class="empty-container" wx:else>

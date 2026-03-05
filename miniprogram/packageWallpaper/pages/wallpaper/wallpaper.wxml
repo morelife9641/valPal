@@ -1,41 +1,38 @@
 <view class="container">
     <view class="canvas-full-wrapper base-wrapper" style="{{canvasWrapperStyle}}">
-        <!-- <canvas type="2d" id="testCanvas" class="main-canvas"></canvas> -->
         <canvas type="2d" id="testCanvas" class="main-canvas" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" disable-scroll="true"></canvas>
         <view class="ui-screen">
             <view class="action-menu">
                 <view class="menu-group {{activeCategory === 'agent' ? 'active' : ''}}">
                     <view class="category-label" bindtap="toggleCategory" data-cat="agent">
-                        <view class="label-en">AGENT</view>
-                        <view class="label-cn">英雄</view>
+                        <view class="label-cn">英 雄</view>
                     </view>
                     <scroll-view scroll-x class="sub-options">
-                        <view class="opt-item" bindtap="togglePanel" data-type="hero">切换英雄</view>
-                        <view class="opt-item" bindtap="handleReset">位置重置</view>
-                        <view class="opt-item" bindtap="resetCanvas">清空全部</view>
+                        <view class="opt-item" bindtap="togglePanel" data-type="hero">切 换</view>
+                        <!-- <view class="opt-item" bindtap="handleReset">位置重置</view> -->
                     </scroll-view>
                 </view>
                 <view class="menu-group {{activeCategory === 'cosmetic' ? 'active' : ''}}">
                     <view class="category-label" bindtap="toggleCategory" data-cat="cosmetic">
-                        <view class="label-en">GEAR</view>
-                        <view class="label-cn">装饰</view>
+                        <!-- <view class="label-en">GEAR</view> -->
+                        <view class="label-cn">装 饰</view>
                     </view>
                     <scroll-view scroll-x class="sub-options">
-                        <view class="opt-item" bindtap="openCardPanel">卡面</view>
-                        <view class="opt-item" bindtap="togglePanel" data-type="weapon">枪械</view>
-                        <view class="opt-item" bindtap="showStickerPanel">贴纸</view>
-                        <view class="opt-item" bindtap="onCardReset">还原</view>
+                        <view class="opt-item" bindtap="openCardPanel">卡 面</view>
+                        <view class="opt-item" bindtap="togglePanel" data-type="weapon">枪 械</view>
+                        <!-- <view class="opt-item" bindtap="showStickerPanel">贴纸</view> -->
                     </scroll-view>
                 </view>
                 <view class="menu-group {{activeCategory === 'system' ? 'active' : ''}}">
                     <view class="category-label" bindtap="toggleCategory" data-cat="system">
-                        <view class="label-en">SYSTEM</view>
-                        <view class="label-cn">操作</view>
+                        <!-- <view class="label-en">SYSTEM</view> -->
+                        <view class="label-cn">操 作</view>
                     </view>
                     <scroll-view scroll-x class="sub-options">
-                        <view class="opt-item highlight" bindtap="saveCanvas">保存图片</view>
-                        <view class="opt-item" bindtap="openSaveModal">上传素材</view>
-                        <view class="opt-item" bindtap="clearDecorations">清除装饰</view>
+                        <view class="opt-item" bindtap="resetAll">重 制</view>
+                        <view class="opt-item" bindtap="openSaveModal">上 传</view>
+                        <view class="opt-item highlight" bindtap="saveCanvas">导 出</view>
+                        <!-- <view class="opt-item" bindtap="clearDecorations">清除装饰</view> -->
                     </scroll-view>
                 </view>
             </view>
@@ -51,21 +48,24 @@
                         {{item}}
                     </view>
                 </scroll-view>
-                <scroll-view scroll-x class="selector-view" enhanced show-scrollbar="{{false}}" bindscrolltolower="loadMoreWeapons">
-                    <view class="item-list">
-                        <view wx:for="{{filteredList}}" wx:key="uuid" class="item-card {{currentWeapon.uuid === item.uuid ? 'selected' : ''}}" bindtap="selectWeapon" data-item="{{item}}">
-                            <image src="{{item.displayIconLocal || item.displayIcon}}" class="agent-icon" mode="aspectFit"></image>
+                <scroll-view scroll-y class="selector-view-vertical" enhanced show-scrollbar="{{false}}" bindscrolltolower="loadMoreWeapons">
+                    <view class="item-grid">
+                        <view wx:for="{{filteredList}}" wx:key="uuid" class="item-card-vertical {{currentWeapon.uuid === item.uuid ? 'selected' : ''}}" bindtap="selectWeapon" data-item="{{item}}">
+                            <view class="icon-box">
+                                <image src="{{item.displayIconLocal || item.displayIcon}}" class="agent-icon" mode="aspectFit"></image>
+                            </view>
                             <text class="agent-name">{{item.skinName}}</text>
                         </view>
                     </view>
+                    <view class="load-more-tip" wx:if="{{!isWeaponOver}}">正在扫描档案...</view>
                 </scroll-view>
                 <view class="chroma-bar-wrapper" wx:if="{{currentWeapon && currentWeapon.chromas.length > 0}}">
-                    <text class="chroma-tip">切换颜色:</text>
-                    <scroll-view scroll-x class="chroma-scroll">
+                    <text class="chroma-tip">3131切换颜色:</text>
+                    <view class="chroma-scroll">
                         <view wx:for="{{currentWeapon.chromas}}" wx:key="chromaUuid" class="chroma-dot {{tempChromaUuid === item.chromaUuid ? 'active' : ''}}" bindtap="changeChroma" data-chroma="{{item}}">
                             <image src="{{item.swatch}}" class="swatch-img"></image>
                         </view>
-                    </scroll-view>
+                    </view>
                 </view>
             </view>
         </view>

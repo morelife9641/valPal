@@ -231,6 +231,7 @@ Page({
 
   // 排行榜页面的跳转逻辑
   navToAgentStrategy(e) {
+    return;
     const statItem = e.currentTarget.dataset.agent;
     const { maps, currentMapIdx, agentList } = this.data;
 

@@ -1,6 +1,5 @@
 const db = wx.cloud.database();
 import { availableTags } from "../../../config/tags";
-// import { PLAYER_CARDS } from "../../../config/player_cards_index";
 
 const WEAPON_MAP = {
   近战: "melee",
@@ -232,9 +231,6 @@ Page({
     this.setData({
       activeCategory: this.data.activeCategory === cat ? "" : cat,
     });
-
-    // 震动反馈提升质感
-    // wx.vibrateShort({ type: 'light' });
   },
 
   /**
@@ -673,7 +669,10 @@ Page({
   },
 
   async selectWeapon(e) {
+    console.log(e);
+
     const item = e.currentTarget.dataset.item;
+    const skinName = e.currentTarget.dataset.item.skinName;
     if (!item) return;
 
     // 1. 开启加载提示，防止用户重复点击
@@ -736,6 +735,10 @@ Page({
           // 7. 渲染层同步后，触发 Canvas 重绘
           this.drawWithLocalFiles();
           wx.hideLoading();
+          wx.showToast({
+            title: `已装配 ${skinName}`,
+            icon: "none",
+          });
 
           // 可选：添加成功后自动关闭选择弹窗
           // this.setData({ showPopup: false });
@@ -1069,22 +1072,78 @@ Page({
     );
   },
 
-  resetCanvas() {
+  onCardReset() {
+    const agent = this.data.currentAgent;
+    let gradientStyle = "background-color: #000;"; // 默认保底色
+
+    // 如果当前英雄有渐变色配置，重新计算它
+    if (agent && agent.backgroundGradientColors?.length > 0) {
+      const colors = agent.backgroundGradientColors.map((color) => {
+        const r = parseInt(color.substr(0, 2), 16),
+          g = parseInt(color.substr(2, 2), 16),
+          b = parseInt(color.substr(4, 2), 16),
+          a = parseInt(color.substr(6, 2), 16) / 255;
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+      });
+      gradientStyle = `background: linear-gradient(to bottom, ${colors.join(", ")});`;
+    }
+
+    this.setData(
+      {
+        usePlayerCard: false,
+        currentCard: null,
+        showCardPanel: false,
+        // 关键：把样式还原回英雄的渐变色
+        canvasWrapperStyle: gradientStyle,
+      },
+      () => {
+        // 重新触发绘制，此时 drawWithLocalFiles 内部会因为 usePlayerCard 为 false 而去画英雄背景
+        this.drawWithLocalFiles();
+      },
+    );
+  },
+
+  resetAll() {
     wx.showModal({
-      title: "提示",
-      content: "确定要清空所有装饰吗？",
+      title: "确认重置",
+      content: "将清空所有已装配的枪械并还原背景样式，确定吗？",
+      confirmColor: "#ff4655", // 使用瓦罗兰特红增强视觉暗示
       success: (res) => {
         if (res.confirm) {
-          // 清空数组
+          // 1. 计算当前英雄的初始渐变色（回溯逻辑）
+          const agent = this.data.currentAgent;
+          let gradientStyle = "background-color: #000;";
+
+          if (agent && agent.backgroundGradientColors?.length > 0) {
+            const colors = agent.backgroundGradientColors.map((color) => {
+              const r = parseInt(color.substr(0, 2), 16),
+                g = parseInt(color.substr(2, 2), 16),
+                b = parseInt(color.substr(4, 2), 16),
+                a = parseInt(color.substr(6, 2), 16) / 255;
+              return `rgba(${r}, ${g}, ${b}, ${a})`;
+            });
+            gradientStyle = `background: linear-gradient(to bottom, ${colors.join(", ")});`;
+          }
+
+          // 2. 批量执行状态重置
           this.setData(
             {
+              // 枪械部分重置
               activeWeapons: [],
               selectedWeaponIndex: -1,
+              // 卡面与背景还原
+              usePlayerCard: false,
+              currentCard: null,
+              showCardPanel: false,
+              canvasWrapperStyle: gradientStyle,
             },
             () => {
-              // 清空所有武器缓存
+              // 3. 清理物理缓存
               ImageCache.weapons = {};
+              // 4. 重新触发 Canvas 绘制
               this.drawWithLocalFiles();
+
+              wx.showToast({ title: "已恢复初始化", icon: "none" });
             },
           );
         }
@@ -1233,8 +1292,6 @@ Page({
     }
   },
 
-  //卡面逻辑
-
   // 切换回英雄背景
   resetToHeroBg() {
     this.setData({
@@ -1247,52 +1304,11 @@ Page({
 
   openCardPanel() {
     this.setData({ showCardPanel: true });
-    console.log(1);
   },
 
   // 关闭弹窗
   closeCardPanel() {
     this.setData({ showCardPanel: false });
-  },
-
-  // 重置回英雄背景
-  onCardReset() {
-    this.setData({
-      usePlayerCard: false,
-      currentCard: null,
-      showCardPanel: false,
-    });
-    this.drawWithLocalFiles();
-  },
-  onCardReset() {
-    const agent = this.data.currentAgent;
-    let gradientStyle = "background-color: #000;"; // 默认保底色
-
-    // 如果当前英雄有渐变色配置，重新计算它
-    if (agent && agent.backgroundGradientColors?.length > 0) {
-      const colors = agent.backgroundGradientColors.map((color) => {
-        const r = parseInt(color.substr(0, 2), 16),
-          g = parseInt(color.substr(2, 2), 16),
-          b = parseInt(color.substr(4, 2), 16),
-          a = parseInt(color.substr(6, 2), 16) / 255;
-        return `rgba(${r}, ${g}, ${b}, ${a})`;
-      });
-      gradientStyle = `background: linear-gradient(to bottom, ${colors.join(", ")});`;
-    }
-
-    this.setData(
-      {
-        usePlayerCard: false,
-        currentCard: null,
-        showCardPanel: false,
-        // 关键：把样式还原回英雄的渐变色
-        canvasWrapperStyle: gradientStyle,
-      },
-      () => {
-        // 重新触发绘制，此时 drawWithLocalFiles 内部会因为 usePlayerCard 为 false 而去画英雄背景
-        this.drawWithLocalFiles();
-      },
-    );
   },
 
   async onCardSelect(e) {

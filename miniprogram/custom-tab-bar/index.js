@@ -9,15 +9,15 @@ Component({
     list: [
       {
         pagePath: "pages/strategy/index",
-        text: "攻略",
+        text: "首页",
         iconPath: "../assets/index.png",
         selectedIconPath: "../assets/index_active.png",
       },
       {
         pagePath: "pages/news/index",
         text: "赛事",
-        iconPath: "../assets/news.png",
-        selectedIconPath: "../assets/news_active.png",
+        iconPath: "../assets/公开比赛.png",
+        selectedIconPath: "../assets/公开比赛 (1).png",
       },
       {
         pagePath: "pages/skins/index",
@@ -28,8 +28,8 @@ Component({
       {
         pagePath: "pages/tools/index",
         text: "我的",
-        iconPath: "../assets/pinpoint.png",
-        selectedIconPath: "../assets/pinpoint_active.png",
+        iconPath: "../assets/个人 (1).png",
+        selectedIconPath: "../assets/个人.png",
       },
     ],
   },

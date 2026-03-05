@@ -10,6 +10,7 @@ Page({
       title: "",
       side: "atk",
       mapId: "",
+      pointType: "A", // 默认选中A区
       markPoints: [],
       standImg: [], // [{url: '', memo: ''}]
       enemyImg: [], // 修正后的变量名
@@ -18,46 +19,68 @@ Page({
   },
 
   onLoad() {
-    // 1. 基础数据加载
-    const maps = Array.isArray(mapsData) ? mapsData : mapsData.maps || [];
+    // 1. 获取原始数据
+    const rawMaps = Array.isArray(mapsData) ? mapsData : mapsData.maps || [];
     const agents = Array.isArray(AGENTS_CONFIG)
       ? AGENTS_CONFIG
       : AGENTS_CONFIG.agents || [];
 
-    // 2. 默认选中第一张地图
-    let defaultMap = null;
+    // 2. 定义目标地图白名单 (只要这些 key 对应的 displayName)
+    const targetMaps = {
+      幽邃地窟: "abyss",
+      霓虹町: "split",
+      微风岛屿: "breeze",
+      深海明珠: "pearl",
+      隐世修所: "haven",
+      源工重镇: "bind",
+      盐海矿镇: "corrode",
+    };
+    const allowedNames = Object.keys(targetMaps);
+
+    // 3. 过滤地图：只保留白名单内的地图，并提取必要字段
+    const filteredMaps = rawMaps
+      .filter((m) => allowedNames.includes(m.displayName))
+      .map((m) => ({
+        uuid: m.uuid,
+        displayName: m.displayName,
+        displayIcon: m.displayIcon, // 绘图/预览底图
+        listViewIconTall: m.listViewIconTall, // 备用
+      }));
+
+    // 4. 初始化默认选中状态
     let mapIndex = -1;
+    let defaultMap = null;
     let currentMapIcon = "";
 
-    if (maps.length > 0) {
+    if (filteredMaps.length > 0) {
       mapIndex = 0;
-      defaultMap = maps[0];
-      currentMapIcon = defaultMap.displayIcon; // 获取地图底图
+      defaultMap = filteredMaps[0];
+      currentMapIcon = defaultMap.displayIcon;
     }
 
-    // 3. 统一 setData
+    // 5. 统一同步数据
     this.setData({
-      maps: maps,
+      maps: filteredMaps,
       allAgents: agents,
 
-      // 地图相关初始化
+      // 地图选择器状态
       mapIndex: mapIndex,
       mapName: defaultMap ? defaultMap.displayName : "",
       currentMapIcon: currentMapIcon,
 
-      // 初始化 formData
+      // 初始化提交给后端的表单数据结构
       "formData.mapId": defaultMap ? defaultMap.uuid : "",
-      "formData.side": "atk", // 默认进攻方
+      "formData.side": "atk",
       "formData.markPoints": [],
       "formData.standImg": [],
       "formData.aimImg": [],
       "formData.enemyImg": [],
       "formData.resultImg": [],
+      "formData.title": "",
+      "formData.desc": "",
     });
 
-    // 4. 关键：由于默认选了地图，需要初始化地图组件的状态
-    // 如果之前写了 initMapCanvas 等初始化方法，在这里调用
-    console.log("默认选中地图:", this.data.mapName);
+    console.log("添加页初始化完成，默认地图:", this.data.mapName);
   },
 
   onInputChange(e) {
@@ -100,6 +123,15 @@ Page({
         }
       },
     });
+  },
+
+  onPointSelect(e) {
+    const point = e.currentTarget.dataset.point;
+    this.setData({
+      "formData.pointType": point,
+    });
+    // 增加震动反馈
+    // wx.vibrateShort({ type: 'light' });
   },
 
   // 1. 切换阵营
@@ -440,14 +472,26 @@ Page({
     });
   },
 
+  onAnonymousChange(e) {
+    this.setData({
+      "formData.isAnonymous": e.detail.value,
+    });
+  },
+
   async submitForm() {
     const { formData, mapName } = this.data;
-
+    const userInfo = wx.getStorageSync("userInfo") || {};
+    const isAnonymous = formData.isAnonymous || false;
     // 1. 基础校验
     if (!formData.title)
       return wx.showToast({ title: "请输入方案标题", icon: "none" });
     if (!formData.mapId)
       return wx.showToast({ title: "请选择地图", icon: "none" });
+
+    if (!formData.pointType) {
+      wx.showToast({ title: "请选择区域", icon: "none" });
+      return;
+    }
     if (formData.standImg.length === 0)
       // return wx.showToast({ title: "请上传至少一张站位图", icon: "none" });
 
@@ -482,6 +526,20 @@ Page({
         updateTime: new Date(),
         status: 1,
         _keywords: [formData.title, mapName].join(","),
+        creator: {
+          nickname: isAnonymous ? "匿名特工" : userInfo.nickname || "未知特工",
+          avatar: isAnonymous
+            ? "/images/default-avatar.png"
+            : userInfo.avatarUrl || "", // 匿名则用默认头像
+          _id: userInfo._id || "", // 方便后续点击头像跳转个人主页
+          isAnonymous: isAnonymous,
+        },
+        stats: {
+          up: 0, // 赞同 (实战有效)
+          down: 0, // 质疑 (实战存疑)
+          hot: 0, // 综合热度分数 (用于算法排序)
+          view: 0, // 浏览量
+        },
       };
 
       const db = wx.cloud.database();

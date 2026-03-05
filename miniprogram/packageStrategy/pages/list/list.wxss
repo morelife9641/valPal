@@ -1,245 +1,489 @@
+/* 全局容器 */
 .detail-container {
   min-height: 100vh;
-  background-color: #0f1923;
-  padding-top: 120rpx; /* 为顶部固定栏留位置 */
+  background-color: #0f1923; /* 瓦罗兰特深蓝黑 */
+  display: flex;
+  flex-direction: column;
 }
 
-/* 顶部筛选栏 */
-.filter-sticky-bar {
-  position: fixed;
+.header-filter-row {
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 110rpx;
-  background: rgba(15, 25, 35, 0.95);
-  backdrop-filter: blur(10px);
   z-index: 100;
-  border-bottom: 1rpx solid rgba(236, 232, 225, 0.1);
-  padding: 0 30rpx;
-  display: flex;
-  align-items: center;
-}
 
-.filter-row {
-  display: flex;
-  width: 100%;
-  gap: 20rpx;
-}
-.flex-1 {
-  flex: 1;
-}
-.flex-2 {
-  flex: 2;
-}
+  /* 🚩 关键：去掉外边距，改用内边距 */
+  margin: 0;
+  padding: 20rpx;
 
-.filter-item {
-  background: rgba(236, 232, 225, 0.05);
-  height: 70rpx;
-  padding: 0 20rpx;
-  border: 1rpx solid rgba(236, 232, 225, 0.1);
-}
+  /* 🚩 底色优化：使用半透明 + 毛玻璃，减少视觉上的“沉重感” */
+  /* background: rgba(31, 35, 38, 0.9); */
+  background: #0f1923;
+  backdrop-filter: blur(20rpx); /* 现代手机会有磨砂玻璃感 */
 
-.filter-inner {
-  height: 100%;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  font-size: 22rpx;
+  align-items: center;
+  box-sizing: border-box;
+
+  /* 🚩 移除硬边框，改用更深一点的投影或极细线 */
+  border-bottom: 1rpx solid rgba(236, 232, 225, 0.08);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.4);
 }
 
-.filter-inner .label {
-  color: rgba(236, 232, 225, 0.4);
-  margin-right: 10rpx;
+/* 容器：平分三份 */
+.filter-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* padding: 20rpx; */
+  gap: 15rpx; /* 按钮间距 */
+  background: #0f1923; /* 瓦蓝背景底色 */
+  width: 100%;
 }
-.filter-inner .value {
+
+.filter-view-btn {
+  flex: 1; /* 核心：三个容器平分 */
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 15rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative; /* 为 X 号定位 */
+  /* box-sizing: border-box; */
+  transition: all 0.2s ease;
+}
+
+/* 激活状态 */
+.filter-view-btn.active {
+  border-color: #ff4655;
+  background: rgba(255, 70, 85, 0.05);
+}
+
+.filter-view-btn:nth-child(1) {
+  flex: 1.1;
+}
+
+/* 地图按钮：通过 nth-child(2) 增加一个汉字的宽度权重 */
+.filter-view-btn:nth-child(2) {
+  flex: 1.5; /* 增加权重，把空间抢过来 */
+}
+
+/* 阵营和位置按钮：稍微收缩 */
+.filter-view-btn:nth-child(3),
+.filter-view-btn:nth-child(4) {
+  flex: 0.9; /* 稍微减小比例 */
+}
+
+/* 4. 细节优化：缩减文字间距 */
+.btn-value {
+  font-size: 22rpx; /* 如果还是挤，可以微调小 1rpx */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 左侧内容区：Label 和 Value 垂直堆叠 */
+.btn-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  overflow: hidden; /* 防止文字溢出 */
+}
+
+.btn-label {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+  margin-bottom: 4rpx;
+}
+
+.btn-value {
+  font-size: 24rpx;
   color: #ece8e1;
-  font-weight: 900;
+  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
-.filter-inner .value.atk {
+
+.filter-view-btn.active .btn-value {
   color: #ff4655;
 }
-.filter-inner .value.def {
+
+/* 右侧删除号：绝对定位，保证不占空间导致容器抖动 */
+.clear-icon {
+  position: absolute;
+  right: 10rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 24rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4rpx;
+  z-index: 2;
+}
+
+.clear-icon:active {
+  background: #ff4655;
+  color: #fff;
+}
+
+/* 添加 */
+
+.add-btn-wrap {
+  width: 90rpx;
+  height: 90rpx;
+  background: #ff4655;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 15rpx;
+}
+
+.add-icon {
+  font-size: 40rpx;
+  color: #ece8e1;
+}
+
+.label {
+  font-size: 16rpx;
+  color: #ff4655; /* 标签用红色，更有电竞感 */
+  font-weight: 900;
+  letter-spacing: 2rpx;
+  margin-bottom: 4rpx;
+}
+
+.value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.value {
+  font-size: 28rpx;
+  color: #ece8e1;
+  font-weight: bold;
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 颜色区分 */
+.value.atk {
+  color: #ff4655;
+  text-shadow: 0 0 10rpx rgba(255, 70, 85, 0.3);
+}
+.value.def {
   color: #00eeff;
+  text-shadow: 0 0 10rpx rgba(0, 238, 255, 0.3);
 }
 
-/* 卡片布局 - 增加图片占比 */
-.strategy-list {
+.arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-top: 8rpx solid rgba(236, 232, 225, 0.5);
+}
+
+/* --- 2. 列表内容区域 --- */
+/* 列表容器 */
+.content-scroll-box {
   padding: 20rpx 30rpx;
+  background: #0f1923;
 }
 
-/* 卡片基础：增加一点外边距和圆角感 */
+/* 卡片主体 */
 .strategy-card {
   display: flex;
-  height: 240rpx; /* 再次微调高度，平衡比例 */
-  background: #1f2326;
-  margin-bottom: 30rpx;
-  border: 1rpx solid rgba(236, 232, 225, 0.1);
+  background: rgba(236, 232, 225, 0.03); /* 极淡的底色 */
+  margin-bottom: 24rpx;
+  height: 180rpx; /* 缩减高度，更显精致 */
   position: relative;
-  clip-path: polygon(0 0, 100% 0, 100% 88%, 97% 100%, 0 100%);
+  /* border: 1rpx solid rgba(236, 232, 225, 0.05); */
+}
+.strategy-card.atk {
+  border-top: 2rpx solid #ff4655; /* 加粗顶部色条，增加权重 */
+
+  /* 给左侧一个非常淡的红色渐变，勾勒轮廓 */
+  background: linear-gradient(135deg, rgba(255, 70, 85, 0.05) 0%, #16212b 40%);
 }
 
+/* 防守方 */
+.strategy-card.def {
+  border-top: 2rpx solid #00eeff;
+  /* border-bottom: 2rpx solid #00eeff; */
+
+  background: linear-gradient(135deg, rgba(0, 238, 255, 0.05) 0%, #16212b 40%);
+}
+
+/* 左侧地图图 */
 .card-left {
-  width: 200rpx; /* 增加图片宽度到 200rpx */
+  width: 180rpx;
   height: 100%;
   position: relative;
   flex-shrink: 0;
-  background: #000;
 }
 
 .map-preview-img {
   width: 100%;
   height: 100%;
-  opacity: 0.7; /* 稍微压低亮度，突出 Tag */
+  filter: grayscale(0.3) brightness(0.8); /* 稍微压暗，更有质感 */
 }
 
-/* --- 新增：文字 Tag 样式 --- */
-.side-tag-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 4rpx 15rpx;
-  font-size: 16rpx;
-  font-weight: 900;
-  letter-spacing: 2rpx;
-  z-index: 10;
-  /* 瓦罗兰特式的斜切感 */
-  clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
-}
-
-/* 进攻方：红底白字 */
-.side-tag-label.atk {
-  background: #ff4655;
-  color: #fff;
-}
-
-/* 防守方：青蓝底黑字（高对比） */
-.side-tag-label.def {
-  background: #00eeff;
-  color: #0f1923;
-}
-
-/* 侧边颜色指示条 */
-.side-indicator {
+/* 阵营指示条：改为细长的侧边条 */
+.side-indicator-bar {
   position: absolute;
   left: 0;
   top: 0;
   width: 6rpx;
   height: 100%;
-  z-index: 5;
 }
-.side-indicator.atk {
+.side-indicator-bar.atk {
   background: #ff4655;
-  box-shadow: 0 0 15rpx #ff4655;
+  box-shadow: 4rpx 0 10rpx rgba(255, 70, 85, 0.3);
 }
-.side-indicator.def {
+.side-indicator-bar.def {
   background: #00eeff;
-  box-shadow: 0 0 15rpx #00eeff;
+  box-shadow: 4rpx 0 10rpx rgba(0, 238, 255, 0.3);
 }
 
-/* --- 右侧内容区域优化 --- */
+/* 右侧内容区 */
 .card-right {
   flex: 1;
-  padding: 24rpx;
+  padding: 20rpx 24rpx;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-width: 0;
+}
+
+/* 第一行：标题 + 星星 */
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .card-title {
-  font-size: 32rpx;
-  font-weight: 900;
+  font-size: 30rpx;
+  font-weight: 800;
   color: #ece8e1;
-  display: block;
-  margin-bottom: 4rpx;
-}
-
-.card-map-name {
-  font-size: 18rpx;
-  font-weight: 700;
-  color: rgba(236, 232, 225, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: "Oswald", sans-serif; /* 模拟瓦罗兰特字体 */
   text-transform: uppercase;
 }
 
-.stat-group {
-  display: flex;
-  gap: 40rpx;
+.favorite-star {
+  font-size: 36rpx;
+  color: rgba(255, 255, 255, 0.15);
+  margin-top: -6rpx;
 }
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-item .num {
-  font-size: 32rpx;
-  font-weight: 900;
-  color: #ece8e1;
-  line-height: 1;
-}
-
-.stat-item .lab {
-  font-size: 14rpx;
+.favorite-star.active {
   color: #ff4655;
-  font-weight: 700;
-  margin-top: 6rpx;
 }
 
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.view-action {
+/* 第二行：地图 + 点位Tag */
+.card-mid-row {
   display: flex;
   align-items: center;
-  gap: 10rpx;
+  gap: 16rpx;
+}
+
+.map-label {
+  font-size: 20rpx;
+  color: rgba(236, 232, 225, 0.5);
+  font-weight: 600;
+}
+
+.point-tag {
   font-size: 18rpx;
+  background: rgba(236, 232, 225, 0.1);
+  color: #ece8e1;
+  padding: 2rpx 12rpx;
+  border-radius: 2rpx;
   font-weight: 900;
-  color: #ff4655;
-  border-bottom: 1rpx solid #ff4655;
-  padding-bottom: 4rpx;
 }
 
-.card-map-name {
-  font-size: 18rpx;
-  color: #ff4655;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
-.card-footer {
+/* 第三行：时间 + 阵营文字 */
+.card-bottom-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
 
-.date {
+.side-text {
+  font-size: 18rpx;
+  font-weight: 900;
+  letter-spacing: 2rpx;
+}
+.side-text.atk {
+  color: #ff4655;
+}
+.side-text.def {
+  color: #00eeff;
+}
+
+.date-text {
   font-size: 18rpx;
   color: rgba(236, 232, 225, 0.2);
   font-family: monospace;
 }
 
-.go-btn {
-  font-size: 18rpx;
-  font-weight: 900;
-  color: #ff4655;
-  border-bottom: 2rpx solid #ff4655;
+/* 缺省 */
+/* 1. 容器居中 */
+.presets-empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+  width: 100%;
 }
 
-/* 悬浮按钮 */
-.fab-btn {
-  position: fixed;
-  right: 40rpx;
-  bottom: 60rpx;
-  width: 100rpx;
-  height: 100rpx;
-  background: #ff4655;
-  border-radius: 50%;
+/* 2. 战术边框 */
+.tactical-frame {
+  position: relative;
+  width: 240rpx;
+  height: 240rpx;
+  background: rgba(255, 70, 85, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 60rpx;
+}
+
+/* 绘制四个角的小红点/折线 */
+.corner-t-l,
+.corner-t-r,
+.corner-b-l,
+.corner-b-r {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+  border: 2rpx solid #ff4655;
+}
+.corner-t-l {
+  top: -2rpx;
+  left: -2rpx;
+  border-right: 0;
+  border-bottom: 0;
+}
+.corner-t-r {
+  top: -2rpx;
+  right: -2rpx;
+  border-left: 0;
+  border-bottom: 0;
+}
+.corner-b-l {
+  bottom: -2rpx;
+  left: -2rpx;
+  border-right: 0;
+  border-top: 0;
+}
+.corner-b-r {
+  bottom: -2rpx;
+  right: -2rpx;
+  border-left: 0;
+  border-top: 0;
+}
+
+/* 3. 核心图标与动画 */
+.empty-icon-wrapper {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 60rpx;
-  color: #fff;
-  box-shadow: 0 10rpx 30rpx rgba(255, 70, 85, 0.4);
+  overflow: hidden;
+}
+
+/* 3. 核心图标与动画 */
+.empty-icon-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.pulse-ring {
+  width: 80rpx;
+  height: 80rpx;
+  border: 2rpx solid rgba(255, 70, 85, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s infinite ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.scan-line-v {
+  position: absolute;
+  width: 2rpx;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, #ff4655, transparent);
+  left: 50%;
+  animation: scanLR 3s infinite linear;
+}
+
+@keyframes scanLR {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* 4. 文字组 */
+.text-group {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.empty-main-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #ff4655;
+  /* font-style: italic; */
+  letter-spacing: 4rpx;
+}
+
+.empty-sub-title {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 10rpx;
+}
+
+.deco-bar {
+  width: 60rpx;
+  height: 4rpx;
+  background: #ff4655;
+  margin: 20rpx auto;
 }

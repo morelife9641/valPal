@@ -11,7 +11,7 @@
   background: #ff4655;
   color: #fff;
   font-size: 20rpx;
-  font-weight: 900;
+  /* font-weight: 900; */
   text-align: center;
   padding: 10rpx 0;
   margin: 0 -30rpx 30rpx;
@@ -20,7 +20,7 @@
 
 /* 头部样式 */
 .top-header {
-  padding: 40rpx 0;
+  padding: 20rpx 0;
   border-bottom: 1rpx solid rgba(236, 232, 225, 0.1);
 }
 .title-row {
@@ -31,7 +31,7 @@
 .main-title {
   font-size: 44rpx;
   font-weight: 900;
-  font-style: italic;
+  /* font-style: italic; */
   color: #ff4655;
   flex: 1;
 }
@@ -40,6 +40,7 @@
   padding: 4rpx 12rpx;
   background: rgba(236, 232, 225, 0.1);
   font-weight: 900;
+  margin-top: 10rpx;
 }
 .side-tag.atk {
   color: #ff4655;
@@ -60,7 +61,7 @@
 
 /* 模块标题 */
 .module-section {
-  margin-top: 50rpx;
+  margin-top: 20rpx;
 }
 .module-head {
   display: flex;
@@ -80,7 +81,7 @@
 /* --- 地图标点核心容器 --- */
 .map-mark-container {
   width: 100%;
-  height: 600rpx;
+  height: 500rpx;
   background: #05090d;
   border: 1rpx solid rgba(236, 232, 225, 0.1);
   position: relative;
@@ -197,12 +198,12 @@
 
 /* 备注盒子 */
 .memo-box {
-  margin-top: 2rpx;
   background: rgba(236, 232, 225, 0.03);
-  padding: 24rpx;
+  padding: 12rpx;
   border-left: 2rpx solid rgba(255, 70, 85, 0.5);
   display: flex;
   gap: 15rpx;
+  align-items: center;
 }
 .memo-deco {
   width: 4rpx;
@@ -222,4 +223,174 @@
   padding: 30rpx;
   font-size: 28rpx;
   line-height: 1.8;
+}
+
+.tactical-assess-widget {
+  position: fixed;
+  right: 30rpx;
+  bottom: calc(100rpx + env(safe-area-inset-bottom)); /* 避开底部操作区 */
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  width: 90rpx; /* 窄窄的小方块 */
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* 隐藏状态：缩回右侧边缘 */
+.widget-hidden {
+  transform: translateX(110rpx);
+  opacity: 0.5;
+}
+
+.widget-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 25, 35, 0.9);
+  backdrop-filter: blur(15rpx);
+  border: 1rpx solid rgba(236, 232, 225, 0.15);
+  /* 🚩 瓦罗兰特风格切角 */
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 70% 100%, 0 100%);
+  z-index: -1;
+}
+
+.widget-item {
+  height: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.w-count {
+  font-size: 24rpx;
+  font-weight: 900;
+  font-family: "DIN Alternate", monospace;
+  color: rgba(236, 232, 225, 0.8);
+}
+
+.w-icon {
+  font-size: 20rpx;
+  margin: 4rpx 0;
+  opacity: 0.6;
+}
+
+.widget-divider {
+  height: 1rpx;
+  width: 50%;
+  align-self: center;
+  background: rgba(236, 232, 225, 0.1);
+}
+
+/* 🚩 激活状态：注入能量光 */
+.widget-item.up.active {
+  color: #00eeff;
+  background: rgba(0, 238, 255, 0.15);
+  text-shadow: 0 0 10rpx rgba(0, 238, 255, 0.5);
+}
+
+.widget-item.down.active {
+  color: #ff4655;
+  background: rgba(255, 70, 85, 0.15);
+  text-shadow: 0 0 10rpx rgba(255, 70, 85, 0.5);
+}
+
+/* 装饰：激活时左侧的小竖条 */
+.widget-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 4rpx;
+  background: currentColor;
+}
+
+.tactical-horizontal-widget {
+  position: fixed;
+  right: 30rpx;
+  bottom: calc(120rpx + env(safe-area-inset-bottom));
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  height: 80rpx;
+  min-width: 240rpx;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* 隐藏状态：向右滑出并淡出 */
+.widget-hidden {
+  transform: translateX(50rpx);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.h-widget-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 25, 35, 0.9);
+  backdrop-filter: blur(12rpx);
+  border: 1rpx solid rgba(236, 232, 225, 0.2);
+  /* 🚩 战术切角：右上和左下直角，右下大切角 */
+  /* clip-path: polygon(0 0, 100% 0, 100% 60%, 85% 100%, 0 100%); */
+  z-index: -1;
+}
+
+.h-widget-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  height: 100%;
+  padding: 0 20rpx;
+  transition: all 0.2s;
+}
+
+.h-count {
+  font-size: 28rpx;
+  font-weight: 900;
+  /* font-family: "DIN Alternate", monospace; */
+  color: #ece8e1;
+}
+
+.h-icon {
+  font-size: 20rpx;
+  opacity: 0.7;
+}
+
+.h-divider {
+  width: 1rpx;
+  height: 30rpx;
+  background: rgba(236, 232, 225, 0.2);
+}
+
+/* 🚩 激活态颜色 */
+.h-widget-item.up.active {
+  color: #00eeff;
+  background: rgba(0, 238, 255, 0.15);
+}
+
+.h-widget-item.down.active {
+  color: #ff4655;
+  background: rgba(255, 70, 85, 0.15);
+}
+
+/* 激活时顶部的亮条指示 */
+.h-widget-item.active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 4rpx;
+  background: currentColor;
+  box-shadow: 0 0 8rpx currentColor;
 }

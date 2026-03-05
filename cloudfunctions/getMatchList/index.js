@@ -5,7 +5,7 @@ cloud.init({ env: cloud.DYNAMIC_TYPE_ENV });
 
 exports.main = async (event, context) => {
   const url =
-    "https://val.native.game.qq.com/esports/v1/data/VAL_Match_1000055.json";
+    "https://val.native.game.qq.com/esports/v1/data/VAL_Match_1000058.json";
 
   try {
     const res = await axios.get(url, {

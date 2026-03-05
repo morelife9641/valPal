@@ -21,22 +21,24 @@
                     </view>
                     <view class="middle-vs">
                         <view class="v-team">
-                            <image class="v-logo" src="../../assets/logos/{{item.teamA.name}}.png" mode="aspectFit" />
+                            <image class="v-logo" src="{{item.teamA.logoUrl || '../../assets/logos/' + item.teamA.name + '.png'}}" mode="aspectFit" binderror="onLogoError" data-team="teamA" data-index="{{index}}" />
                             <text class="v-name">{{item.teamA.name}}</text>
                         </view>
                         <view class="v-score-box">
                             <view class="v-score">{{item.teamA.score}} : {{item.teamB.score}}</view>
-                            <view class="tag {{item.status == 2 ? 'live' : ''}}">
-                                {{item.status == 3 ? '已结束' : (item.status == 2 ? '进行中' : '未开始')}}
+                            <view class="tag {{item.status == 2 ? '正在进行' : ''}}">
+                                {{item.status == 3 ? '已结束' : (item.status == 2 ? '正在进行' : '即将到来')}}
                             </view>
                         </view>
                         <view class="v-team">
-                            <image class="v-logo" src="../../assets/logos/{{item.teamB.name}}.png" mode="aspectFit" />
+                            <image class="v-logo" src="{{item.teamB.logoUrl || '../../assets/logos/' + item.teamB.name + '.png'}}" mode="aspectFit" binderror="onLogoError" data-team="teamB" data-index="{{index}}" />
                             <text class="v-name">{{item.teamB.name}}</text>
                         </view>
                     </view>
                 </view>
-                <view wx:if="{{displayMatches.length == 0}}" class="empty-tip">今天没有比赛安排</view>
+                <view wx:if="{{displayMatches.length == 0}}" class="empty-tip">
+                    <text>当日暂无比赛安排</text>
+                </view>
             </view>
         </view>
         <view wx:if="{{currentTab === 1}}" class="teams-container">

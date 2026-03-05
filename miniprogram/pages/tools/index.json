@@ -2,7 +2,7 @@
   "usingComponents": {
     "login-popup": "../../components/login-popup/login-popup"
   },
-  "navigationBarTitleText": "特工档案",
+  "navigationBarTitleText": "我的档案",
   "navigationBarBackgroundColor": "#1f2326",
   "navigationBarTextStyle": "white"
 }

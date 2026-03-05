@@ -206,6 +206,18 @@ Page({
     });
   },
 
+  onLogoError(e) {
+    const { team, index } = e.currentTarget.dataset;
+    const defaultLogo = "../../assets/default_icon.png"; // 🚩 替换为你的默认图路径
+
+    // 动态修改对应数组项的图片路径
+    const key = `displayMatches[${index}].${team}.logoUrl`;
+
+    this.setData({
+      [key]: defaultLogo,
+    });
+  },
+
   getVctMatches: function () {
     wx.showLoading({ title: "加载中..." });
 
