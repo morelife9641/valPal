@@ -117,3 +117,33 @@
   background: #ff4655;
   color: #fff;
 }
+
+.ch-preview {
+  position: relative;
+  /* 确保预览图区域不会溢出 */
+  overflow: hidden;
+}
+
+.favorite-star {
+  position: absolute;
+  top: 8rpx; /* 缩小边距 */
+  right: 8rpx;
+  width: 36rpx; /* 大幅缩小尺寸 */
+  height: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx; /* 缩小字体 */
+  /* 增加一个极淡的背景，确保在任何背景图上都能看清 */
+  /* background: rgba(0, 0, 0, 0.3); */
+  border-radius: 4rpx;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.favorite-star.active {
+  color: #ff4655;
+  /* background: rgba(255, 70, 85, 0.15);  */
+  text-shadow: 0 0 8rpx rgba(255, 70, 85, 0.6);
+}
