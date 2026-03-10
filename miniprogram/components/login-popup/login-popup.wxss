@@ -132,7 +132,7 @@
   border-radius: 0;
   position: relative;
 }
-.btn-deco {
+/* .btn-deco {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -140,13 +140,13 @@
   height: 0;
   border-bottom: 20rpx solid #1f2326;
   border-left: 20rpx solid transparent;
-}
+} */
 
 .login-header {
   display: flex;
   align-items: center;
   justify-content: space-between; /* 关键：左右撑开 */
-  margin-bottom: 40rpx;
+  margin-bottom: 20rpx;
   width: 100%;
 }
 

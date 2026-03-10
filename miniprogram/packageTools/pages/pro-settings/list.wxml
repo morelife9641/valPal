@@ -29,4 +29,7 @@
             </view>
         </view>
     </view>
+    <view class="data-source-footer">
+        <text>数据声明：本页面所列职业选手配置参数均同步自 ProSettings.net 数据库。数据具有时效性，仅供参考。</text>
+    </view>
 </view>

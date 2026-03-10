@@ -17,6 +17,7 @@ const targetMaps = {
 
 // 角色图标路径映射
 const roleIconMap = {
+  全部: "/assets/unnamed.png",
   哨卫: "/assets/哨卫.png",
   决斗: "/assets/决斗.png",
   先锋: "/assets/先锋.png",
@@ -41,14 +42,14 @@ Page({
 
     rankList: [
       { tier: "all", label: "全部段位", icon: "0" }, // 对应 0.png
-      { tier: "Iron", label: "黑铁", icon: "3" }, // 对应 3.png
-      { tier: "Bronze", label: "青铜", icon: "6" },
-      { tier: "Silver", label: "白银", icon: "9" },
-      { tier: "Gold", label: "黄金", icon: "12" },
-      { tier: "Platinum", label: "白金", icon: "15" },
-      { tier: "Diamond", label: "钻石", icon: "18" },
-      { tier: "Ascendant", label: "超凡", icon: "21" },
-      { tier: "Immortal", label: "神话", icon: "24" },
+      { tier: "Iron", label: "黑铁", icon: "5" }, // 对应 3.png
+      { tier: "Bronze", label: "青铜", icon: "8" },
+      { tier: "Silver", label: "白银", icon: "11" },
+      { tier: "Gold", label: "黄金", icon: "14" },
+      { tier: "Platinum", label: "白金", icon: "17" },
+      { tier: "Diamond", label: "钻石", icon: "20" },
+      { tier: "Ascendant", label: "超凡", icon: "23" },
+      { tier: "Immortal", label: "神话", icon: "26" },
       { tier: "Radiant", label: "无畏战魂", icon: "27" },
     ],
     rankIndex: 0,
@@ -70,45 +71,36 @@ Page({
     currentRankLabel: "未定级",
 
     rankIndex: 0, // 对应 rankOptions 的索引
+    isMapPopupShow: false, // 控制 Map 弹窗
+    currentMapIdx: 0, // 当前选中地图的索引
+    currentMapLabel: "全部地图", // 首页 Tag 显示的文字
+    maps: [], // 存放从 config 过滤出来的地图数组 (对象数组)
 
+    // --- 4. Table (数据展示) 相关 ---
+    displayStats: [], // 最终渲染在 Table 里的特工战绩数组
+    scrollTop: 0, // 切换条件时，让 Table 回到顶部
     recommendPoints: [],
     currentMapIdx: 0,
     allData: [],
-    newsList: [
-      {
-        _id: "news_001",
-        title: "版本更新 8.11 // 特工平衡性调整",
-        desc: "雷兹与捷风的位移技能进行了重大重写，旨在提升竞技公平性。",
-        cover:
-          "https://picture.mval.qq.com/source/818/20260221/1771603214aedf116905866108.png", // 示例图
-        tag: "PATCH NOTES",
-        dateStr: "2026.02.24",
-        priority: "URGENT",
-      },
-      {
-        _id: "news_002",
-        title: "冠军巡回赛 // 首尔大师赛正式开赛",
-        desc: "全球顶尖战队集结首尔，争夺本赛季首个世界冠军头衔。",
-        cover:
-          "https://picture.mval.qq.com/source/818/20260221/17716032143937ffd59b84191e.jpg",
-        tag: "ESPORTS",
-        dateStr: "2026.02.22",
-        priority: "NORMAL",
-      },
-      {
-        _id: "news_003",
-        title: "深度档案 // 新地图「幽邃地窟」点位全解析",
-        desc: "如何在深渊之中占据地利？点击查阅各英雄最强点位推荐。",
-        cover:
-          "https://picture.mval.qq.com/source/818/20260221/1771603214b37eeeaa42b5be24.jpg",
-        tag: "STRATEGY",
-        dateStr: "2026.02.20",
-        priority: "HOT",
-      },
+
+    roleIndex: 0,
+    currentRoleLabel: "全部角色",
+    currentRoleIcon: "/assets/unnamed.png",
+    isRolePopupShow: false,
+
+    // 定义选择项列表
+    // index.js data
+    roleOptions: [
+      { label: "全部角色", value: "all", icon: "/assets/unnamed.png" },
+      { label: "哨卫", value: "哨卫", icon: "/assets/哨卫.png" },
+      { label: "决斗", value: "决斗", icon: "/assets/决斗.png" },
+      { label: "先锋", value: "先锋", icon: "/assets/先锋.png" },
+      { label: "控场", value: "控场", icon: "/assets/控场.png" },
     ],
   },
 
   async onLoad() {
+    this.fetchFocusNews();
     require
       .async("../../packageStrategy/maps_data_statistics.js")
       .then((res) => {
@@ -128,13 +120,42 @@ Page({
         console.error("加载分包数据失败", err);
       });
     // 1. 先初始化地图数据（基础）
-    const filteredMaps = mapsData.filter((map) =>
-      Object.keys(this.data.targetMaps).includes(map.displayName),
+    // const filteredMaps = mapsData.filter((map) =>
+    //   Object.keys(this.data.targetMaps).includes(map.displayName),
+    // );
+
+    // this.setData({
+    //   maps: filteredMaps,
+    // });
+    // 1. 过滤出白名单地图
+    let filteredMaps = mapsData.filter(
+      (map) =>
+        Object.keys(this.data.targetMaps).includes(map.displayName) &&
+        map.displayName !== "全部" &&
+        map.displayName !== "基础训练",
     );
 
-    // 2. 同步设置地图，确保 updateDisplayStats 运行时 maps 已经存在
+    // 2. 🚩 关键：手动构造那个带“基础训练”图片的“全部”选项
+    const trainingMap = mapsData.find((m) => m.displayName === "基础训练");
+    const allOption = {
+      ...(trainingMap || {}),
+      displayName: "全部地图",
+      uuid: "all",
+      // 这里的路径要和组件里对应上
+      listViewIcon: trainingMap
+        ? trainingMap.listViewIcon
+        : "/assets/icons/all_maps.png",
+    };
+
+    // 3. 把“全部”塞到数组最前面
+    filteredMaps.unshift(allOption);
+
+    // 4. 同步设置到 data，并初始化首页显示的图标
     this.setData({
       maps: filteredMaps,
+      currentMapIdx: 0,
+      currentMapLabel: "全部地图",
+      currentMapIcon: allOption.listViewIcon, // 🚩 这样首页一进来就有地图图标了
     });
 
     // 3. 执行图标同步（异步）
@@ -144,7 +165,7 @@ Page({
     this.updateDisplayStats();
 
     // 5. 更新报点
-    this.updateCallouts();
+    // this.updateCallouts();
 
     this.fetchMapRecommendations();
 
@@ -153,6 +174,13 @@ Page({
         selected: 0,
       });
     }
+    console.log(this.data.currentMapLabel);
+  },
+
+  onShow() {
+    // 🚩 每次回到首页（包括从后台切回、从详情页返回）都会触发
+    console.log("首页可见，开始同步最新情报...");
+    this.fetchFocusNews();
   },
 
   async initAgentIcons() {
@@ -166,12 +194,18 @@ Page({
 
       const res = await wx.cloud.getTempFileURL({ fileList });
 
-      const finalAgents = AGENTS_CONFIG.map((agent, index) => ({
-        ...agent,
-        displayIcon: res.fileList[index].tempFileURL || "",
-      }));
+      const finalAgents = AGENTS_CONFIG.map((agent, index) => {
+        // 🚩 直接拿 agent.role (比如 "先锋") 去查 roleIconMap
+        // 注意：确保字典里的 Key "先锋" 和数据里的 "先锋" 字符完全一致
+        const iconPath = roleIconMap[agent.role] || roleIconMap["全部"];
 
-      // 使用 Promise 的方式确保 setData 完成
+        return {
+          ...agent,
+          displayIcon: res.fileList[index].tempFileURL || "",
+          roleIcon: iconPath, // 这样 "先锋" 就会匹配到 "/assets/先锋.png"
+        };
+      });
+
       return new Promise((resolve) => {
         this.setData(
           {
@@ -189,9 +223,30 @@ Page({
     }
   },
 
+  // 辅助函数：转换英文 Role 到中文映射 Key
+  _getRoleChineseName(roleEn) {
+    const dict = {
+      Sentinel: "哨卫",
+      Duelist: "决斗",
+      Initiator: "先锋",
+      Controller: "控场",
+    };
+    return dict[roleEn] || "全部";
+  },
+
   // 1. 点击表头唤起弹窗
   openRankPopup() {
     this.setData({ isPopupShow: true });
+
+    // 隐藏自定义 TabBar
+    const tabBar = this.getTabBar();
+    if (tabBar) {
+      tabBar.setTabBarHidden(true);
+    }
+  },
+
+  openMapPopup() {
+    this.setData({ isMapPopupShow: true });
 
     // 隐藏自定义 TabBar
     const tabBar = this.getTabBar();
@@ -211,60 +266,120 @@ Page({
     }
   },
 
-  // 3. 选中某个段位后
   onRankSelect(e) {
-    // 关键：直接从 e.detail 拿组件算好的 label 和 index
+    console.log(e);
+
     const { value, label } = e.detail;
 
+    // 确保 value 是数字类型，防止字符串索引导致无法读取数组
+    const index = parseInt(value);
+
     this.setData({
-      rankIndex: value,
+      rankIndex: index,
       currentRankLabel: label,
       isPopupShow: false,
+    });
+
+    // 🚩 调试：看看拼接出来的图标名对不对
+
+    const tabBar = this.getTabBar();
+    if (tabBar) {
+      tabBar.setTabBarHidden(false);
+    }
+
+    this.updateDisplayStats();
+  },
+
+  // 1. 关闭地图弹窗（点击遮罩或关闭按钮）
+  closeMapPopup() {
+    this.setData({ isMapPopupShow: false });
+
+    // 恢复显示自定义 TabBar
+    const tabBar = this.getTabBar();
+    if (tabBar) {
+      tabBar.setTabBarHidden(false);
+    }
+  },
+
+  // 2. 选择地图后的回调
+  onMapSelect(e) {
+    // 根据你 map-picker 组件里 triggerEvent 传回的字段获取
+    const { index, label } = e.detail;
+
+    // 确保 index 是数字类型
+    const mapIdx = parseInt(index);
+
+    this.setData({
+      currentMapIdx: mapIdx,
+      currentMapLabel: label,
+      isMapPopupShow: false,
+    });
+
+    // 恢复显示自定义 TabBar
+    const tabBar = this.getTabBar();
+    if (tabBar) {
+      tabBar.setTabBarHidden(false);
+    }
+
+    // 选择完地图后，立即刷新战绩列表
+    this.updateDisplayStats();
+  },
+
+  onMapSelect(e) {
+    const { value, label, icon } = e.detail; // 这里的 value 就是 index
+    const index = parseInt(value);
+
+    this.setData({
+      currentMapIdx: index,
+      currentMapLabel: label,
+      currentMapIcon: icon, // 将选中的地图图标存入 data
+      isMapPopupShow: false,
     });
 
     const tabBar = this.getTabBar();
     if (tabBar) {
       tabBar.setTabBarHidden(false);
     }
-    this.updateDisplayStats(); // 去查询数据库
+
+    this.updateDisplayStats();
+  },
+
+  // 打开职业弹窗
+  openRolePopup() {
+    this.setData({ isRolePopupShow: true });
+    if (this.getTabBar()) this.getTabBar().setTabBarHidden(true);
+  },
+
+  // 关闭职业弹窗
+  closeRolePopup() {
+    this.setData({ isRolePopupShow: false });
+    if (this.getTabBar()) this.getTabBar().setTabBarHidden(false);
+  },
+
+  // 🚩 核心：选择职业后的联动逻辑
+  onRoleSelect(e) {
+    const { value, label, icon } = e.detail; // 假设组件传回这些
+    const index = parseInt(value);
+
+    this.setData({
+      roleIndex: index,
+      currentRoleLabel: label,
+      currentRoleIcon: icon,
+      isRolePopupShow: false,
+    });
+
+    if (this.getTabBar()) this.getTabBar().setTabBarHidden(false);
+
+    // 重新触发数据计算
+    this.updateDisplayStats();
   },
 
   // 排行榜页面的跳转逻辑
   navToAgentStrategy(e) {
-    return;
-    const statItem = e.currentTarget.dataset.agent;
-    const { maps, currentMapIdx, agentList } = this.data;
-
-    const currentMap = maps[currentMapIdx];
-    // 匹配完整的特工配置，获取 bustPortrait 和 uuid
-    const agentInfo = (agentList || []).find(
-      (a) =>
-        a.displayName === statItem.finalName ||
-        a.displayName === statItem.agentCn,
-    );
-
-    if (!agentInfo || !currentMap) return;
-
-    // 构建参数
-    const params = {
-      mapId: currentMap.uuid,
-      mapName: currentMap.displayName,
-      heroId: agentInfo.uuid,
-      heroName: agentInfo.displayName,
-      heroNameEn: agentInfo.developerName || agentInfo.displayName, // 英文名
-      // 由于 URL 长度限制，图片 URL 建议在目标页通过 heroId 重新查，或者进行编码
-      bustPortrait: encodeURIComponent(
-        agentInfo.bustPortrait || agentInfo.fullPortrait || "",
-      ),
-    };
-
-    // 拼接 URL
-    const query = Object.keys(params)
-      .map((key) => `${key}=${params[key]}`)
-      .join("&");
-
+    const { agent } = e.currentTarget.dataset;
+    const map = this.data.maps[this.data.currentMapIdx];
     wx.navigateTo({
-      url: `/packageStrategy/pages/list/list?${query}`,
+      url: `/packageStrategy/pages/list/list?mapId=${map.uuid}&agentId=${agent.Agent_EN}&type=agent`,
     });
   },
 
@@ -348,6 +463,302 @@ Page({
     this.setData({ displayStats });
   },
 
+  updateDisplayStats() {
+    const { maps, currentMapIdx, rankIndex, rankList, agentList } = this.data;
+    const valorantMasterData = this.allData;
+
+    // 1. 安全检查：确保索引是有效的数字且数据已加载
+    const mapIdx = parseInt(currentMapIdx);
+    const rIdx = parseInt(rankIndex);
+
+    if (
+      isNaN(mapIdx) ||
+      isNaN(rIdx) ||
+      !maps ||
+      !maps[mapIdx] ||
+      !rankList ||
+      !rankList[rIdx] ||
+      !valorantMasterData
+    ) {
+      console.warn("⏳ 筛选条件或大数据源尚未就绪", { mapIdx, rIdx });
+      return;
+    }
+
+    // 2. 获取匹配词：处理“全部”逻辑
+    const currentMap = maps[mapIdx];
+    const mapDisplayName = currentMap.displayName;
+
+    // 🚩 核心修正：如果地图名是“全部”，映射为 "all"；否则去 targetMaps 找
+    const mapKey =
+      mapDisplayName === "全部" ? "all" : targetMaps[mapDisplayName] || "all";
+    const currentRankWord = rankList[rIdx].tier;
+
+    console.log(
+      `📊 执行过滤 -> 地图Key: ${mapKey}, 段位Word: ${currentRankWord}`,
+    );
+
+    // 3. 过滤逻辑
+    let filtered = valorantMasterData.filter((item) => {
+      // 确保字段存在并统一转小写比对
+      const itemMap = (item.Map || "").toLowerCase();
+      const itemRank = (item.Rank_Level || "").toLowerCase();
+      const targetMap = mapKey.toLowerCase();
+      const targetRank = currentRankWord.toLowerCase();
+
+      return itemMap === targetMap && itemRank === targetRank;
+    });
+
+    // 4. 空数据处理：如果没搜到，清空列表
+    if (filtered.length === 0) {
+      console.warn("❌ 未找到匹配数据，请检查 JSON 中的 Map/Rank_Level 字段");
+      this.setData({ displayStats: [] });
+      return;
+    }
+
+    // 5. 数据加工 (保持你的逻辑，优化头像匹配)
+    const processed = filtered.map((stat) => {
+      const agentInfo = agentList.find(
+        (a) =>
+          a.displayNameEn === stat.Agent_EN || a.displayName === stat.Agent,
+      );
+
+      const winValue = parseFloat(stat.Win_Rate.replace("%", "")) || 0;
+
+      return {
+        ...stat,
+        finalName: stat.Agent,
+        agentIcon: agentInfo ? agentInfo.displayIcon : "",
+        roleIcon: agentInfo ? roleIconMap[agentInfo.role] : "",
+        winValue: winValue,
+        winRateDisplay: winValue.toFixed(1),
+        kd: stat.KD || "0.00",
+        pickRate: stat.Pick_Rate ? stat.Pick_Rate.replace("%", "") : "0.0",
+        matches: stat.Matches || "0",
+        avgScore: "N/A",
+        kda: { k: "-", d: "-", a: "-" },
+      };
+    });
+
+    // 6. 排序与排名
+    processed.sort((a, b) => b.winValue - a.winValue);
+    const displayStats = processed.map((item, index) => ({
+      ...item,
+      rankPos: index + 1,
+    }));
+
+    // 7. 更新视图并重置滚动位置
+    this.setData({
+      displayStats,
+      scrollTop: 0, // 切换条件后回到顶部
+    });
+  },
+
+  updateDisplayStats() {
+    const {
+      maps,
+      currentMapIdx,
+      rankIndex,
+      rankList,
+      agentList,
+      roleOptions,
+      roleIndex,
+    } = this.data;
+    const valorantMasterData = this.allData;
+
+    // 1. 安全检查
+    const mapIdx = parseInt(currentMapIdx);
+    const rIdx = parseInt(rankIndex);
+    if (
+      isNaN(mapIdx) ||
+      isNaN(rIdx) ||
+      !maps ||
+      !maps[mapIdx] ||
+      !valorantMasterData
+    )
+      return;
+
+    // 2. 获取筛选词
+    const mapKey =
+      maps[mapIdx].displayName === "全部"
+        ? "all"
+        : targetMaps[maps[mapIdx].displayName] || "all";
+    const currentRankWord = rankList[rIdx].tier;
+    const targetRoleValue = roleOptions[roleIndex].value; // 如 'Sentinel' 或 'all'
+
+    // 3. 基础过滤：地图 + 段位
+    let filtered = valorantMasterData.filter((item) => {
+      return (
+        (item.Map || "").toLowerCase() === mapKey.toLowerCase() &&
+        (item.Rank_Level || "").toLowerCase() === currentRankWord.toLowerCase()
+      );
+    });
+
+    // 4. 加工数据并进行“职业筛选”
+    const processed = [];
+    filtered.forEach((stat) => {
+      // 找到该特工的详细配置（为了拿职业信息）
+      const agentInfo = agentList.find(
+        (a) =>
+          a.displayNameEn === stat.Agent_EN || a.displayName === stat.Agent,
+      );
+
+      // 🚩 职业二次过滤逻辑
+      if (targetRoleValue !== "all") {
+        // 如果选了特定职业，但当前特工不属于该职业，则跳过
+        if (!agentInfo || agentInfo.role !== targetRoleValue) return;
+      }
+
+      const winValue = parseFloat(stat.Win_Rate.replace("%", "")) || 0;
+
+      processed.push({
+        ...stat,
+        agentIcon: agentInfo ? agentInfo.displayIcon : "",
+        // 使用你提供的本地资源映射
+        roleIcon: agentInfo
+          ? roleIconMap[this._getRoleChineseName(agentInfo.role)] || ""
+          : "",
+        winValue: winValue,
+        winRateDisplay: winValue.toFixed(1),
+        kd: stat.KD || "0.00",
+        pickRate: stat.Pick_Rate ? stat.Pick_Rate.replace("%", "") : "0.0",
+        matches: stat.Matches || "0",
+      });
+    });
+
+    // 5. 排序与更新
+    processed.sort((a, b) => b.winValue - a.winValue);
+    const displayStats = processed.map((item, index) => ({
+      ...item,
+      rankPos: index + 1,
+    }));
+
+    this.setData({ displayStats, scrollTop: 0 });
+  },
+
+  updateDisplayStats() {
+    const {
+      maps,
+      currentMapIdx,
+      rankIndex,
+      rankList,
+      agentList,
+      roleOptions,
+      roleIndex,
+    } = this.data;
+    const valorantMasterData = this.allData;
+
+    // 1. 安全检查
+    const mapIdx = parseInt(currentMapIdx);
+    const rIdx = parseInt(rankIndex);
+    if (
+      isNaN(mapIdx) ||
+      isNaN(rIdx) ||
+      !maps ||
+      !maps[mapIdx] ||
+      !valorantMasterData
+    )
+      return;
+
+    // 2. 获取筛选词
+    const mapKey =
+      maps[mapIdx].displayName === "全部"
+        ? "all"
+        : targetMaps[maps[mapIdx].displayName] || "all";
+    const currentRankWord = rankList[rIdx].tier;
+    // 🚩 获取当前选中的职业英文 Value (如 'Sentinel' 或 'all')
+    const targetRoleValue = roleOptions[roleIndex].value;
+
+    // 3. 地图 + 段位过滤
+    let filtered = valorantMasterData.filter((item) => {
+      return (
+        (item.Map || "").toLowerCase() === mapKey.toLowerCase() &&
+        (item.Rank_Level || "").toLowerCase() === currentRankWord.toLowerCase()
+      );
+    });
+
+    // 4. 职业过滤与数据加工
+    const processed = [];
+    filtered.forEach((stat) => {
+      // 🚩 匹配特工信息
+      const agentInfo = agentList.find(
+        (a) =>
+          a.displayNameEn === stat.Agent_EN || a.displayName === stat.Agent,
+      );
+
+      // 如果选了特定职业，进行拦截
+      if (targetRoleValue !== "all") {
+        // 如果找不到特工信息或者职业不符，直接跳过
+        if (!agentInfo || agentInfo.role !== targetRoleValue) return;
+      }
+
+      const winValue = parseFloat(stat.Win_Rate.replace("%", "")) || 0;
+
+      processed.push({
+        ...stat,
+        finalName: stat.Agent,
+        agentIcon: agentInfo ? agentInfo.displayIcon : "",
+        // 🚩 直接使用 initAgentIcons 里存好的 roleIcon
+        roleIcon: agentInfo ? agentInfo.roleIcon : roleIconMap["全部"],
+        winValue: winValue,
+        winRateDisplay: winValue.toFixed(1),
+        kd: stat.KD || "0.00",
+        pickRate: stat.Pick_Rate ? stat.Pick_Rate.replace("%", "") : "0.0",
+        matches: stat.Matches || "0",
+      });
+    });
+
+    // 5. 排序渲染
+    processed.sort((a, b) => b.winValue - a.winValue);
+    const displayStats = processed.map((item, index) => ({
+      ...item,
+      rankPos: index + 1,
+    }));
+
+    this.setData({ displayStats, scrollTop: 0 });
+  },
+
+  // 辅助函数：将英文 Role 转为对应的中文 Key 以匹配你的 roleIconMap
+  _getRoleChineseName(roleEn) {
+    const map = {
+      Sentinel: "哨卫",
+      Duelist: "决斗",
+      Initiator: "先锋",
+      Controller: "控场",
+    };
+    return map[roleEn] || "全部";
+  },
+
+  resetFilters() {
+    // 1. 震动反馈
+    // wx.vibrateShort({ type: "medium" });
+
+    // 2. 恢复所有初始状态
+    this.setData({
+      // Rank
+      rankIndex: 0,
+      currentRankLabel: "全部段位",
+
+      // Map (注意：这里要对应你之前 initMapFilter 里的初始值)
+      currentMapIdx: 0,
+      currentMapLabel: "全部地图",
+      currentMapIcon: this.data.maps[0].listViewIcon, // 或者是你定义的那个基础训练图
+
+      // Role
+      roleIndex: 0,
+      currentRoleLabel: "全部角色",
+      currentRoleIcon: "/assets/unnamed.png",
+    });
+
+    // 3. 重新拉取/计算数据
+    this.updateDisplayStats();
+
+    wx.showToast({
+      title: "配置已重置",
+      icon: "none",
+      duration: 1000,
+    });
+  },
+
   // 职业筛选逻辑：基于同步后的 agentList 进行过滤
   selectRole(e) {
     const role = e.currentTarget.dataset.role;
@@ -383,9 +794,9 @@ Page({
         mapLoaded: false, // 切换时先重置状态，让图片变透明
       },
       () => {
-        this.updateCallouts();
+        // this.updateCallouts();
         this.updateDisplayStats();
-        this.fetchMapRecommendations();
+        // this.fetchMapRecommendations();
       },
     );
   },
@@ -396,23 +807,6 @@ Page({
     });
   },
 
-  fetchMapRecommendations() {
-    const currentMap = this.data.maps[this.data.currentMapIdx];
-    if (!currentMap) return;
-
-    db.collection("points")
-      .where({
-        mapId: currentMap.uuid,
-      })
-      .limit(5) // 推荐位显示5个
-      .orderBy("createTime", "desc")
-      .get()
-      .then((res) => {
-        this.setData({
-          recommendPoints: res.data,
-        });
-      });
-  },
   fetchMapRecommendations() {
     const currentMap = this.data.maps[this.data.currentMapIdx];
     if (!currentMap) return;
@@ -456,12 +850,10 @@ Page({
     });
   },
 
-  // 4. 跳转到点位列表（查看全部）
   navToAllPoints() {
-    const currentMap = this.data.maps[this.data.currentMapIdx];
-    // 这里跳转到你之前写的 List 页面
+    const map = this.data.maps[this.data.currentMapIdx];
     wx.navigateTo({
-      url: `/packageStrategy/pages/list/list?mapId=${currentMap.uuid}&mapName=${encodeURIComponent(currentMap.displayName)}`,
+      url: `/packageStrategy/pages/list/list?mapId=${map.uuid}&type=general`,
     });
   },
 
@@ -482,6 +874,20 @@ Page({
       fail: (err) => {
         console.error("跳转失败", err);
         wx.showToast({ title: "模块载入中", icon: "none" });
+      },
+    });
+  },
+  /**
+   * 跳转至情报局（新闻列表）
+   */
+  navToWiki() {
+    wx.navigateTo({
+      url: "/pages/valo_news/index",
+      // 如果你把这个页面配置在了 app.json 的 tabBar 里，则需要用 switchTab
+      // url: '/pages/valo_news/index',
+      // success: (res) => {},
+      fail: (err) => {
+        console.error("跳转失败，请检查路径是否在 app.json 中注册", err);
       },
     });
   },
@@ -548,6 +954,54 @@ Page({
 
     wx.navigateTo({
       url: `/pages/map-detail/map-detail?mapId=${map.uuid}&agentId=${agent.uuid}&region=${region}`,
+    });
+  },
+
+  async fetchFocusNews() {
+    try {
+      // 1. 先查 hot，如果没有 hot 就取最新的 5 条
+      const res = await db
+        .collection("valorant_news")
+        .orderBy("fetchTime", "desc")
+        .limit(10) // 拿10条出来筛选
+        .get();
+
+      const CAT_MAP = {
+        patch: "版本公告",
+        news: "官方资讯",
+        esports: "电竞赛事",
+        skin: "皮肤情报",
+      };
+
+      // 2. 格式化数据
+      const formatted = res.data.map((item) => {
+        const timestamp = item.fetchTime?.$date || item.fetchTime || Date.now();
+        const d = new Date(timestamp);
+        return {
+          ...item,
+          displayTag: CAT_MAP[item.category] || "特工情报",
+          displayTime: `${d.getMonth() + 1}-${d.getDate()}`,
+          thumb: item.thumb || (item.images && item.images[0]) || "",
+        };
+      });
+
+      // 3. 筛选 focus 内容：优先 isHot，没 hot 取前 5
+      const hotItems = formatted.filter((i) => i.isHot === true);
+      const finalFocus = hotItems.length > 0 ? hotItems : formatted.slice(0, 5);
+
+      this.setData({ focusList: finalFocus });
+    } catch (err) {
+      console.error("首页情报加载失败:", err);
+    }
+  },
+
+  /**
+   * 跳转到新闻详情
+   */
+  navToNewsDetail(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/valo_news/detail?id=${id}`,
     });
   },
 });

@@ -11,10 +11,10 @@
             <view class="cross-mark br">✖</view>
             <view class="inner-panel">
                 <view class="avatar-box" bindtap="{{!isLogin ? 'handleLoginClick' : ''}}">
-                    <image class="avatar" src="{{isLogin ? userInfo.avatarUrl : '../../assets/news.png'}}" mode="aspectFill"></image>
+                    <image class="avatar" src="{{isLogin ? userInfo.avatarUrl : '../../assets/default_icon.png'}}" mode="aspectFill"></image>
                 </view>
                 <view class="name-overlay">
-                    <text class="nickname">{{isLogin ? userInfo.nickname : '皮蛋路人甲'}}</text>
+                    <text class="nickname">{{isLogin ? userInfo.nickname : '游客'}}</text>
                 </view>
             </view>
             <view class="stats-module">

@@ -1,5 +1,6 @@
 {
   "usingComponents": {
+    "login-popup": "../../components/login-popup/login-popup",
     "agent-selector": "/components/agent-selector/agent-selector"
   },
   "enablePullDownRefresh": true,

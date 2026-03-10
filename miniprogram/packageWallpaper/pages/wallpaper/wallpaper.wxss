@@ -267,6 +267,7 @@ canvas[canvas-id="testCanvas"] {
   transform: translateY(0) scaleY(1);
   opacity: 1 !important;
   visibility: visible !important;
+  position: relative;
 }
 
 /* 3. 内部英雄卡片：入场动画 */
@@ -471,16 +472,21 @@ canvas[canvas-id="testCanvas"] {
 
 /* 底部炫彩条样式 */
 .chroma-bar-wrapper {
+  bottom: 0px;
+  width: 100%;
+  z-index: 998;
+  position: absolute;
   display: flex;
   align-items: center;
   padding: 12rpx 60rpx;
-  background: rgba(0, 0, 0, 0.3);
+  background: #0f1923;
   border-top: 1rpx solid rgba(255, 255, 255, 0.05);
 }
 .chroma-tip {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #aaa;
   margin-right: 20rpx;
+  /* margin-bottom: 10rpx; */
 }
 .chroma-scroll {
   flex: 1;

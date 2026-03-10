@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "点位列表",
-  "usingComponents": {}
+  "usingComponents": {
+    "login-popup": "../../../components/login-popup/login-popup"
+  }
 }

@@ -76,7 +76,7 @@
 
 /* 战队头部 */
 .team-group {
-  margin-bottom: 60rpx;
+  margin-bottom: 40rpx;
 }
 
 .team-header {
@@ -90,14 +90,14 @@
 
 .team-prefix {
   display: block;
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #ff4655;
   font-weight: 900;
   margin-bottom: 4rpx;
 }
 
 .team-name {
-  font-size: 44rpx;
+  font-size: 40rpx;
   font-weight: 900;
   color: #ece8e1;
   text-transform: uppercase;
@@ -191,4 +191,19 @@
   font-weight: 900;
   color: rgba(255, 255, 255, 0.05);
   font-family: monospace;
+}
+
+.data-source-footer {
+  padding: 0rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.3; /* 🚩 极低透明度，类似水印 */
+}
+
+.data-source-footer text {
+  font-size: 18rpx;
+  color: #ece8e1;
+  letter-spacing: 2rpx;
+  line-height: 1.6;
 }

@@ -328,6 +328,23 @@ Page({
     });
   },
 
+  playTacticalVideo() {
+    const { videoFeedId, videoNonceId } = this.data.detail;
+
+    wx.openChannelsActivity({
+      finderUserName: "sphJEriMoMTht1o", // 🚩 替换成你的视频号 ID (sph_ 开头那个)
+      feedId: videoFeedId,
+      nonceId: videoNonceId || "", // 如果上传时没存 nonceId 也可以尝试传空
+      success: (res) => {
+        console.log("视频号拉起成功");
+      },
+      fail: (err) => {
+        console.error("拉起失败", err);
+        wx.showToast({ title: "视频档案调取失败", icon: "none" });
+      },
+    });
+  },
+
   // 图片全屏预览
   previewImage(e) {
     const { src, list } = e.currentTarget.dataset;

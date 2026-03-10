@@ -22,11 +22,18 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/skins/index",
-          "pathName": "pages/skins/index",
+          "name": "pages/valo_news/index",
+          "pathName": "pages/valo_news/index",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "pages/skins/index",
+          "pathName": "pages/skins/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "packageStrategy/pages/list/list",

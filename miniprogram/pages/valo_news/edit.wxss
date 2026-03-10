@@ -1,0 +1,185 @@
+page {
+  background: #0f1923;
+  color: #ece8e1;
+}
+.editor-container {
+  padding: 30rpx;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #ff4655;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff4655;
+}
+
+.save-btn {
+  background: #ff4655;
+  color: #fff;
+  font-size: 26rpx;
+  margin: 0;
+  padding: 0 40rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+}
+
+.input-group {
+  margin-bottom: 30rpx;
+}
+.label {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(236, 232, 225, 0.5);
+  margin-bottom: 10rpx;
+  text-transform: uppercase;
+}
+
+.input-item,
+.picker-val {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+}
+
+.content-textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  height: 400rpx;
+  padding: 20rpx;
+  font-size: 26rpx;
+  box-sizing: border-box;
+}
+
+.image-uploader {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.mini-btn {
+  font-size: 22rpx;
+  background: #ece8e1;
+  color: #0f1923;
+  margin: 0;
+}
+
+.preview-thumb {
+  width: 200rpx;
+  height: 120rpx;
+  margin-top: 20rpx;
+  border: 2rpx solid #ff4655;
+}
+
+.preview-section {
+  margin-top: 40rpx;
+  padding-top: 40rpx;
+  border-top: 4rpx dashed rgba(255, 255, 255, 0.1);
+}
+.rich-preview {
+  background: #fff;
+  color: #333;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  min-height: 200rpx;
+}
+
+.flex-1 {
+  flex: 1;
+}
+.input-row {
+  display: flex;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10rpx;
+  background: #1f2326;
+  border: 1rpx solid #383e42;
+  border-bottom: none;
+  gap: 10rpx;
+}
+
+.tool-group {
+  display: flex;
+  border-right: 1rpx solid rgba(255, 255, 255, 0.1);
+  padding-right: 10rpx;
+}
+
+.tool-group:last-child {
+  border-right: none;
+}
+
+.tool-btn {
+  width: 70rpx;
+  height: 70rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #ece8e1;
+  background: rgba(255, 255, 255, 0.05);
+  margin: 2rpx;
+  transition: all 0.2s;
+}
+
+/* 按钮激活状态 */
+.tool-btn.active {
+  background: #ff4655;
+  color: #fff;
+}
+
+/* 管理/危险按钮 */
+.tool-btn.danger {
+  color: #ff4655;
+  font-weight: bold;
+}
+
+.ql-container {
+  box-sizing: border-box;
+  width: 100%;
+  height: 700rpx;
+  background: #0f1923;
+  color: #ece8e1;
+  padding: 30rpx;
+  border: 1rpx solid #383e42;
+  font-size: 30rpx;
+  line-height: 1.6;
+}
+
+/* 简报文本框样式 */
+.summary-textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  height: 180rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #ece8e1;
+  box-sizing: border-box;
+  margin-top: 10rpx;
+}
+
+/* 之前编辑器高度可能不够，调大一点 */
+.ql-container {
+  min-height: 600rpx;
+  background: #0f1923;
+  padding: 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.tool-btn.active {
+  background: #ff4655 !important;
+  color: white !important;
+}

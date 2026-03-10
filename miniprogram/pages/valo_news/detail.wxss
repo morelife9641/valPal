@@ -1,0 +1,133 @@
+page {
+  background-color: #0f1923;
+  color: #ece8e1;
+  /* font-family: "FF Mark W05", sans-serif; */
+}
+
+/* 顶部英雄区 */
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 400rpx;
+}
+
+.main-thumb {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    #0f1923 5%,
+    rgba(15, 25, 35, 0.4) 50%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 40rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.hero-tag {
+  background: #ff4655;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: bold;
+  padding: 4rpx 16rpx;
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 20rpx;
+  text-transform: uppercase;
+  letter-spacing: 2rpx;
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 24rpx;
+  text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.5);
+}
+
+.hero-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 22rpx;
+  color: rgba(236, 232, 225, 0.6);
+}
+
+.meta-left {
+  display: flex;
+  align-items: center;
+}
+
+.source-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 12rpx;
+}
+
+/* 内容包装 */
+.body-wrapper {
+  padding: 0 40rpx 150rpx;
+  margin-top: -20rpx; /* 向上微移，产生层叠感 */
+}
+
+.brief-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 4rpx solid #ff4655;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.brief-title {
+  display: flex;
+  align-items: center;
+  /* gap: 10rpx; */
+  font-size: 24rpx;
+  color: #ff4655;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.brief-text {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: rgba(236, 232, 225, 0.8);
+  /* font-style: italic; */
+}
+
+.rich-content {
+  font-size: 28rpx;
+  line-height: 1.8;
+}
+
+/* 底部动作条 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30rpx 40rpx 50rpx;
+  background: linear-gradient(to top, #0f1923 80%, transparent);
+  z-index: 100;
+}
+
+.glass-btn {
+  background: #ff4655;
+  color: #fff;
+  border-radius: 0;
+  font-weight: bold;
+  font-size: 28rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 95% 100%, 0 100%);
+}

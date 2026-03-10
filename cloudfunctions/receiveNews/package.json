@@ -1,0 +1,9 @@
+{
+  "name": "receiveNews",
+  "version": "1.0.0",
+  "description": "接收 OpenClaw 抓取的新闻数据并入库",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

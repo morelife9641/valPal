@@ -1,0 +1,44 @@
+<view class="news-container">
+    <!-- <swiper class="focus-swiper" indicator-dots indicator-color="rgba(255,255,255,0.3)" indicator-active-color="#ff4655" autoplay circular>
+        <swiper-item wx:for="{{focusList}}" wx:key="id" bindtap="navToDetail" data-id="{{item.id}}">
+            <view class="swiper-content">
+                <image src="{{item.thumb}}" mode="aspectFill" class="swiper-image"></image>
+                <view class="swiper-mask">
+                    <view class="swiper-title">{{item.title}}</view>
+                </view>
+            </view>
+        </swiper-item>
+    </swiper> -->
+    <!-- <scroll-view scroll-x class="category-bar">
+        <view wx:for="{{categories}}" wx:key="index" class="cat-item {{currentCat === index ? 'active' : ''}}" bindtap="switchCat" data-index="{{index}}">
+            {{item}}
+            <view class="active-line"></view>
+        </view>
+    </scroll-view> -->
+    <view class="category-bar">
+        <view wx:for="{{categories}}" wx:key="index" class="cat-item {{currentCat === index ? 'active' : ''}}" bindtap="switchCat" data-index="{{index}}">
+            <text class="cat-text">{{item}}</text>
+            <view class="active-line"></view>
+        </view>
+    </view>
+    <view class="news-list">
+        <view class="news-item" wx:for="{{newsList}}" wx:key="_id" bindtap="navToDetail" data-id="{{item._id}}">
+            <view class="news-info">
+                <view class="news-title">{{item.title}}</view>
+                <view class="news-meta">
+                    <text class="news-date">{{item.displayTime}}</text>
+                    ·
+                    <text class="news-date">{{item.categoryLabel}}</text>
+                </view>
+            </view>
+            <view class="thumb-container">
+                <!-- <view class="item-cat-tag {{item.category}}">{{item.categoryLabel}}</view> -->
+                <image src="{{item.thumb ? item.thumb : '../../assets/logos/EDG.png'}}" mode="aspectFill" class="news-thumb"></image>
+                <view class="item-admin-btn" wx:if="{{isAdmin}}" catchtap="onAdminEdit" data-id="{{item._id}}">
+                    <text>编辑</text>
+                </view>
+            </view>
+        </view>
+    </view>
+    <view class="load-more" wx:if="{{loading}}">正在同步特工情报...</view>
+</view>

@@ -1,9 +1,12 @@
 const mapsData = require("../../../config/maps_data.js");
 import { toggleFavoriteStatus } from "../../../utils/fav.js";
+const app = getApp();
 
 Page({
   data: {
     sideIndex: 0,
+    showLoginPopup: false,
+    pendingAdd: false, // 🚩 新增：记录是否需要跳转到添加页
     sideOptions: [
       { name: "全部阵营", value: "all" },
       { name: "进攻", value: "atk" },
@@ -234,6 +237,14 @@ Page({
     const listName = "filteredList"; // 🚩 确认你页面渲染用的数组名，如果是 allList 就改回 allList
     const list = this.data[listName];
 
+    if (!app.globalData.isLogin) {
+      this.setData({
+        showLoginPopup: true,
+        pendingId: pointId, // 记录想收藏的点位ID
+      });
+      return;
+    }
+
     // 1. 查找索引
     const index = list.findIndex((item) => item._id === pointId);
     if (index === -1) return;
@@ -257,6 +268,64 @@ Page({
       });
 
       // 5. 可选：如果 res 状态与预期不符，则强制同步一次
+      if (res.isFavorite === isAlreadyFav) {
+        this.setData({ [`${listName}[${index}].isFavorite`]: res.isFavorite });
+      }
+    } catch (err) {
+      console.error("点位收藏操作失败:", err);
+      // 6. 失败回滚
+      this.setData({
+        [`${listName}[${index}].isFavorite`]: isAlreadyFav,
+      });
+      wx.showToast({ title: "操作失败", icon: "none" });
+    }
+  },
+
+  onLoginClose() {
+    this.setData({ showLoginPopup: false });
+  },
+
+  async toggleFavorite(e) {
+    const pointId = e.currentTarget.dataset.id;
+    const app = getApp();
+    // 🚩 身份拦截：未登录则记录意图并弹窗
+    if (!app.globalData.isLogin) {
+      this.setData({
+        showLoginPopup: true,
+        pendingId: pointId, // 记录想收藏的点位ID
+      });
+      return;
+    }
+
+    // 已登录直接执行
+    await this.executeFavorite(pointId);
+  },
+
+  async executeFavorite(pointId) {
+    const listName = "filteredList";
+    const list = this.data[listName];
+
+    // 1. 查找索引
+    const index = list.findIndex((item) => item._id === pointId);
+    if (index === -1) return;
+
+    // 2. 获取当前收藏状态并乐观更新 UI
+    const isAlreadyFav = list[index].isFavorite || false;
+    this.setData({
+      [`${listName}[${index}].isFavorite`]: !isAlreadyFav,
+    });
+
+    try {
+      // 3. 调用通用工具函数，业务类型传入 'point'
+      const res = await toggleFavoriteStatus(pointId, "point");
+
+      // 4. 反馈
+      wx.showToast({
+        title: res.isFavorite ? "已加入收藏" : "已取消收藏",
+        icon: "none",
+      });
+
+      // 5. 状态同步校验
       if (res.isFavorite === isAlreadyFav) {
         this.setData({ [`${listName}[${index}].isFavorite`]: res.isFavorite });
       }
@@ -367,9 +436,79 @@ Page({
     );
   },
 
+  // pages/crosshair/list.js
   goToAdd() {
+    const app = getApp();
+
+    // 1. 拦截未登录
+    if (!app.globalData.isLogin) {
+      this.setData({
+        showLoginPopup: true,
+        pendingAdd: true, // 🚩 标记：登录完要去添加页
+      });
+      return;
+    }
+
+    // 2. 已登录直接跳转
     wx.navigateTo({ url: "../add-point/add-point" });
   },
+
+  async onRegister(e) {
+    const { nickname, avatarUrl } = e.detail;
+    wx.showLoading({ title: "档案激活中...", mask: true });
+
+    try {
+      // Step 1: 上传头像
+      const cloudPath = `user_avatars/${Date.now()}-${Math.floor(Math.random() * 1000)}.png`;
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: avatarUrl,
+      });
+
+      // Step 2: 调云函数注册
+      const res = await wx.cloud.callFunction({
+        name: "manageUser",
+        data: {
+          action: "register",
+          userInfo: { nickname, avatarUrl: uploadRes.fileID },
+        },
+      });
+
+      if (res.result && res.result.success) {
+        // Step 3: 更新全局状态与本地缓存
+        const serverUserInfo = res.result.data;
+        app.globalData.isLogin = true;
+        app.globalData.userInfo = serverUserInfo;
+        wx.setStorageSync("userInfo", serverUserInfo);
+
+        // Step 4: 关闭弹窗
+        this.setData({ showLoginPopup: false });
+
+        // Step 5: 意图恢复 (按照优先级执行)
+        if (this.data.pendingAdd) {
+          // 场景 A：刚才想去添加页
+          this.setData({ pendingAdd: false });
+          wx.navigateTo({ url: "../add-point/add-point" });
+        } else if (this.data.pendingId) {
+          // 场景 B：刚才想收藏某个准星
+          const id = this.data.pendingId;
+          this.setData({ pendingId: null });
+          await this.executeFavorite(id);
+        } else {
+          // 场景 C：纯手动点击登录，仅刷新列表状态
+          if (this.initData) await this.initData();
+        }
+
+        wx.showToast({ title: "特工档案已激活", icon: "success" });
+      }
+    } catch (err) {
+      console.error("激活失败:", err);
+      wx.showToast({ title: "激活失败", icon: "none" });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
   goToDetail(e) {
     console.log(e);
 

@@ -415,3 +415,44 @@
 textarea.custom-textarea {
   margin-left: 0;
 }
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16rpx;
+}
+
+.label-hint {
+  font-size: 18rpx;
+  color: rgba(255, 70, 85, 0.5);
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+.video-link-box {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.link-input {
+  flex: 1;
+  height: 80rpx;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: #ff4655; /* 既然是视频号链接，颜色给亮一点，突出它 */
+}
+
+.how-to-get {
+  width: 60rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 70, 85, 0.1);
+  color: #ff4655;
+  font-weight: bold;
+  border-left: 1rpx solid rgba(255, 70, 85, 0.2);
+}

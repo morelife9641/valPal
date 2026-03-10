@@ -1,0 +1,34 @@
+<view class="detail-container">
+    <view class="hero-section">
+        <image class="main-thumb" src="{{news.thumb || '../../assets/logos/EDG.png'}}" mode="aspectFill"></image>
+        <view class="hero-mask">
+            <view class="hero-info">
+                <text class="hero-tag">{{news.category || '情报'}}</text>
+                <view class="hero-title">{{news.title}}</view>
+                <view class="hero-meta">
+                    <view class="meta-left">
+                        <!-- <image class="source-icon" src="/assets/icons/{{news.source.platform || 'x'}}.png"></image> -->
+                        <text>{{news.publishDateStr}}</text>
+                    </view>
+                    <!-- <text class="read-count">{{news.metrics.views || 0}} 浏览</text> -->
+                </view>
+            </view>
+        </view>
+    </view>
+    <view class="body-wrapper">
+        <view class="brief-box" wx:if="{{news.summary}}">
+            <view class="brief-title">
+                <view class="brief-line"></view>
+                <text>摘要</text>
+            </view>
+            <text class="brief-text">{{news.summary}}</text>
+        </view>
+        <view class="rich-content">
+            <rich-text nodes="{{news.content}}" wx:if="{{news.content}}"></rich-text>
+            <view class="empty-state" wx:else>
+                <view class="scanner-line"></view>
+                <text>正在解密信号内容...</text>
+            </view>
+        </view>
+    </view>
+</view>

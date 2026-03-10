@@ -394,3 +394,76 @@
   background: currentColor;
   box-shadow: 0 0 8rpx currentColor;
 }
+
+.video-trigger-container {
+  padding: 40rpx 30rpx;
+  background: #0f1923;
+}
+
+.video-btn {
+  position: relative;
+  height: 120rpx;
+  background: #1f2326;
+  border: 1rpx solid rgba(255, 70, 85, 0.3);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 0 40rpx;
+  /* 🚩 瓦式非对称切角 */
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 92% 100%, 0 100%);
+}
+
+.video-btn-content {
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+
+.v-icon {
+  font-size: 40rpx;
+  color: #ff4655;
+  margin-right: 30rpx;
+  text-shadow: 0 0 15rpx rgba(255, 70, 85, 0.6);
+}
+
+.v-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.v-cn {
+  font-size: 30rpx;
+  color: #ece8e1;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+.v-en {
+  font-size: 16rpx;
+  color: rgba(255, 70, 85, 0.6);
+  font-weight: 800;
+  margin-top: 4rpx;
+}
+
+/* 🚩 呼吸灯荧光效果 */
+.video-btn-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255, 70, 85, 0.1), transparent);
+  animation: v-pulse 2s infinite;
+}
+
+@keyframes v-pulse {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}

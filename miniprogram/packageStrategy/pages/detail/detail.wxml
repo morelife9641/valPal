@@ -19,6 +19,22 @@
             </view>
         </view>
     </view>
+    <view class="video-trigger-container" wx:if="{{detail.videoFeedId}}">
+        <view class="video-btn" bindtap="playTacticalVideo">
+            <view class="video-btn-glow"></view>
+            <view class="video-btn-content">
+                <text class="v-icon">▶</text>
+                <view class="v-text">
+                    <text class="v-cn">调取实机演示</text>
+                    <text class="v-en">// LIVE_RECORDING</text>
+                </view>
+            </view>
+            <view class="v-corner"></view>
+        </view>
+    </view>
+    <!-- <view class="embedded-video" wx:if="{{detail.videoFeedId}}">
+        <channel-video finder-user-name="sphJEriMoMTht1o" feed-id="{{detail.videoFeedId}}" class="v-player"></channel-video>
+    </view> -->
     <view class="module-section">
         <view class="module-head">
             <view class="head-line"></view>

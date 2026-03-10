@@ -5,6 +5,58 @@
   padding-bottom: 30rpx;
 }
 
+.tactical-intel-page {
+  background-color: #0f1923;
+  min-height: 100vh;
+  color: #ece8e1;
+}
+
+/* Tab 样式：复用你提供的荧光逻辑 */
+.tab-header {
+  display: flex;
+  background: #1f2326;
+  height: 90rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.tab-text {
+  font-size: 24rpx;
+  color: rgba(236, 232, 225, 0.5);
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+.tab-item.active .tab-text {
+  color: #ff4655;
+}
+
+/* 🚩 复用你的指示线逻辑 */
+.tab-item.active .active-line {
+  position: absolute;
+  top: 0;
+  width: 40rpx;
+  height: 4rpx;
+  background: #ff4655;
+  box-shadow: 0 0 10rpx #ff4655;
+}
+
+.tab-item.active .active-glow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, rgba(255, 70, 85, 0.05), transparent);
+}
+
 /* Tabs 导航样式 */
 .tab-header {
   display: flex;
@@ -38,7 +90,7 @@
   width: 40rpx;
   height: 6rpx;
   background-color: #ff4655; /* 官方红下划线 */
-  border-radius: 3rpx;
+  /* border-radius: 3rpx; */
 }
 
 /* 占位区样式 */
@@ -65,7 +117,7 @@
 .date-nav {
   white-space: nowrap; /* 必须，否则 scroll-view 不横向 */
   background-color: #17212b; /* 略深于背景色，区分层次 */
-  padding: 20rpx 0;
+  padding: 10rpx 0;
   border-bottom: 1rpx solid #2f3942;
   position: sticky;
   top: 0;
@@ -82,7 +134,7 @@
   width: 120rpx; /* 固定宽度保证排列整齐 */
   height: 110rpx;
   margin: 0 10rpx;
-  border-radius: 12rpx;
+  /* border-radius: 12rpx; */
   transition: all 0.2s ease-in-out;
   color: #8b97a2;
 }
@@ -120,16 +172,16 @@
   width: 6rpx;
   height: 6rpx;
   background: #fff;
-  border-radius: 50%;
+  /* border-radius: 50%; */
   margin-top: 6rpx;
 }
 
 /* 3. 赛程卡片：紧凑、扁平、专业 */
 .match-card {
-  margin: 16rpx 20rpx;
+  margin: 20rpx 20rpx;
   background: #1a252e;
-  border-radius: 8rpx;
-  padding: 30rpx 20rpx;
+  /* border-radius: 8rpx; */
+  padding: 60rpx 20rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -203,7 +255,7 @@
   color: #7a8288;
   background: rgba(255, 255, 255, 0.05);
   padding: 2rpx 12rpx;
-  border-radius: 4rpx;
+  /* border-radius: 4rpx; */
 }
 .tag.live {
   color: #ff4655;
@@ -214,7 +266,7 @@
 /* 战队 */
 .teams-container {
   background: #0f1923;
-  padding: 20rpx 0;
+  /* padding: 20rpx 0; */
 }
 .team-block {
   margin-bottom: 40rpx;
@@ -257,7 +309,7 @@
   background: #1a252e;
   margin-right: 20rpx;
   padding: 20rpx 10rpx;
-  border-radius: 8rpx;
+  /* border-radius: 8rpx; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -466,4 +518,74 @@
   color: rgba(255, 255, 255, 0.03);
   font-weight: 900;
   pointer-events: none;
+}
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.player-card {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16rpx;
+  position: relative;
+}
+
+.player-role-dot {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  width: 8rpx;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.player-role-dot.special {
+  background: #ff4655;
+  box-shadow: 0 0 8rpx #ff4655;
+}
+
+.p-name {
+  font-size: 24rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4rpx;
+}
+.p-role {
+  font-size: 16rpx;
+  color: rgba(236, 232, 225, 0.4);
+}
+
+.team-block {
+  background: #1f2326;
+  margin: 30rpx;
+  padding: 30rpx;
+  /* border-left: 6rpx solid #ff4655; */
+}
+
+.team-header-box {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  position: relative;
+}
+
+.team-logo-bg {
+  width: 100rpx;
+  height: 100rpx;
+  opacity: 0.8;
+}
+.team-main-info {
+  margin-left: 20rpx;
+}
+.team-name {
+  font-size: 36rpx;
+  font-weight: 900;
+  display: block;
+}
+.team-en-sub {
+  font-size: 16rpx;
+  color: rgba(255, 70, 85, 0.6);
+  letter-spacing: 4rpx;
 }

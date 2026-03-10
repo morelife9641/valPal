@@ -64,34 +64,7 @@
                     </view>
                 </view>
             </view>
-            <!-- <view class="strategy-card" wx:for="{{filteredList}}" wx:key="_id" bindtap="goToDetail" data-id="{{item._id}}">
-                <view class="card-left">
-                    <image src="{{item.mapThumb}}" mode="aspectFill" class="map-preview-img" />
-                    <view class="side-indicator-bar {{item.side}}"></view>
-                </view>
-                <view class="card-right">
-                    <view class="card-top-row">
-                        <text class="card-title">{{item.title}}</text>
-                        <view class="favorite-star {{item.isFavorite ? 'active' : ''}}" catchtap="toggleFavorite" data-id="{{item._id}}">
-                            {{item.isFavorite ? '★' : '☆'}}
-                        </view>
-                    </view>
-                    <view class="card-mid-row">
-                        <text class="map-label">{{item.mapName}}</text>
-                        <view class="point-tag">{{item.pointType || '其他'}}</view>
-                    </view>
-                    <view class="card-bottom-row">
-                        <text class="side-text {{item.side}}">
-                            {{item.side === 'atk' ? '攻方' : '守方'}}
-                        </text>
-                        <text class="date-text">{{item.dateDisplay}}</text>
-                    </view>
-                </view>
-            </view> -->
         </view>
-        <!-- <view class="empty-hint" wx:if="{{filteredList.length === 0}}">
-            <text>NO DEPLOYMENTS FOUND</text>
-        </view> -->
         <view wx:if="{{filteredList.length === 0}}" class="presets-empty-container">
             <view class="tactical-frame">
                 <view class="corner-t-l"></view>
@@ -111,3 +84,4 @@
         </view>
     </view>
 </view>
+<login-popup id="loginPopup" show="{{showLoginPopup}}" bind:close="onLoginClose" bind:register="onRegister" />

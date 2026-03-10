@@ -60,7 +60,7 @@
                     <view class="load-more-tip" wx:if="{{!isWeaponOver}}">正在扫描档案...</view>
                 </scroll-view>
                 <view class="chroma-bar-wrapper" wx:if="{{currentWeapon && currentWeapon.chromas.length > 0}}">
-                    <text class="chroma-tip">3131切换颜色:</text>
+                    <text class="chroma-tip">切换颜色:</text>
                     <view class="chroma-scroll">
                         <view wx:for="{{currentWeapon.chromas}}" wx:key="chromaUuid" class="chroma-dot {{tempChromaUuid === item.chromaUuid ? 'active' : ''}}" bindtap="changeChroma" data-chroma="{{item}}">
                             <image src="{{item.swatch}}" class="swatch-img"></image>

@@ -1,0 +1,9 @@
+{
+  "name": "updateStats",
+  "version": "1.0.0",
+  "description": "更新新闻统计数据（点赞、浏览等）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

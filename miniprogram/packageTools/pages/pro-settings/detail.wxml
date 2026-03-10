@@ -3,12 +3,13 @@
         <image class="header-bg" src="{{proInfo.avatar}}" mode="aspectFill" />
         <view class="header-mask"></view>
         <view class="header-content">
-            <text class="team-tag">{{proInfo.team}}</text>
-            <text class="pro-full-name">{{proInfo.name}}</text>
-            <view class="info-row">
-                <!-- <text class="role-label">{{proInfo.role}}</text> -->
-                <!-- <text class="country-label">// {{proInfo.intro_fields.Country}}</text> -->
+            <view class="team-badge">
+                <image class="team-logo" src="../../../assets/logos/{{teamLogo}}.png" mode="aspectFit" lazy-load />
+                <view class="team-tag">{{proInfo.team}}</view>
             </view>
+            <!-- <view class="team-tag">{{proInfo.team}}</view> -->
+            <view class="pro-full-name">{{proInfo.name}}</view>
+            <view class="info-row"></view>
         </view>
     </view>
     <view class="section-title">选手装备</view>
@@ -27,8 +28,7 @@
     </view>
     <view class="fixed-footer" bindtap="goBack">
         <view class="back-btn-inner">
-            <view class="back-arrow"></view>
-            <text>返回</text>
+            <view class="back-arrow">返 回</view>
         </view>
     </view>
 </view>

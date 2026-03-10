@@ -6,7 +6,10 @@
     "pages/tools/index",
     "components/card-selector/card-selector",
     "components/rank-picker/rank-picker",
-    "components/login-popup/login-popup"
+    "components/login-popup/login-popup",
+    "pages/valo_news/index",
+    "pages/valo_news/detail",
+    "pages/valo_news/edit"
   ],
   "subpackages": [
     {
@@ -21,7 +24,10 @@
     {
       "root": "packageWallpaper",
       "name": "wallpaperEditor",
-      "pages": ["pages/wallpaper/wallpaper", "pages/preview/preview"]
+      "pages": [
+        "pages/wallpaper/wallpaper",
+        "pages/preview/preview"
+      ]
     },
     {
       "root": "packageTools",
@@ -36,7 +42,9 @@
   "preloadRule": {
     "pages/strategy/index": {
       "network": "all",
-      "packages": ["packageStrategy"]
+      "packages": [
+        "packageStrategy"
+      ]
     }
   },
   "window": {

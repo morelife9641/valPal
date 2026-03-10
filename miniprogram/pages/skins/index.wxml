@@ -124,3 +124,4 @@
         </view>
     </view>
 </root-portal>
+<login-popup id="loginPopup" show="{{showLoginPopup}}" bind:close="onLoginClose" bind:register="onRegister" />

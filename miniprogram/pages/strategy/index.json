@@ -1,5 +1,7 @@
 {
   "usingComponents": {
-    "rank-popup": "../../components/rank-picker/rank-picker"
+    "rank-popup": "../../components/rank-picker/rank-picker",
+    "map-popup": "../../components/map-picker/map-picker",
+    "role-popup": "../../components/role-picker/role-picker"
   }
 }

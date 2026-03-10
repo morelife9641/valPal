@@ -1,0 +1,71 @@
+<view class="editor-container">
+    <view class="editor-header">
+        <text class="header-title">情报编辑模式</text>
+        <button class="save-btn" bindtap="submitUpdate">保存同步</button>
+    </view>
+    <view class="input-group">
+        <text class="label">标题 (Title)</text>
+        <input class="input-item" value="{{form.title}}" data-field="title" bindinput="onInput" placeholder="请输入标题" />
+    </view>
+    <view class="input-group">
+        <text class="label">任务简报 (Summary / TL;DR)</text>
+        <textarea class="summary-textarea" value="{{form.summary}}" data-field="summary" bindinput="onInput" placeholder="请输入任务简报内容..." maxlength="500" />
+    </view>
+    <view class="input-row">
+        <view class="input-group flex-1">
+            <text class="label">分类 (Category)</text>
+            <!-- <picker bindchange="onCatChange" value="{{catIndex}}" range="{{categories}}">
+                <view class="picker-val">{{categories[catIndex]}}</view>
+            </picker> -->
+            <picker bindchange="onCatChange" value="{{catIndex}}" range="{{categoryLabels}}">
+                <view class="picker-val">{{categoryLabels[catIndex]}}</view>
+            </picker>
+        </view>
+        <view class="input-group flex-1" style="margin-left: 20rpx;">
+            <text class="label">热门状态 (isHot)</text>
+            <switch checked="{{form.isHot}}" color="#ff4655" bindchange="onHotToggle" />
+        </view>
+    </view>
+    <view class="input-group">
+        <text class="label">封面图 (Thumb URL)</text>
+        <view class="image-uploader">
+            <input class="input-item flex-1" value="{{form.thumb}}" data-field="thumb" bindinput="onInput" placeholder="图片URL或上传" />
+            <button class="mini-btn" bindtap="uploadImage">上传</button>
+        </view>
+        <image wx:if="{{form.thumb}}" src="{{form.thumb}}" class="preview-thumb" mode="aspectFill"></image>
+    </view>
+    <view class="editor-wrapper">
+        <view class="toolbar" catchtap="format">
+            <view class="tool-group">
+                <view class="tool-btn {{formats.bold ? 'active' : ''}}" data-name="bold">B</view>
+                <view class="tool-btn {{formats.italic ? 'active' : ''}}" data-name="italic">
+                    I
+                </view>
+                <view class="tool-btn {{formats.header === 2 ? 'active' : ''}}" data-name="header" data-value="{{2}}">
+                    H2
+                </view>
+                <view class="tool-btn {{formats.header === 3 ? 'active' : ''}}" data-name="header" data-value="{{3}}">
+                    H3
+                </view>
+            </view>
+            <view class="tool-group">
+                <view class="tool-btn {{formats.align === 'center' ? 'active' : ''}}" data-name="align" data-value="center">
+                    居中
+                </view>
+                <view class="tool-btn" data-name="list" data-value="ordered">有序</view>
+                <view class="tool-btn" bindtap="insertImage">图片</view>
+            </view>
+            <view class="tool-group admin">
+                <view class="tool-btn" bindtap="removeFormat">清格式</view>
+                <view class="tool-btn danger" bindtap="clearAll">全清空</view>
+            </view>
+        </view>
+        <editor id="editor" class="ql-container" placeholder="在此输入加密情报正文..." bindstatuschange="onStatusChange" bindready="onEditorReady" bindinput="onEditorInput"></editor>
+    </view>
+    <view class="preview-section">
+        <text class="label">实时效果预览</text>
+        <view class="rich-preview">
+            <rich-text nodes="{{form.content}}"></rich-text>
+        </view>
+    </view>
+</view>

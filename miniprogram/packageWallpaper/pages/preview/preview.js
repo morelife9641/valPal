@@ -1,5 +1,6 @@
 // packageWallpaper/pages/preview/preview.js
 const db = wx.cloud.database();
+const app = getApp();
 
 Page({
   data: {
@@ -31,124 +32,6 @@ Page({
       console.error("加载方案失败:", err);
       wx.showToast({ title: "方案已删除或无权限", icon: "none" });
     }
-  },
-
-  applyPreset() {
-    const { snapshot, _id: presetId } = this.data.preset;
-
-    if (!snapshot) {
-      wx.showToast({ title: "方案图片不存在", icon: "none" });
-      return;
-    }
-
-    wx.showLoading({ title: "正在保存图片...", mask: true });
-
-    // 1. 下载图片获取临时路径
-    wx.downloadFile({
-      url: snapshot,
-      success: (res) => {
-        if (res.statusCode === 200) {
-          // 2. 保存到相册
-          wx.saveImageToPhotosAlbum({
-            filePath: res.tempFilePath,
-            success: () => {
-              wx.hideLoading();
-              wx.showModal({
-                title: "保存成功",
-                content: "预览图已保存至相册，即将前往配置页",
-                showCancel: false,
-                confirmText: "确定",
-                success: () => {
-                  // 3. 确认后跳转
-                  wx.reLaunch({
-                    url: `/packageWallpaper/pages/wallpaper/wallpaper?presetId=${presetId}`,
-                  });
-                },
-              });
-            },
-            fail: (err) => {
-              wx.hideLoading();
-              // 如果用户拒绝了权限，引导去开启
-              if (err.errMsg.includes("auth deny")) {
-                wx.showModal({
-                  title: "提示",
-                  content: "需要保存图片权限，请在设置中开启",
-                  success: (res) => {
-                    if (res.confirm) wx.openSetting();
-                  },
-                });
-              } else {
-                wx.showToast({ title: "保存失败", icon: "none" });
-              }
-            },
-          });
-        }
-      },
-      fail: () => {
-        wx.hideLoading();
-        wx.showToast({ title: "下载失败", icon: "none" });
-      },
-    });
-  },
-
-  applyPreset() {
-    const presetId = this.data.preset._id;
-    const snapshotUrl = this.data.preset.snapshot;
-    console.log(snapshotUrl);
-
-    if (!snapshotUrl) {
-      wx.showToast({ title: "未找到预览图", icon: "none" });
-      return;
-    }
-
-    wx.showLoading({ title: "正在保存方案...", mask: true });
-
-    // 1. 因为 snapshot 是云端或网络路径，需要先下载
-    wx.downloadFile({
-      url: snapshotUrl,
-      success: (res) => {
-        if (res.statusCode === 200) {
-          // 2. 保存到相册 (参考你提供的 saveImageToPhotosAlbum 逻辑)
-          wx.saveImageToPhotosAlbum({
-            filePath: res.tempFilePath,
-            success: () => {
-              wx.showToast({ title: "已存至相册", icon: "success" });
-
-              // 3. 延迟一会再跳转，让用户看清“已存至相册”的提示
-              setTimeout(() => {
-                wx.reLaunch({
-                  url: `/packageWallpaper/pages/wallpaper/wallpaper?presetId=${presetId}`,
-                });
-              }, 1000);
-            },
-            fail: (err) => {
-              console.error("保存失败", err);
-              // 处理用户拒绝权限的情况
-              if (err.errMsg.includes("auth deny")) {
-                wx.showModal({
-                  title: "授权提示",
-                  content: "需要开启相册权限才能保存预览图",
-                  confirmText: "去开启",
-                  success: (modalRes) => {
-                    if (modalRes.confirm) wx.openSetting();
-                  },
-                });
-              } else {
-                wx.showToast({ title: "保存失败", icon: "none" });
-              }
-            },
-            complete: () => {
-              wx.hideLoading();
-            },
-          });
-        }
-      },
-      fail: (err) => {
-        console.error("下载预览图失败", err);
-        wx.hideLoading();
-        wx.showToast({ title: "图片下载失败", icon: "none" });
-      },
-    });
   },
 
   applyPreset() {
@@ -202,6 +85,121 @@ Page({
         wx.showToast({ title: "图片下载失败", icon: "none" });
       },
     });
+  },
+
+  // 核心：应用预设/保存方案
+  applyPreset() {
+    // 🚩 1. 登录拦截
+    if (!app.globalData.isLogin) {
+      this.setData({
+        showLoginPopup: true,
+        pendingApply: true, // 记录意图
+      });
+      return;
+    }
+
+    // --- 以下是原有的保存逻辑 ---
+    const presetId = this.data.preset._id;
+    const snapshotUrl = this.data.preset.snapshot;
+
+    if (!snapshotUrl) {
+      wx.showToast({ title: "未找到预览图", icon: "none" });
+      return;
+    }
+
+    wx.showLoading({ title: "正在保存方案...", mask: true });
+
+    wx.cloud.downloadFile({
+      fileID: snapshotUrl,
+      success: (res) => {
+        const tempFilePath = res.tempFilePath;
+        wx.saveImageToPhotosAlbum({
+          filePath: tempFilePath,
+          success: () => {
+            wx.showToast({ title: "已存至相册", icon: "success" });
+          },
+          fail: (err) => {
+            if (err.errMsg.includes("auth deny")) {
+              wx.showModal({
+                title: "授权提示",
+                content: "需要开启相册权限才能保存预览图",
+                confirmText: "去开启",
+                success: (modalRes) => {
+                  if (modalRes.confirm) wx.openSetting();
+                },
+              });
+            } else {
+              wx.showToast({ title: "保存失败", icon: "none" });
+            }
+          },
+          complete: () => {
+            wx.hideLoading();
+          },
+        });
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        wx.showToast({ title: "图片下载失败", icon: "none" });
+      },
+    });
+  },
+
+  async onRegister(e) {
+    const { nickname, avatarUrl } = e.detail;
+    wx.showLoading({ title: "档案激活中...", mask: true });
+
+    try {
+      // Step 1: 上传头像
+      const cloudPath = `user_avatars/${Date.now()}-${Math.floor(Math.random() * 1000)}.png`;
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: avatarUrl,
+      });
+
+      // Step 2: 调云函数注册
+      const res = await wx.cloud.callFunction({
+        name: "manageUser",
+        data: {
+          action: "register",
+          userInfo: { nickname, avatarUrl: uploadRes.fileID },
+        },
+      });
+
+      if (res.result && res.result.success) {
+        // Step 3: 同步全局状态
+        const serverUserInfo = res.result.data;
+        app.globalData.isLogin = true;
+        app.globalData.userInfo = serverUserInfo;
+        wx.setStorageSync("userInfo", serverUserInfo);
+
+        this.setData({ showLoginPopup: false });
+
+        // Step 4: 意图恢复逻辑
+        if (this.data.pendingApply) {
+          // 刚才想保存图片
+          this.setData({ pendingApply: false });
+          this.applyPreset(); // 🚩 重新调用，此时已登录，直接开始下载并保存
+        } else if (this.data.pendingId) {
+          // 刚才想收藏预设
+          const id = this.data.pendingId;
+          this.setData({ pendingId: null });
+          await this.executeFavorite(id);
+        } else if (this.data.pendingEditor) {
+          // 刚才想去编辑器
+          this.setData({ pendingEditor: false });
+          this.goToEditor();
+        } else {
+          if (this.initData) await this.initData();
+        }
+
+        wx.showToast({ title: "特工档案已激活", icon: "success" });
+      }
+    } catch (err) {
+      console.error("激活失败:", err);
+      wx.showToast({ title: "激活失败", icon: "none" });
+    } finally {
+      wx.hideLoading();
+    }
   },
 
   goBack() {

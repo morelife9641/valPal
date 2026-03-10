@@ -1,0 +1,17 @@
+<view class="popup-mask {{visible ? 'show' : ''}}" bindtap="close" catchtouchmove="prevent">
+    <view class="popup-content" catchtap="prevent">
+        <view class="p-header">
+            <text class="p-title">选择作战地图</text>
+            <view class="p-close" bindtap="close">✕</view>
+        </view>
+        <view class="rank-scroll" enable-flex="true">
+            <view class="rank-item {{index === activeIndex ? 'active' : ''}}" wx:for="{{mapList}}" wx:key="uuid" bindtap="onSelect" style="background-image: url({{item.listViewIcon}});" data-index="{{index}}">
+                <!-- <image class="rank-img" src="{{item.listViewIcon}}" mode="aspectFill" lazy-load /> -->
+                <view class="item-overlay">
+                    <text class="rank-txt">{{item.displayName}}</text>
+                    <view class="active-bar" wx:if="{{index === activeIndex}}"></view>
+                </view>
+            </view>
+        </view>
+    </view>
+</view>

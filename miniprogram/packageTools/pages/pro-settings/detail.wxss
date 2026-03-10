@@ -10,7 +10,7 @@
 /* 头部视觉 */
 .pro-header {
   position: relative;
-  height: 500rpx;
+  height: 540rpx;
   overflow: hidden;
 }
 .header-bg {
@@ -28,18 +28,19 @@
 }
 .header-content {
   position: absolute;
-  bottom: 40rpx;
+  bottom: 10rpx;
   left: 40rpx;
   z-index: 2;
 }
 .team-tag {
-  font-size: 24rpx;
+  font-size: 42rpx;
   color: #ff4655;
-  font-weight: 900;
+  font-weight: bold;
+  margin-bottom: -20rpx;
 }
 .pro-full-name {
-  font-size: 72rpx;
-  font-weight: 900;
+  font-size: 52rpx;
+  font-weight: bold;
   color: #fff;
   display: block;
   margin: 10rpx 0;
@@ -127,4 +128,32 @@
   font-weight: 900;
   font-size: 24rpx;
   letter-spacing: 4rpx;
+}
+
+.team-badge {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  /* margin-bottom: 20rpx; */
+}
+
+.team-logo {
+  width: 44rpx; /* 稍微放大一点点 */
+  height: 44rpx;
+  /* 🚩 如果是白底队徽，开启亮度过滤能更好地融入暗色背景 */
+  filter: brightness(1.1);
+}
+
+.team-tag {
+  font-size: 42rpx;
+  font-weight: bold;
+  color: #ff4655; /* 🚩 尝试用瓦罗兰特红做队名，更醒目 */
+  letter-spacing: 1rpx;
+  /* 去掉背景，直接靠队徽撑起视觉 */
+  background: none;
+  padding: 0;
+}
+
+.back-arrow {
+  font-size: 30rpx;
 }

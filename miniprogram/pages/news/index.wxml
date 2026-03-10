@@ -1,8 +1,15 @@
-<view class="container">
-    <view class="tab-header">
+<view class="container tactical-intel-page">
+    <!-- <view class="tab-header">
         <view wx:for="{{tabs}}" wx:key="*this" class="tab-item {{currentTab === index ? 'active' : ''}}" bindtap="handleTabChange" data-index="{{index}}">
             {{item}}
             <view class="tab-line" wx:if="{{currentTab === index}}"></view>
+        </view>
+    </view> -->
+    <view class="tab-header">
+        <view wx:for="{{tabs}}" wx:key="*this" class="tab-item {{currentTab === index ? 'active' : ''}}" bindtap="handleTabChange" data-index="{{index}}">
+            <text class="tab-text">{{item}}</text>
+            <view class="active-line" wx:if="{{currentTab === index}}"></view>
+            <view class="active-glow" wx:if="{{currentTab === index}}"></view>
         </view>
     </view>
     <view class="tab-content">
@@ -41,7 +48,7 @@
                 </view>
             </view>
         </view>
-        <view wx:if="{{currentTab === 1}}" class="teams-container">
+        <!-- <view wx:if="{{currentTab === 1}}" class="teams-container">
             <view wx:for="{{teamsList}}" wx:key="_id" class="team-block">
                 <view class="team-header">
                     <image class="team-logo" src="../../assets/logos/{{item.logoName}}.png" mode="aspectFit" />
@@ -61,6 +68,24 @@
                         </view>
                     </view>
                 </scroll-view>
+            </view>
+        </view> -->
+        <view wx:if="{{currentTab === 1}}" class="teams-container">
+            <view wx:for="{{teamsList}}" wx:key="_id" class="team-block">
+                <view class="team-header-box">
+                    <image class="team-logo-bg" src="../../assets/logos/{{item.logoName}}.png" mode="aspectFit" />
+                    <view class="team-main-info">
+                        <text class="team-name">{{item.teamName}}</text>
+                        <text class="team-en-sub">VCT_PARTNER_DATA</text>
+                    </view>
+                </view>
+                <view class="member-grid">
+                    <view wx:for="{{item.members}}" wx:for-item="player" wx:key="name" class="player-card">
+                        <view class="player-role-dot {{player.role ? 'special' : ''}}"></view>
+                        <text class="p-name">{{player.name}}</text>
+                        <text class="p-role">{{player.role || 'AGENT'}}</text>
+                    </view>
+                </view>
             </view>
         </view>
         <view wx:if="{{currentTab === 2}}" class="event-timeline">

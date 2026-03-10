@@ -61,6 +61,16 @@
                 </movable-area>
             </view>
             <view class="form-group">
+                <view class="label-row">
+                    <text class="label">作战演示 (视频号)</text>
+                    <text class="label-hint">// 选填，粘贴视频号 FeedId</text>
+                </view>
+                <view class="video-link-box">
+                    <input class="custom-input link-input" placeholder="粘贴视频号 FeedId (如: exportId_...)" placeholder-class="ph-style" bindinput="onInputChange" data-field="videoFeedId" value="{{formData.videoFeedId}}" />
+                    <view class="how-to-get" bindtap="showVideoHelp">?</view>
+                </view>
+            </view>
+            <view class="form-group">
                 <text class="label">站位详情</text>
                 <view class="vertical-item-list">
                     <view class="tactical-item" wx:for="{{formData.standImg}}" wx:key="index">

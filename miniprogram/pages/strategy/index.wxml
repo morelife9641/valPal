@@ -1,13 +1,13 @@
 <view class="tactical-container">
     <view class="intel-section">
         <swiper class="intel-swiper" autoplay circular interval="4500" indicator-dots indicator-active-color="#FF4655">
-            <swiper-item wx:for="{{newsList}}" wx:key="id">
-                <view class="intel-card" bindtap="navToNews" data-info="{{item}}">
-                    <image src="{{item.cover}}" mode="aspectFill" class="intel-img" />
+            <swiper-item wx:for="{{focusList}}" wx:key="_id">
+                <view class="intel-card" bindtap="navToNewsDetail" data-id="{{item._id}}">
+                    <image src="{{item.thumb ? item.thumb : '/assets/logos/EDG.png'}}" mode="aspectFill" class="intel-img" />
                     <view class="intel-overlay">
                         <view class="intel-tag-row">
-                            <text class="intel-tag">{{item.tag || '情报'}}</text>
-                            <text class="intel-date">{{item.date}}</text>
+                            <text class="intel-tag">{{item.displayTag || '情报'}}</text>
+                            <text class="intel-date">{{item.displayTime}}</text>
                         </view>
                         <text class="intel-title">{{item.title}}</text>
                     </view>
@@ -17,116 +17,60 @@
         </swiper>
     </view>
     <view class="quick-nav-bar">
+        <view class="nav-item" bindtap="navToWiki">
+            <text>更新资讯</text>
+        </view>
+        <view class="nav-item" bindtap="navToAllPoints">
+            <text>地图选位</text>
+        </view>
         <view class="nav-item" bindtap="navToCrosshair">
             <text>准星库</text>
         </view>
         <view class="nav-item" bindtap="navToProSettings">
             <text>职业外设</text>
         </view>
-        <view class="nav-item" bindtap="navToSkins">
-            <text>皮肤百科</text>
-        </view>
-        <view class="nav-item" bindtap="navToWiki">
-            <text>更新资讯</text>
-        </view>
-    </view>
-    <!-- 战术区域 -->
-    <view class="tactical-hub">
-        <view class="map-nav">
-            <scroll-view class="map-scroll" scroll-x enable-flex scroll-into-view="map-{{currentMapIdx}}">
-                <view id="map-{{index}}" class="map-cell {{currentMapIdx === index ? 'active' : ''}}" wx:for="{{maps}}" wx:key="uuid" bindtap="selectMap" data-idx="{{index}}">
-                    <image class="map-thumb" src="{{item.listViewIcon}}" mode="aspectFill" />
-                    <view class="map-line"></view>
-                </view>
-            </scroll-view>
-        </view>
-        <view class="hub-panel">
-            <view class="panel-info">
-                <view class="panel-title">
-                    <text class="map-name">{{maps[currentMapIdx].displayName}}</text>
-                    <text class="map-label">通用点位</text>
-                </view>
-            </view>
-            <view class="panel-action" bindtap="navToAllPoints">
-                <text>查看全部</text>
-            </view>
-        </view>
-        <view class="hub-content fixed-height">
-            <block wx:if="{{recommendPoints.length > 0}}">
-                <view class="tactical-row atk-row">
-                    <view class="side-label atk">攻方</view>
-                    <scroll-view class="inner-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-                        <view class="mini-card-group">
-                            <view class="mini-card {{item.pointType === 'A' ? 'type-a' : (item.pointType === 'B' ? 'type-b' : 'type-other')}}" wx:for="{{atkPoints}}" wx:key="_id" bindtap="navToPointDetail" data-id="{{item._id}}">
-                                <view class="card-accent"></view>
-                                <view class="mini-header">
-                                    <view class="header-left">
-                                        <text class="site-label">{{item.pointType}}点</text>
-                                    </view>
-                                </view>
-                                <view class="mini-main">
-                                    <text class="mini-title">{{item.title}}</text>
-                                </view>
-                            </view>
-                            <view class="row-empty-hint" wx:if="{{atkPoints.length === 0}}">
-                                <text>NOT_DEPLOYED</text>
-                            </view>
-                        </view>
-                    </scroll-view>
-                </view>
-                <view class="row-divider"></view>
-                <view class="tactical-row def-row">
-                    <view class="side-label def">守方</view>
-                    <scroll-view class="inner-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-                        <view class="mini-card-group">
-                            <view class="mini-card {{item.pointType === 'A' ? 'type-a' : (item.pointType === 'B' ? 'type-b' : 'type-other')}}" wx:for="{{defPoints}}" wx:key="_id" bindtap="navToPointDetail" data-id="{{item._id}}">
-                                <view class="card-accent"></view>
-                                <view class="mini-header">
-                                    <view class="header-left">
-                                        <text class="site-label">{{item.pointType}}点</text>
-                                    </view>
-                                </view>
-                                <view class="mini-main">
-                                    <text class="mini-title">{{item.title}}</text>
-                                </view>
-                            </view>
-                            <view class="row-empty-hint" wx:if="{{atkPoints.length === 0}}">
-                                <text>NOT_DEPLOYED</text>
-                            </view>
-                        </view>
-                    </scroll-view>
-                </view>
-            </block>
-            <view class="hub-empty" wx:else>
-                <image class="empty-bg-map {{mapLoaded ? 'loaded' : ''}}" src="{{maps[currentMapIdx].listViewIcon}}" mode="aspectFill" bindload="onMapImgLoad" />
-                <view class="empty-overlay"></view>
-                <view class="empty-status">
-                    <text class="empty-hint">当前地图未检索到部署方案</text>
-                </view>
-            </view>
-        </view>
     </view>
     <!-- 列表区域 table -->
     <view class="list-section">
+        <view class="filter-tag-row">
+            <view class="filter-tag {{currentRankLabel !== '全部段位' ? 'active' : ''}}" bindtap="openRankPopup">
+                <!-- <image class="tag-rank-icon" src="cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/valorant_rank_icons/rankList[rankIndex].png" mode="aspectFit" lazy-load /> -->
+                <image class="tag-rank-icon" src="cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/valorant_rank_icons/{{rankList[rankIndex].icon}}.png" mode="aspectFit" lazy-load />
+                <text class="tag-text">{{currentRankLabel || '全段位'}}</text>
+                <view class="tag-arrow"></view>
+                <view class="tag-deco-line"></view>
+            </view>
+            <view class="filter-tag {{currentMapLabel !== '全部地图' ? 'active' : ''}}" bindtap="openMapPopup">
+                <image class="tag-rank-icon" src="{{currentMapIcon}}" mode="aspectFill" />
+                <text class="tag-text">{{maps[currentMapIdx].displayName || '选择地图'}}</text>
+                <view class="tag-arrow"></view>
+                <view class="tag-deco-line"></view>
+            </view>
+            <view class="filter-tag {{currentRoleLabel !== '全部角色' ? 'active' : ''}}" bindtap="openRolePopup">
+                <image class="tag-rank-icon" src="{{currentRoleIcon}}" mode="aspectFit" />
+                <text class="tag-text">{{currentRoleLabel}}</text>
+                <view class="tag-arrow"></view>
+                <view class="tag-deco-line"></view>
+            </view>
+            <view class="reset-btn" bindtap="resetFilters">
+                <text class="reset-icon">↺</text>
+            </view>
+        </view>
         <view class="stats-table">
             <block wx:if="{{displayStats.length > 0}}">
-                <scroll-view class="horizontal-scroll" scroll-x="true" enable-flex="true">
+                <view class="horizontal-scroll" enable-flex="true">
                     <view class="table-content-wrap">
                         <view class="table-thead">
-                            <view class="th rank" bindtap="openRankPopup">
-                                <view class="rank-picker-trigger">
-                                    <text>{{currentRankLabel}}</text>
-                                </view>
-                            </view>
+                            <view class="th rank">#</view>
                             <view class="th agent">特工</view>
                             <view class="th win">胜率</view>
-                            <view class="th nm-win">非镜像胜率</view>
+                            <!-- <view class="th nm-win">非镜像胜率</view> -->
                             <view class="th kd">K/D</view>
                             <view class="th pick">登场率</view>
-                            <view class="th matches">对局数</view>
+                            <view class="th matches">操作</view>
                         </view>
                         <scroll-view enable-flex="true" scroll-top="{{scrollTop}}" scroll-with-animation="true" scroll-y class="table-tbody">
-                            <view class="table-tr {{index < 3 ? 'top-three top-' + (index + 1) : ''}}" wx:for="{{displayStats}}" wx:key="Agent_EN" bindtap="navToAgentStrategy" data-agent="{{item}}">
+                            <view class="table-tr {{index < 3 ? 'top-three top-' + (index + 1) : ''}}" wx:for="{{displayStats}}" wx:key="Agent_EN">
                                 <view class="td rank">
                                     <text class="rank-num">{{item.rankPos}}</text>
                                 </view>
@@ -142,15 +86,20 @@
                                 <view class="td win {{item.winValue >= 50 ? 'text-green' : 'text-red'}}">
                                     {{item.Win_Rate}}
                                 </view>
-                                <view class="td nm-win">{{item.Non_Mirror_WR}}</view>
+                                <!-- <view class="td nm-win">{{item.Non_Mirror_WR}}</view> -->
                                 <view class="td kd">{{item.KD}}</view>
                                 <view class="td pick">{{item.Pick_Rate}}</view>
-                                <view class="td matches">{{item.Matches}}</view>
+                                <view class="td matches">
+                                    <view class="strategy-btn" catchtap="navToAgentStrategy" data-agent="{{item}}">
+                                        <text class="btn-text">详情</text>
+                                        <view class="btn-deco"></view>
+                                    </view>
+                                </view>
                             </view>
                         </scroll-view>
                     </view>
                     <view class="tabbar-bottom-spacer"></view>
-                </scroll-view>
+                </view>
             </block>
             <view class="empty-container" wx:else>
                 <view class="empty-content">
@@ -160,5 +109,7 @@
             </view>
         </view>
     </view>
+    <role-popup visible="{{isRolePopupShow}}" list="{{roleOptions}}" activeIndex="{{roleIndex}}" bind:close="closeRolePopup" bind:change="onRoleSelect" />
+    <map-popup visible="{{isMapPopupShow}}" activeIndex="{{currentMapIdx}}" bind:close="closeMapPopup" bind:change="onMapSelect" />
     <rank-popup visible="{{isPopupShow}}" list="{{rankOptions}}" activeIndex="{{rankIndex}}" bind:close="closeRankPopup" bind:change="onRankSelect" />
 </view>

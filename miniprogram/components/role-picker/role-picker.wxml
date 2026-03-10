@@ -1,0 +1,15 @@
+<view class="popup-mask {{visible ? 'show' : ''}}" bindtap="close" catchtouchmove="prevent">
+    <view class="popup-content" catchtap="prevent">
+        <view class="p-header">
+            <text class="p-title">选择角色位置</text>
+            <view class="p-close" bindtap="close">✕</view>
+        </view>
+        <view class="role-scroll">
+            <view class="role-item {{index === activeIndex ? 'active' : ''}}" wx:for="{{list}}" wx:key="value" bindtap="onSelect" data-index="{{index}}">
+                <image class="role-img" src="{{item.icon}}" mode="aspectFit" lazy-load />
+                <text class="role-txt">{{item.label}}</text>
+                <view class="active-dot" wx:if="{{index === activeIndex}}"></view>
+            </view>
+        </view>
+    </view>
+</view>

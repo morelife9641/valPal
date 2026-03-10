@@ -612,4 +612,13 @@ Page({
       });
     });
   },
+  showVideoHelp() {
+    wx.showModal({
+      title: "如何获取 FeedId？",
+      content:
+        "1. 将视频上传至视频号\n2. 在视频号助手或通过接口获取该视频的 feedId\n3. 粘贴至此处即可实现小程序内免流播放",
+      showCancel: false,
+      confirmColor: "#ff4655",
+    });
+  },
 });

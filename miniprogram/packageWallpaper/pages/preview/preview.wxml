@@ -2,7 +2,7 @@
     <image wx:if="{{preset.snapshot}}" class="full-snapshot" src="{{preset.snapshot}}" mode="aspectFill" show-menu-by-longpress="{{true}}"></image>
     <view wx:if="{{loading}}" class="loading-box">
         <view class="valorant-loader"></view>
-        <text>RESTORING AGENT...</text>
+        <text>加载中</text>
     </view>
     <view class="bottom-bar" wx:if="{{!loading}}">
         <view class="info">
@@ -15,3 +15,4 @@
         </view>
     </view>
 </view>
+<login-popup id="loginPopup" show="{{showLoginPopup}}" bind:close="onLoginClose" bind:register="onRegister" />

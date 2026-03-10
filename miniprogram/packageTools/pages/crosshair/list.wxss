@@ -23,14 +23,13 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  padding: 0 10rpx;
 }
 
 .ch-card {
   width: 25%;
   background: #1f2326;
   border: 1rpx solid #383e44;
-  margin-bottom: 24rpx;
+  margin-bottom: 10rpx;
   position: relative;
   display: flex;
   flex-direction: column;

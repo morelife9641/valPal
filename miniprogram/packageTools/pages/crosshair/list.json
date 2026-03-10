@@ -1,4 +1,7 @@
 {
+  "usingComponents": {
+    "login-popup": "../../../components/login-popup/login-popup"
+  },
   "navigationBarTitleText": "准星库",
   "navigationBarBackgroundColor": "#0f1923",
   "navigationBarTextStyle": "white"

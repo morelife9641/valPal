@@ -2,6 +2,7 @@ const db = wx.cloud.database();
 import { AGENTS_CONFIG } from "../../config/agents_merged";
 import { availableTags } from "../../config/tags";
 import { toggleFavoriteStatus } from "../../utils/fav";
+const app = getApp();
 
 Page({
   data: {
@@ -20,6 +21,9 @@ Page({
     filterAgent: { displayName: "", uuid: "" },
     filterTag: "全部",
     fromUserCenter: false,
+    showLoginPopup: false,
+    pendingId: null, // 记录想收藏的预设 ID
+    pendingEditor: false, // 记录是否想去编辑器
   },
 
   // async onShow() {
@@ -542,7 +546,20 @@ Page({
     );
   },
 
+  // goToEditor() {
+  //   wx.navigateTo({
+  //     url: `/packageWallpaper/pages/wallpaper/wallpaper`,
+  //   });
+  // },
+
   goToEditor() {
+    if (!app.globalData.isLogin) {
+      this.setData({
+        showLoginPopup: true,
+        pendingEditor: true,
+      });
+      return;
+    }
     wx.navigateTo({
       url: `/packageWallpaper/pages/wallpaper/wallpaper`,
     });
@@ -557,117 +574,37 @@ Page({
 
   async toggleFavorite(e) {
     const presetId = e.currentTarget.dataset.id;
-    const presets = this.data.presets;
-    const index = presets.findIndex((p) => p._id === presetId);
-    if (index === -1) return;
-
-    const isAlreadyFavorited = presets[index].isFavorite || false;
-    const db = wx.cloud.database();
-    const _ = db.command;
-
-    // 1. 乐观更新 UI
-    this.setData({
-      [`presets[${index}].isFavorite`]: !isAlreadyFavorited,
-    });
-
-    try {
-      if (!isAlreadyFavorited) {
-        // --- 执行【收藏】动作 ---
-        await db.collection("user_favorites").add({
-          data: {
-            presetId: presetId,
-            createTime: db.serverDate(),
-          },
-        });
-        wx.showToast({ title: "已收藏", icon: "none" });
-      } else {
-        // --- 执行【取消收藏】动作 ---
-        // 注意：这里需要根据 presetId 和自己的 openid 来删除
-        await db
-          .collection("user_favorites")
-          .where({
-            presetId: presetId,
-          })
-          .remove();
-        wx.showToast({ title: "已取消", icon: "none" });
-      }
-    } catch (err) {
-      console.error("收藏操作失败:", err);
-      // 回滚 UI
+    if (!app.globalData.isLogin) {
       this.setData({
-        [`presets[${index}].isFavorite`]: isAlreadyFavorited,
+        showLoginPopup: true,
+        pendingId: presetId, // 暂存预设 ID
       });
-      wx.showToast({ title: "操作失败", icon: "none" });
+      return;
     }
+    // 已登录，直接执行
+    await this.executeFavorite(presetId);
   },
 
-  async toggleFavorite(e) {
-    const presetId = e.currentTarget.dataset.id;
-    const presets = this.data.presets;
-    const index = presets.findIndex((p) => p._id === presetId);
-    if (index === -1) return;
-
-    // const itemId = e.currentTarget.dataset.id;
-    // const { filteredList } = this.data;
-    // const index = filteredList.findIndex((item) => item._id === itemId);
-
-    if (index === -1) return;
-
-    // 1. 获取旧状态
-    const oldStatus = presets[index].isFavorite;
-
-    // 2. 乐观更新 UI (先变色，提升用户体验)
-    this.setData({
-      [`presets[index].isFavorite`]: !oldStatus,
-    });
-
-    try {
-      // 3. 调用工具函数，传入业务类型 'point'
-      const res = await toggleFavoriteStatus(itemId, "preset");
-
-      // 4. 根据返回结果微调（如果后端返回状态与前端不一致）
-      if (res.isFavorite !== !oldStatus) {
-        this.setData({ [`presets[index].isFavorite`]: res.isFavorite });
-      }
-
-      wx.showToast({
-        title: res.msg,
-        icon: "none",
-      });
-    } catch (err) {
-      console.error("收藏失败:", err);
-      // 5. 失败回滚
-      this.setData({
-        [`presets[index].isFavorite`]: oldStatus,
-      });
-      wx.showToast({
-        title: "操作失败，请重试",
-        icon: "none",
-      });
-    }
+  onLoginClose() {
+    this.setData({ showLoginPopup: false });
   },
 
-  async toggleFavorite(e) {
-    const presetId = e.currentTarget.dataset.id;
+  async executeFavorite(presetId) {
     const presets = this.data.presets;
     const index = presets.findIndex((p) => p._id === presetId);
-
     if (index === -1) return;
 
-    // 1. 获取旧状态
     const oldStatus = presets[index].isFavorite;
 
-    // 2. 乐观更新 UI
-    // 注意这里：一定要用反引号 ` ，并且变量 index 要写成 ${index}
+    // 乐观更新 UI
     this.setData({
       [`presets[${index}].isFavorite`]: !oldStatus,
     });
 
     try {
-      // 3. 调用工具函数 (注意这里你的变量名是 presetId 而不是 itemId)
       const res = await toggleFavoriteStatus(presetId, "preset");
 
-      // 4. 根据返回结果微调
+      // 根据返回结果微调同步
       if (res.isFavorite !== !oldStatus) {
         this.setData({
           [`presets[${index}].isFavorite`]: res.isFavorite,
@@ -680,14 +617,65 @@ Page({
       });
     } catch (err) {
       console.error("收藏失败:", err);
-      // 5. 失败回滚
       this.setData({
         [`presets[${index}].isFavorite`]: oldStatus,
       });
-      wx.showToast({
-        title: "操作失败",
-        icon: "none",
+      wx.showToast({ title: "操作失败", icon: "none" });
+    }
+  },
+
+  async onRegister(e) {
+    const { nickname, avatarUrl } = e.detail;
+    wx.showLoading({ title: "档案激活中...", mask: true });
+
+    try {
+      // Step 1: 上传头像
+      const cloudPath = `user_avatars/${Date.now()}-${Math.floor(Math.random() * 1000)}.png`;
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: avatarUrl,
       });
+
+      // Step 2: 调云函数注册
+      const res = await wx.cloud.callFunction({
+        name: "manageUser",
+        data: {
+          action: "register",
+          userInfo: { nickname, avatarUrl: uploadRes.fileID },
+        },
+      });
+
+      if (res.result && res.result.success) {
+        // Step 3: 更新状态
+        const serverUserInfo = res.result.data;
+        app.globalData.isLogin = true;
+        app.globalData.userInfo = serverUserInfo;
+        wx.setStorageSync("userInfo", serverUserInfo);
+
+        this.setData({ showLoginPopup: false });
+
+        // Step 4: 意图恢复
+        if (this.data.pendingEditor) {
+          // 恢复去编辑器
+          this.setData({ pendingEditor: false });
+          this.goToEditor(); // 此时已登录，会直接跳走
+        } else if (this.data.pendingId) {
+          // 恢复收藏操作
+          const id = this.data.pendingId;
+          this.setData({ pendingId: null });
+          await this.executeFavorite(id);
+        } else {
+          // 纯手动登录，刷新页面收藏状态
+          if (this.initData) await this.initData();
+        }
+
+        wx.showToast({ title: "档案激活成功", icon: "success" });
+      }
+    } catch (err) {
+      console.error("激活失败:", err);
+      wx.showToast({ title: "激活失败", icon: "none" });
+    } finally {
+      wx.hideLoading();
     }
   },
 

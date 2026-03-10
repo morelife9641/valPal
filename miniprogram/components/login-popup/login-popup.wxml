@@ -4,7 +4,7 @@
         <view class="login-header">
             <view class="header-left">
                 <view class="red-bar"></view>
-                <text class="title">授权特工档案</text>
+                <text class="title">注册</text>
             </view>
             <view class="close-btn" bindtap="onClose">×</view>
         </view>
@@ -15,7 +15,7 @@
             </view>
             <view class="desc-item">
                 <view class="dot"></view>
-                <text>同步战术点位收藏夹</text>
+                <text>同步战术点位 准星库 装配库收藏功能</text>
             </view>
             <view class="desc-item">
                 <view class="dot"></view>
@@ -32,10 +32,10 @@
             </view>
             <view class="input-group">
                 <text class="label">昵称</text>
-                <input type="nickname" name="nickname" class="nickname-input" placeholder="请输入特工代号" />
+                <input type="nickname" name="nickname" class="nickname-input" placeholder="请输入昵称" />
             </view>
             <button class="submit-btn" form-type="submit">
-                <text>激活档案</text>
+                <text>确认</text>
                 <view class="btn-deco"></view>
             </button>
         </form>
