@@ -1,0 +1,14 @@
+<view class="popup-mask {{visible ? 'show' : ''}}" bindtap="close" catchtouchmove="prevent">
+    <view class="popup-content" catchtap="prevent">
+        <view class="p-header">
+            <text class="p-title">选择作战阵营</text>
+            <view class="p-close" bindtap="close">✕</view>
+        </view>
+        <view class="side-container">
+            <view wx:for="{{sides}}" wx:key="value" class="side-btn {{item.value}} {{activeValue === item.value ? 'active' : ''}}" bindtap="onSelect" data-item="{{item}}">
+                <!-- <image class="side-icon" src="{{item.icon}}" mode="aspectFit" /> -->
+                <text class="side-label">{{item.label}}</text>
+            </view>
+        </view>
+    </view>
+</view>

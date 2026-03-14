@@ -26,16 +26,6 @@ Page({
     pendingEditor: false, // 记录是否想去编辑器
   },
 
-  // async onShow() {
-  //   if (typeof this.getTabBar === "function" && this.getTabBar()) {
-  //     this.getTabBar().setData({
-  //       selected: 2, // 对应你 list 里的索引，skins 是第 3 个，所以是 2
-  //     });
-  //     await this.refreshPresets();
-  //     this.setData({ loading: false });
-  //   }
-
-  // },
   async onShow() {
     // 1. 同步 TabBar (保持原有)
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
@@ -389,27 +379,6 @@ Page({
       this.setData({
         showPopup: true,
         popupType: type,
-        // currentTab: defaultTab,
-        // popupTabs: isHero ? this.data.heroTabs : this.data.weaponTabs,
-      });
-    } else {
-      list = this.data.availableTags;
-    }
-    this.hideTabBar();
-    this.setData({
-      popupType: type,
-      popupList: list,
-      showPopup: true,
-    });
-  },
-  openFilter(e) {
-    const type = e.currentTarget.dataset.type;
-    let list = [];
-
-    if (type === "hero") {
-      this.setData({
-        showPopup: true,
-        popupType: type,
       });
     } else {
       // 处理 Tag 逻辑
@@ -546,12 +515,6 @@ Page({
     );
   },
 
-  // goToEditor() {
-  //   wx.navigateTo({
-  //     url: `/packageWallpaper/pages/wallpaper/wallpaper`,
-  //   });
-  // },
-
   goToEditor() {
     if (!app.globalData.isLogin) {
       this.setData({
@@ -563,6 +526,69 @@ Page({
     wx.navigateTo({
       url: `/packageWallpaper/pages/wallpaper/wallpaper`,
     });
+  },
+
+  // 1. 触发入口
+  goToEditor() {
+    if (!app.globalData.isLogin) {
+      this.setData({
+        showLoginPopup: true,
+        pendingEditor: true,
+      });
+      return;
+    }
+    // 🚩 打开分流弹窗
+    this.setData({ showEditorSwitch: true });
+  },
+
+  // 2. 关闭弹窗
+  closeEditorSwitch() {
+    this.setData({ showEditorSwitch: false });
+  },
+
+  // 3. 执行具体跳转
+  navToEditor(e) {
+    const { type } = e.currentTarget.dataset;
+    this.closeEditorSwitch();
+
+    if (type === "crosshair") {
+      wx.navigateTo({
+        url: `/packageWallpaper/pages/wallpaper/wallpaper?mode=crosshair`,
+      });
+    } else {
+      wx.navigateTo({
+        url: `/packageWallpaper/pages/wallpaper/wallpaper?mode=agent`,
+      });
+    }
+  },
+
+  navToEditor(e) {
+    const { type } = e.currentTarget.dataset;
+    this.closeEditorSwitch();
+
+    // 🚩 路径规则：/分包root/页面path
+    let targetUrl = "";
+
+    if (type === "crosshair") {
+      // 准星壁纸跳转到 wallpaper 编辑页
+      targetUrl = "/packageWallpaper/pages/wallpaper/wallpaper?mode=crosshair";
+    } else {
+      // 特工壁纸跳转到你指定的 display 页面
+      targetUrl = "/packageWallpaper/pages/display/display?mode=agent";
+    }
+
+    wx.navigateTo({
+      url: targetUrl,
+      fail: (err) => {
+        console.error("跳转失败，请检查路径:", err);
+        wx.showToast({ title: "系统链路异常", icon: "none" });
+      },
+    });
+  },
+
+  prevent() {
+    // 仅仅为了拦截滑动事件，防止穿透到背景列表
+    return;
   },
 
   onImageError(e) {

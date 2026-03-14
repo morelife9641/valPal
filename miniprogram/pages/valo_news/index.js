@@ -26,10 +26,7 @@ Page({
 
   onLoad() {
     const userInfo = wx.getStorageSync("userInfo");
-    const adminOpenIds = [
-      "o2BJX13TzO96J9w9FfJUqvdqjUdA",
-      "o2BJX1_Ro4AEMfTM4TEiC5a6vfrU",
-    ];
+    const adminOpenIds = [];
 
     if (userInfo && adminOpenIds.includes(userInfo._openid)) {
       this.setData({ isAdmin: true });

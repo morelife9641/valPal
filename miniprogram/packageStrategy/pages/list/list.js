@@ -1,17 +1,40 @@
 const mapsData = require("../../../config/maps_data.js");
 import { toggleFavoriteStatus } from "../../../utils/fav.js";
+import { AGENTS_CONFIG } from "../../../config/agents_merged";
+
+const formatDate = (date) => {
+  if (!date) return "";
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+  return `${year}/${month}/${day}`;
+};
+
 const app = getApp();
+
+// 辅助函数：处理 RRGGBBAA 颜色
+const formatThemeColor = (hex) => {
+  if (!hex) return "rgba(139, 145, 150, 0.2)";
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, 0.25)`;
+};
 
 Page({
   data: {
     sideIndex: 0,
     showLoginPopup: false,
+    totalCount: 0,
     pendingAdd: false, // 🚩 新增：记录是否需要跳转到添加页
     sideOptions: [
-      { name: "全部阵营", value: "all" },
+      { name: "全部", value: "all" },
       { name: "进攻", value: "atk" },
       { name: "防守", value: "def" },
     ],
+    showPopup: false,
+    popupType: "",
     sideFilter: "all",
     filterSideLabel: "全部", // 初始默认值
     allList: [], // 原始总列表
@@ -30,84 +53,312 @@ Page({
     pointIndex: 0,
     filterPointLabel: "全部", // 用于 DOM 显示
     pointType: "", // 用于后端过滤的具体值
+
+    showMapPopup: false,
+    mapIndex: 0,
+    filterMap: { displayName: "全部地图", uuid: "all" }, // 初始化默认值
+    totalCount: 0,
+    filteredList: [],
+
+    showSidePopup: false,
+    filterSide: "all", // 默认全部，或者 'atk' / 'def'
+    sideLabel: "全部",
+
+    // 也可以在 data 里定义 sides 的简易映射，方便 UI 显示
+    sideMap: {
+      all: "全部",
+      atk: "进攻",
+      def: "防守",
+    },
+
+    showPosPopup: false,
+    filterPos: "all", // 'A' / 'B' / 'C' / 'Others'
+    posLabel: "全部",
   },
 
-  onLoad() {
-    // 1. 获取原始地图数据
-    const rawMaps = Array.isArray(mapsData) ? mapsData : mapsData.maps || [];
+  onLoad(options) {
+    const { agentId, mapId, type } = options;
 
-    // 2. 定义目标地图名称集合 (Key)
-    const targetMaps = {
-      全部: "all",
-      幽邃地窟: "abyss",
-      霓虹町: "split",
-      微风岛屿: "breeze",
-      深海明珠: "pearl",
-      隐世修所: "haven",
-      源工重镇: "bind",
-      盐海矿镇: "corrode",
-      亚海悬城: "ascent", // 补上你示例中的亚海悬城，否则它会被过滤掉
-    };
-
-    // 获取所有需要保留的名字
-    const allowedNames = Object.keys(targetMaps);
-
-    // 3. 过滤并保留需要的字段（可选，建议只保留核心字段以节省内存）
-    const filteredMaps = rawMaps
-      .filter((item) => allowedNames.includes(item.displayName))
-      .map((item) => ({
-        uuid: item.uuid,
-        displayName: item.displayName,
-        displayIcon: item.displayIcon, // 详情页标点底图需要用到
-        splash: item.splash, // 列表展示可能用到
-      }));
-
-    // 4. 合并“全部地图”选项并更新数据
-    this.setData({
-      maps: [{ uuid: "all", displayName: "全部地图" }, ...filteredMaps],
+    // 1. 先处理特工列表（保持基础数据，因为选择器还需要用到）
+    const processedAgents = AGENTS_CONFIG.map((agent) => {
+      const rawColor = agent.backgroundGradientColors
+        ? agent.backgroundGradientColors[0]
+        : "8b9196ff";
+      const themeColor = formatThemeColor(rawColor);
+      return {
+        ...agent,
+        themeColor,
+        pageStyle: `background: linear-gradient(180deg, ${themeColor} 0%, #0f1923 100%);`,
+        displayIcon: `https://636c-cloud1-5gqun0xd80e8dd85-1396911701.tcb.qcloud.la/icons/${agent.uuid}.png`,
+        themeStyle: `background: linear-gradient(135deg, ${themeColor} 0%, rgba(15, 25, 35, 0) 100%);`,
+      };
     });
+
+    // 2. 初始化地图参数
+    let initialMap = { displayName: "全部地图", uuid: "all" };
+    if (mapId) {
+      const mapConfig = mapsData.find((m) => m.uuid === mapId);
+      if (mapConfig) {
+        initialMap = {
+          displayName: mapConfig.displayName,
+          uuid: mapConfig.uuid,
+        };
+      }
+    }
+
+    // 3. 判断是否是“通用点位”模式
+    const isGeneralMode = type === "general";
+    let targetAgent = null;
+
+    if (!isGeneralMode && agentId) {
+      targetAgent = processedAgents.find((a) => a.uuid === agentId) || null;
+    }
+
+    this.setData(
+      {
+        agentList: processedAgents,
+        filterAgent: targetAgent, // 如果是通用模式，这里就是 null
+        filterMap: initialMap,
+        agentIndex: targetAgent ? processedAgents.indexOf(targetAgent) : 0,
+        // 如果是通用模式，背景给个纯黑或中立色
+        pageStyle: targetAgent ? targetAgent.pageStyle : "background: #0f1923;",
+        isGeneralMode: isGeneralMode, // 🚩 存一个标志位方便后续判断
+      },
+      () => {
+        // 设置标题
+        wx.setNavigationBarTitle({
+          title: targetAgent
+            ? `${targetAgent.displayName} - lineups`
+            : "通用点位库",
+        });
+
+        // 🚩 核心分流加载
+        this.refreshPageData();
+      },
+    );
   },
 
   onShow() {
-    this.loadPointList();
+    // this.loadPointList();
   },
 
-  loadPointList() {
-    const db = wx.cloud.database();
-    wx.showLoading({ title: "同步战术库..." });
+  async loadPointList(isAppend = false) {
+    const { filterMap, filterSide, filterPos, allList } = this.data;
+    wx.showLoading({ title: "同步战术库...", mask: true });
 
-    db.collection("points")
-      .where({ status: 1 })
-      .orderBy("createTime", "desc")
-      .get()
-      .then((res) => {
-        const list = res.data.map((item) => {
-          // 核心：在 data.maps 中寻找对应的地图配置
-          // 注意：这里的 maps 是你在 onLoad 中过滤后生成的精简数组
-          const mapConfig = this.data.maps.find((m) => m.uuid === item.mapId);
+    try {
+      const db = wx.cloud.database();
+      // 通用点位不需要 agentId，主要看 mapId 和 status
+      let query = { status: 1 };
 
-          return {
-            ...item,
-            // 优先级：配置中的长版图标 > 配置中的全景图 > 默认图
-            mapThumb: mapConfig
-              ? mapConfig.listViewIconTall || mapConfig.splash
-              : "",
-            // 日期处理：增加年份或更详细的格式
-            dateDisplay: item.createTime
-              ? `${item.createTime.getMonth() + 1}/${item.createTime.getDate()}`
-              : "刚刚",
-          };
-        });
+      if (filterMap && filterMap.uuid !== "all") {
+        query.mapId = filterMap.uuid;
+      }
+      if (filterSide && filterSide !== "all") {
+        query.side = filterSide;
+      }
+      if (filterPos && filterPos !== "all") {
+        // 如果你数据库里存的是“其他”，而组件传出的是“Others”，这里要做个转换
+        const dbValue = filterPos === "Others" ? "其他" : filterPos;
+        query.pointType = dbValue;
+      }
 
-        this.setData({ allList: list }, () => {
-          this.applyFilter();
-          wx.hideLoading();
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-        wx.hideLoading();
+      // 🚩 处理分页，如果是刷新则从0开始
+      const offset = isAppend ? allList.length : 0;
+
+      const res = await db
+        .collection("points")
+        .where(query)
+        .orderBy("createTime", "desc")
+        .skip(offset)
+        .limit(20)
+        .get();
+
+      const list = res.data.map((item) => {
+        // 🚩 直接从原始 mapsData 找配置，避免使用 this.data.maps 可能产生的过滤丢失
+        const mapConfig = mapsData.find((m) => m.uuid === item.mapId);
+
+        return {
+          ...item,
+          // 🚩 修复：通用点位通常需要展示更宏观的地图背景
+          // 这里的图片路径务必确保在你的 wxml 中 map-preview-img 类下能被 filter 渲染
+          mapThumb: mapConfig
+            ? mapConfig.splash || mapConfig.listViewIconTall
+            : "",
+
+          // 补全地图显示名称
+          mapName:
+            item.mapName || (mapConfig ? mapConfig.displayName : "未知区域"),
+
+          // 为了兼容你刚才改的 WXML 结构，通用点位强制给一个 side
+          // 如果数据库没存 side (攻守)，默认给个中立值或从 pointType 判断
+          side: item.side || "def",
+
+          // 日期处理
+          dateDisplay: item.createTime ? formatDate(item.createTime) : "刚刚",
+        };
       });
+
+      this.setData({
+        allList: isAppend ? [...allList, ...list] : list,
+        // 如果你共用一个渲染列表名，请统一改为 filteredList
+        filteredList: isAppend ? [...allList, ...list] : list,
+      });
+    } catch (err) {
+      console.error("加载通用点位失败", err);
+      wx.showToast({ title: "检索失败", icon: "none" });
+    } finally {
+      wx.hideLoading();
+      console.log(this.data.filteredList);
+    }
+  },
+
+  // 2. 之前的加载方法（去除count逻辑，专注列表更新）
+  async loadAgentLineups(isAppend = false) {
+    const { filterAgent, filterMap, filterSide, filterPos, filteredList } =
+      this.data;
+    if (!filterAgent || !filterAgent.uuid) return;
+
+    wx.showLoading({ title: "同步战术中...", mask: true });
+
+    try {
+      const db = wx.cloud.database();
+      let query = { agentId: filterAgent.uuid };
+      if (filterMap && filterMap.uuid !== "all") {
+        query.mapId = filterMap.uuid;
+      }
+
+      // 阵营过滤 (atk/def)
+      if (filterSide && filterSide !== "all") {
+        query.side = filterSide;
+      }
+
+      // 区域过滤 (A/B/其他)
+      if (filterPos && filterPos !== "all") {
+        // 统一转换逻辑：如果组件传出 Others，数据库匹配“其他”
+        const dbValue =
+          filterPos === "Others" || filterPos === "O" ? "其他" : filterPos;
+        query.pointType = dbValue;
+      }
+
+      // 处理分页偏移量
+      const offset = isAppend ? filteredList.length : 0;
+
+      const res = await db
+        .collection("lineup_points")
+        .where(query)
+        .skip(offset) // 跳过已有的条数
+        .limit(10) // 每次拿10条
+        .orderBy("createTime", "desc")
+        .get();
+
+      const newList = res.data.map((item) => {
+        const mapConfig = mapsData.find((m) => m.uuid === item.mapId);
+        return {
+          ...item,
+          mapThumb: mapConfig
+            ? mapConfig.listViewIconTall || mapConfig.splash
+            : "",
+          mapName:
+            item.mapName || (mapConfig ? mapConfig.displayName : "未知地图"),
+          dateDisplay: item.createTime ? formatDate(item.createTime) : "刚刚",
+        };
+      });
+
+      this.setData({
+        filteredList: isAppend ? [...filteredList, ...newList] : newList,
+      });
+    } catch (err) {
+      console.error("加载失败", err);
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
+  //查询lineup数量
+  async updateLineupsCount() {
+    const { filterAgent, filterMap } = this.data;
+    if (!filterAgent || !filterAgent.uuid) return;
+
+    const db = wx.cloud.database();
+    let query = { agentId: filterAgent.uuid };
+    if (filterMap && filterMap.uuid !== "all") {
+      query.mapId = filterMap.uuid;
+    }
+
+    try {
+      const res = await db.collection("lineup_points").where(query).count();
+      this.setData({ totalCount: res.total });
+      console.log(this.data.totalCount);
+    } catch (err) {
+      console.error("计数失败", err);
+    }
+  },
+
+  onAgentCardClick() {
+    this.setData({
+      showPopup: true,
+      popupType: "hero",
+    });
+  },
+
+  // 🚩 2. 关闭弹窗的方法
+  togglePanel() {
+    this.setData({
+      showPopup: false,
+      popupType: "",
+    });
+  },
+
+  selectAgent(e) {
+    const selectedItem = e.detail.item;
+    console.log("选中的特工原始数据:", selectedItem);
+
+    if (!selectedItem) return;
+
+    // --- 🚩 核心修复：手动计算该特工的动态样式 ---
+    const rawColor = selectedItem.backgroundGradientColors
+      ? selectedItem.backgroundGradientColors[0]
+      : "8b9196ff";
+    const themeColor = formatThemeColor(rawColor); // 确保你的页面里能访问到这个格式化函数
+
+    // 1. 重新生成卡片背景 (themeStyle)
+    const themeStyle = `background: linear-gradient(135deg, ${themeColor} 0%, rgba(15, 25, 35, 0) 100%);`;
+
+    // 2. 重新生成全屏/吸顶背景 (pageStyle) - 对应你之前的 180deg 实色渐变
+    const pageStyle = `background-color: #0f1923; background-image: linear-gradient(180deg, ${themeColor} 0%, #0f1923 100%);`;
+
+    // 3. 将样式合并到对象中
+    const updatedAgent = {
+      ...selectedItem,
+      themeStyle,
+      pageStyle,
+    };
+
+    // 更新页面数据
+    this.setData(
+      {
+        filterAgent: updatedAgent,
+        agentIndex: this.data.agentList.findIndex(
+          (a) => a.uuid === selectedItem.uuid,
+        ),
+        showPopup: false,
+        popupType: "",
+      },
+      () => {
+        // 刷新列表
+        wx.setNavigationBarTitle({
+          title: `${updatedAgent.displayName} - linups`,
+        });
+        this.loadAgentLineups();
+        this.updateLineupsCount();
+
+        // 回到顶部
+        console.log(this.data.filterAgent);
+
+        wx.pageScrollTo({ scrollTop: 0, duration: 300 });
+      },
+    );
   },
 
   formatDate(date) {
@@ -117,83 +368,6 @@ Page({
     const month = (d.getMonth() + 1).toString().padStart(2, "0");
     const day = d.getDate().toString().padStart(2, "0");
     return `${year}/${month}/${day}`;
-  },
-
-  async loadPointList() {
-    wx.showLoading({ title: "同步中..." });
-    const db = wx.cloud.database();
-
-    try {
-      // --- 步骤 1: 获取点位类型的收藏 ID ---
-      const favRes = await db
-        .collection("user_favorites")
-        .where({
-          type: "point", // 🚩 只取点位类
-        })
-        .get();
-
-      const myFavIds = favRes.data.map((f) => f.targetId);
-
-      // --- 步骤 2: 获取点位主表数据 ---
-      const res = await db
-        .collection("points")
-        .where({ status: 1 })
-        .orderBy("createTime", "desc")
-        .get();
-
-      // --- 步骤 3: 数据合并渲染 ---
-      const processedList = res.data.map((item) => {
-        // 匹配地图配置获取图标（沿用你之前的逻辑）
-        const mapConfig = this.data.maps.find((m) => m.uuid === item.mapId);
-
-        return {
-          ...item,
-          isFavorite: myFavIds.includes(item._id), // 🚩 匹配并点亮星星
-          mapThumb: mapConfig
-            ? mapConfig.listViewIconTall || mapConfig.splash
-            : "",
-          dateDisplay: item.createTime
-            ? this.formatDate(item.createTime)
-            : "--",
-        };
-      });
-
-      this.setData({
-        allList: processedList,
-        filteredList: processedList,
-      });
-    } catch (err) {
-      console.error("加载列表失败", err);
-    } finally {
-      wx.hideLoading();
-    }
-  },
-
-  // 切换地图筛选
-  onMapFilterChange(e) {
-    this.setData({ mapIndex: e.detail.value }, () => this.applyFilter());
-  },
-
-  // 切换阵营筛选
-  toggleSideFilter() {
-    const modes = ["all", "atk", "def"];
-    let next = modes[(modes.indexOf(this.data.sideFilter) + 1) % 3];
-    this.setData({ sideFilter: next }, () => this.applyFilter());
-  },
-
-  // 执行筛选算法
-  applyFilter() {
-    const { allList, maps, mapIndex, sideFilter } = this.data;
-    const selectedMap = maps[mapIndex];
-
-    const filtered = allList.filter((item) => {
-      const mapMatch =
-        selectedMap.uuid === "all" || item.mapId === selectedMap.uuid;
-      const sideMatch = sideFilter === "all" || item.side === sideFilter;
-      return mapMatch && sideMatch;
-    });
-
-    this.setData({ filteredList: filtered });
   },
 
   applyFilter() {
@@ -227,58 +401,6 @@ Page({
 
     // 调试用：查看过滤后的数量
     console.log(`过滤完成，当前显示条数: ${filtered.length}`);
-  },
-
-  /**
-   * 点位收藏切换
-   */
-  async toggleFavorite(e) {
-    const pointId = e.currentTarget.dataset.id; // WXML 中传来的 item._id
-    const listName = "filteredList"; // 🚩 确认你页面渲染用的数组名，如果是 allList 就改回 allList
-    const list = this.data[listName];
-
-    if (!app.globalData.isLogin) {
-      this.setData({
-        showLoginPopup: true,
-        pendingId: pointId, // 记录想收藏的点位ID
-      });
-      return;
-    }
-
-    // 1. 查找索引
-    const index = list.findIndex((item) => item._id === pointId);
-    if (index === -1) return;
-
-    // 2. 获取当前收藏状态并乐观更新 UI
-    const isAlreadyFav = list[index].isFavorite || false;
-
-    this.setData({
-      [`${listName}[${index}].isFavorite`]: !isAlreadyFav,
-    });
-
-    try {
-      // 3. 调用通用工具函数，业务类型传入 'point'
-      // 注意：这里的字段名在 fav.js 存入的是 targetId
-      const res = await toggleFavoriteStatus(pointId, "point");
-
-      // 4. 反馈
-      wx.showToast({
-        title: res.isFavorite ? "已加入收藏" : "已取消收藏",
-        icon: "none",
-      });
-
-      // 5. 可选：如果 res 状态与预期不符，则强制同步一次
-      if (res.isFavorite === isAlreadyFav) {
-        this.setData({ [`${listName}[${index}].isFavorite`]: res.isFavorite });
-      }
-    } catch (err) {
-      console.error("点位收藏操作失败:", err);
-      // 6. 失败回滚
-      this.setData({
-        [`${listName}[${index}].isFavorite`]: isAlreadyFav,
-      });
-      wx.showToast({ title: "操作失败", icon: "none" });
-    }
   },
 
   onLoginClose() {
@@ -340,14 +462,33 @@ Page({
   },
 
   onMapChange(e) {
-    const idx = e.detail.value;
+    const { value, label, uuid } = e.detail;
+
+    // 更新页面显示的地图信息
     this.setData(
       {
-        mapIndex: idx,
-        filterMap: this.data.maps[idx],
+        mapIndex: value,
+        filterMap: {
+          displayName: label,
+          uuid: uuid,
+        },
       },
-      () => this.applyFilter(),
+      () => {
+        // 🚩 核心逻辑：条件改变后，同步刷新计数和列表
+        this.refreshPageData();
+      },
     );
+  },
+
+  // 3. 控制弹窗开关
+  openMapPopup() {
+    console.log(2);
+
+    this.setData({ showMapPopup: true });
+  },
+
+  closeMapPopup() {
+    this.setData({ showMapPopup: false });
   },
 
   toggleFavoriteFilter() {
@@ -370,87 +511,96 @@ Page({
     // }
   },
 
-  onSideChange(e) {
-    const idx = e.detail.value;
-    const selectedSide = this.data.sideOptions[idx];
+  clearMapFilter(e) {
+    // 使用 catchtap 阻止冒泡，避免触发 openMapPopup
     this.setData(
       {
-        sideIndex: idx,
-        filterSide: selectedSide.value,
-        // 新增：专门存一个字符串用于页面显示，保持 DOM 简洁
-        filterSideLabel: selectedSide.name,
-      },
-      () => this.applyFilter(),
-    );
-
-    console.log("Selected side:", this.data.filterSideLabel);
-  },
-
-  // --- 清除逻辑 ---
-
-  clearMapFilter() {
-    this.setData({ filterMap: {}, mapIndex: 0 }, () => this.applyFilter());
-  },
-
-  // 位置选择改变
-  onPointChange(e) {
-    const idx = e.detail.value;
-    const selectedPoint = this.data.pointOptions[idx];
-
-    this.setData(
-      {
-        pointIndex: idx,
-        pointType: selectedPoint.value,
-        filterPointLabel: selectedPoint.name,
+        mapIndex: 0,
+        filterMap: { displayName: "全部地图", uuid: "all" },
       },
       () => {
-        this.applyFilter(); // 执行筛选过滤
+        this.refreshPageData(); // 重新计数并加载列表
       },
     );
-
-    console.log("Selected Point:", this.data.filterPointLabel);
   },
 
-  // 清除位置筛选
-  clearPointFilter() {
-    this.setData(
-      {
-        pointIndex: 0,
-        pointType: "",
-        filterPointLabel: "全部",
-      },
-      () => {
-        this.applyFilter();
-      },
-    );
+  // 专门用于计算通用点位（points库）的数量
+  async updateGeneralCount() {
+    const { filterMap } = this.data;
+    const db = wx.cloud.database();
+
+    // 这里的查询条件必须和 loadPointList 保持一致
+    let query = { status: 1 };
+
+    if (filterMap && filterMap.uuid !== "all") {
+      query.mapId = filterMap.uuid;
+    }
+
+    try {
+      const res = await db.collection("points").where(query).count();
+      console.log("通用点位总数:", res.total);
+
+      this.setData({
+        totalCount: res.total, // 🚩 更新这个值，按钮上的数字 ({{totalCount}}) 才会变
+      });
+    } catch (err) {
+      console.error("通用计数查询失败", err);
+      this.setData({ totalCount: 0 });
+    }
   },
 
   clearSideFilter() {
     this.setData(
       {
-        sideIndex: 0,
+        // sideIndex: 0, // 如果你不再用 picker，这个可以去掉
         filterSide: "all",
-        filterSideLabel: "全部",
+        sideLabel: "全部", // 确保变量名和你显示用的对应
       },
-      () => this.applyFilter(),
+      () => {
+        // 🚩 重点：直接调用刷新逻辑，让数据库带上最新的 filterSide (all) 去查询
+        this.refreshPageData();
+      },
     );
   },
 
-  // pages/crosshair/list.js
   goToAdd() {
     const app = getApp();
+    const { filterAgent, filterMap } = this.data;
 
-    // 1. 拦截未登录
+    // 1. 拦截未登录 (保持原样)
     if (!app.globalData.isLogin) {
       this.setData({
         showLoginPopup: true,
-        pendingAdd: true, // 🚩 标记：登录完要去添加页
+        pendingAdd: true,
       });
       return;
     }
 
-    // 2. 已登录直接跳转
-    wx.navigateTo({ url: "../add-point/add-point" });
+    // 2. 构建跳转路径
+    let url = "../add-point/add-point";
+    let params = [];
+
+    // 如果当前选了特工，把特工 ID 传过去
+    if (filterAgent && filterAgent.uuid && filterAgent.uuid !== "all") {
+      params.push(`agentId=${filterAgent.uuid}`);
+      params.push(`agentName=${filterAgent.displayName}`);
+    }
+
+    // 如果当前选了地图，把地图 ID 传过去
+    if (filterMap && filterMap.uuid && filterMap.uuid !== "all") {
+      params.push(`mapId=${filterMap.uuid}`);
+      params.push(`mapName=${filterMap.displayName}`);
+    }
+
+    // 拼接参数
+    if (params.length > 0) {
+      url += "?" + params.join("&");
+    }
+
+    console.log("即将跳转添加页，携带参数:", url);
+
+    // 3. 执行跳转
+    wx.navigateTo({ url });
   },
 
   async onRegister(e) {
@@ -509,11 +659,104 @@ Page({
     }
   },
 
+  // 1. 打开弹窗
+  openSidePopup() {
+    this.setData({ showSidePopup: true });
+  },
+
+  // 2. 监听组件选择事件
+  onSideChange(e) {
+    const { value, label } = e.detail;
+    this.setData(
+      {
+        filterSide: value,
+        sideLabel: label,
+        showSidePopup: false,
+      },
+      () => {
+        // 🚩 核心：阵营变了，必须重新从第一页加载数据
+        this.refreshPageData();
+      },
+    );
+  },
+
+  // 3. 关闭弹窗
+  closeSidePopup() {
+    this.setData({ showSidePopup: false });
+  },
+
+  // 4. 修改刷新逻辑，把 side 传入查询
+  async refreshPageData() {
+    const { filterAgent } = this.data;
+
+    // 这里的 count 和 load 方法内部会自动读取 this.data.filterSide
+    if (filterAgent && filterAgent.uuid && filterAgent.uuid !== "all") {
+      await this.updateLineupsCount();
+      this.loadAgentLineups(false);
+    } else {
+      await this.updateGeneralCount();
+      this.loadPointList(false);
+    }
+  },
+
+  // --- Pos 弹窗逻辑 ---
+
+  // 1. 打开弹窗
+  openPosPopup() {
+    // 增加一个震动反馈，提升“战术面板”的操作手感
+    // wx.vibrateShort({ type: "light" });
+    this.setData({ showPosPopup: true });
+  },
+
+  // 2. 关闭弹窗
+  closePosPopup() {
+    this.setData({ showPosPopup: false });
+  },
+
+  // 3. 当组件内点击了 A/B/C/Others 后的回调
+  onPosChange(e) {
+    const { value, label } = e.detail; // 组件抛出的 value(如'A') 和 label(如'A区')
+
+    this.setData(
+      {
+        filterPos: value,
+        posLabel: label,
+        showPosPopup: false, // 选中后自动关闭
+      },
+      () => {
+        // 🚩 核心：筛选条件变了，立即刷新计数和列表数据
+        this.refreshPageData();
+      },
+    );
+  },
+
+  // 4. 点击 ✕ 清除筛选
+  clearPosFilter() {
+    this.setData(
+      {
+        filterPos: "all",
+        posLabel: "全部",
+      },
+      () => {
+        // 🚩 核心：清除后也要重新加载“全部”的数据
+        this.refreshPageData();
+      },
+    );
+  },
+
+  // list.js
   goToDetail(e) {
-    console.log(e);
+    const { id } = e.currentTarget.dataset;
+    // 🚩 核心：从 filteredList 或 allList 中找到这个数据，判断有没有 agentId
+    // 或者直接在 WXML 的 data- 属性里传过来
+    const item =
+      this.data.filteredList.find((i) => i._id === id) ||
+      this.data.allList.find((i) => i._id === id);
+
+    const type = item && item.agentId ? "agent" : "common";
 
     wx.navigateTo({
-      url: `/packageStrategy/pages/detail/detail?id=${e.currentTarget.dataset.id}`,
+      url: `/packageStrategy/pages/detail/detail?id=${id}&type=${type}`,
     });
   },
 });

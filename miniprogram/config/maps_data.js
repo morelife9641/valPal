@@ -6,17 +6,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "45°26'BF'N,12°20'Q'E",
     displayIcon:
-      "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Ascent/Ascent_PrimaryAsset",
     mapUrl: "/Game/Maps/Ascent/Ascent",
     xMultiplier: 7e-5,
@@ -333,17 +333,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "35°41'CD'N,139°41'WX'E",
     displayIcon:
-      "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/d960549e-485c-e861-8d71-aa9d1aed12a2_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/d960549e-485c-e861-8d71-aa9d1aed12a2_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/d960549e-485c-e861-8d71-aa9d1aed12a2_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/d960549e-485c-e861-8d71-aa9d1aed12a2_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/d960549e-485c-e861-8d71-aa9d1aed12a2_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/d960549e-485c-e861-8d71-aa9d1aed12a2_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Bonsai/Bonsai_PrimaryAsset",
     mapUrl: "/Game/Maps/Bonsai/Bonsai",
     xMultiplier: 7.8e-5,
@@ -652,17 +652,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "35°48'BI\"N 106°08'YQ\"W",
     displayIcon:
-      "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/b529448b-4d60-346e-e89e-00a4c527a405_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/b529448b-4d60-346e-e89e-00a4c527a405_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/b529448b-4d60-346e-e89e-00a4c527a405_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/b529448b-4d60-346e-e89e-00a4c527a405_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/b529448b-4d60-346e-e89e-00a4c527a405_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/b529448b-4d60-346e-e89e-00a4c527a405_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Canyon/Canyon_PrimaryAsset",
     mapUrl: "/Game/Maps/Canyon/Canyon",
     xMultiplier: 7.8e-5,
@@ -943,17 +943,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "34°2'A'N,6°51'Z'W",
     displayIcon:
-      "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Duality/Duality_PrimaryAsset",
     mapUrl: "/Game/Maps/Duality/Duality",
     xMultiplier: 5.9e-5,
@@ -1267,13 +1267,13 @@ module.exports = [
     coordinates: null,
     displayIcon: null,
     listViewIcon:
-      "https://media.valorant-api.com/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb_stylizedbackgroundimage.png",
     premierBackgroundImage: null,
     assetPath: "ShooterGame/Content/Maps/Duel/Duel_1/Skirmish_1_PrimaryAsset",
     mapUrl: "/Game/Maps/Duel/Duel_1/Skirmish_A",
@@ -1291,13 +1291,13 @@ module.exports = [
     coordinates: null,
     displayIcon: null,
     listViewIcon:
-      "https://media.valorant-api.com/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d_stylizedbackgroundimage.png",
     premierBackgroundImage: null,
     assetPath: "ShooterGame/Content/Maps/Duel/Duel_2/Skirmish_2_PrimaryAsset",
     mapUrl: "/Game/Maps/Duel/Duel_2/Skirmish_B",
@@ -1315,13 +1315,13 @@ module.exports = [
     coordinates: null,
     displayIcon: null,
     listViewIcon:
-      "https://media.valorant-api.com/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86_stylizedbackgroundimage.png",
     premierBackgroundImage: null,
     assetPath: "ShooterGame/Content/Maps/Duel/Duel_3/Skirmish_3_PrimaryAsset",
     mapUrl: "/Game/Maps/Duel/Duel_3/Skirmish_C",
@@ -1338,17 +1338,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "26°11'AG\"N 71°10'WY\"W",
     displayIcon:
-      "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/FoxTrot/Foxtrot_PrimaryAsset",
     mapUrl: "/Game/Maps/Foxtrot/Foxtrot",
     xMultiplier: 7e-5,
@@ -1641,17 +1641,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "70° 50' AJ\" N, 9° 00' VX\" W",
     displayIcon:
-      "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/224b0a95-48b9-f703-1bd8-67aca101a61f_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/224b0a95-48b9-f703-1bd8-67aca101a61f_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/224b0a95-48b9-f703-1bd8-67aca101a61f_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/224b0a95-48b9-f703-1bd8-67aca101a61f_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/224b0a95-48b9-f703-1bd8-67aca101a61f_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/224b0a95-48b9-f703-1bd8-67aca101a61f_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Infinity/Infinity_PrimaryAsset",
     mapUrl: "/Game/Maps/Infinity/Infinity",
     xMultiplier: 8.1e-5,
@@ -1944,17 +1944,17 @@ module.exports = [
     tacticalDescription: "A/B/C部署区",
     coordinates: "14°07'AD.4\"N8 74°53'XY\"E8",
     displayIcon:
-      "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Jam/Jam_PrimaryAsset",
     mapUrl: "/Game/Maps/Jam/Jam",
     xMultiplier: 7.2e-5,
@@ -2307,17 +2307,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "34° 2′ C″ N, 118° 12′ YT″ W",
     displayIcon:
-      "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/92584fbe-486a-b1b2-9faa-39b0f486b498_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/92584fbe-486a-b1b2-9faa-39b0f486b498_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/92584fbe-486a-b1b2-9faa-39b0f486b498_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/92584fbe-486a-b1b2-9faa-39b0f486b498_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/92584fbe-486a-b1b2-9faa-39b0f486b498_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/92584fbe-486a-b1b2-9faa-39b0f486b498_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Juliett/Juliett_PrimaryAsset",
     mapUrl: "/Game/Maps/Juliett/Juliett",
     xMultiplier: 7.8e-5,
@@ -2543,11 +2543,11 @@ module.exports = [
     coordinates: null,
     displayIcon: null,
     listViewIcon:
-      "https://media.valorant-api.com/maps/1f10dab3-4294-3827-fa35-c2aa00213cf3/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1f10dab3-4294-3827-fa35-c2aa00213cf3_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/1f10dab3-4294-3827-fa35-c2aa00213cf3/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1f10dab3-4294-3827-fa35-c2aa00213cf3_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/1f10dab3-4294-3827-fa35-c2aa00213cf3/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1f10dab3-4294-3827-fa35-c2aa00213cf3_splash.png",
     stylizedBackgroundImage: null,
     premierBackgroundImage: null,
     assetPath: "ShooterGame/Content/Maps/NPEV2/NPEV2_PrimaryAsset",
@@ -2565,17 +2565,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "38°42'ED\"N8 9°08'XS\"W8",
     displayIcon:
-      "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/fd267378-4d1d-484f-ff52-77821ed10dc2_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/fd267378-4d1d-484f-ff52-77821ed10dc2_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/fd267378-4d1d-484f-ff52-77821ed10dc2_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/fd267378-4d1d-484f-ff52-77821ed10dc2_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/fd267378-4d1d-484f-ff52-77821ed10dc2_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/fd267378-4d1d-484f-ff52-77821ed10dc2_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Pitt/Pitt_PrimaryAsset",
     mapUrl: "/Game/Maps/Pitt/Pitt",
     xMultiplier: 7.8e-5,
@@ -3024,17 +3024,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "76°44' A\"N 149°30' Z\"E",
     displayIcon:
-      "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/e2ad5c54-4114-a870-9641-8ea21279579a_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/e2ad5c54-4114-a870-9641-8ea21279579a_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/e2ad5c54-4114-a870-9641-8ea21279579a_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/e2ad5c54-4114-a870-9641-8ea21279579a_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/e2ad5c54-4114-a870-9641-8ea21279579a_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/e2ad5c54-4114-a870-9641-8ea21279579a_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Port/Port_PrimaryAsset",
     mapUrl: "/Game/Maps/Port/Port",
     xMultiplier: 7.2e-5,
@@ -3372,11 +3372,11 @@ module.exports = [
     coordinates: "45°26'FF'N,12°20'Q'E",
     displayIcon: null,
     listViewIcon:
-      "https://media.valorant-api.com/maps/ee613ee9-28b7-4beb-9666-08db13bb2244/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/ee613ee9-28b7-4beb-9666-08db13bb2244_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/ee613ee9-28b7-4beb-9666-08db13bb2244/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/ee613ee9-28b7-4beb-9666-08db13bb2244_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/ee613ee9-28b7-4beb-9666-08db13bb2244/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/ee613ee9-28b7-4beb-9666-08db13bb2244_splash.png",
     stylizedBackgroundImage: null,
     premierBackgroundImage: null,
     assetPath: "ShooterGame/Content/Maps/Poveglia/Poveglia_PrimaryAsset",
@@ -3395,11 +3395,11 @@ module.exports = [
     coordinates: "45°26'FF'N,12°20'Q'E",
     displayIcon: null,
     listViewIcon:
-      "https://media.valorant-api.com/maps/5914d1e0-40c4-cfdd-6b88-eba06347686c/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/5914d1e0-40c4-cfdd-6b88-eba06347686c_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/5914d1e0-40c4-cfdd-6b88-eba06347686c/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/5914d1e0-40c4-cfdd-6b88-eba06347686c_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/5914d1e0-40c4-cfdd-6b88-eba06347686c/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/5914d1e0-40c4-cfdd-6b88-eba06347686c_splash.png",
     stylizedBackgroundImage: null,
     premierBackgroundImage: null,
     assetPath: "ShooterGame/Content/Maps/PovegliaV2/PovegliaV2_PrimaryAsset",
@@ -3417,17 +3417,17 @@ module.exports = [
     tacticalDescription: "A/B部署区",
     coordinates: "48° 38' FH\" N8, 1° 33' YV\" W8",
     displayIcon:
-      "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Rook/Rook_PrimaryAsset",
     mapUrl: "/Game/Maps/Rook/Rook",
     xMultiplier: 7e-5,
@@ -3776,17 +3776,17 @@ module.exports = [
     tacticalDescription: "A/B/C部署区",
     coordinates: "27°28'A'N,89°38'WZ'E",
     displayIcon:
-      "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/displayicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047_displayicon.png",
     listViewIcon:
-      "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/listviewicon.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047_listviewicon.png",
     listViewIconTall:
-      "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/listviewicontall.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047_listviewicontall.png",
     splash:
-      "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/splash.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047_splash.png",
     stylizedBackgroundImage:
-      "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/stylizedbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047_stylizedbackgroundimage.png",
     premierBackgroundImage:
-      "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/premierbackgroundimage.png",
+      "cloud://cloud1-5gqun0xd80e8dd85.636c-cloud1-5gqun0xd80e8dd85-1396911701/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047_premierbackgroundimage.png",
     assetPath: "ShooterGame/Content/Maps/Triad/Triad_PrimaryAsset",
     mapUrl: "/Game/Maps/Triad/Triad",
     xMultiplier: 7.5e-5,

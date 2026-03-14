@@ -61,8 +61,8 @@
 }
 .p-title {
   color: #ece8e1;
-  font-size: 22rpx;
-  font-weight: bold;
+  font-size: 28rpx;
+  font-weight: 900;
   letter-spacing: 4rpx;
 }
 .p-close {

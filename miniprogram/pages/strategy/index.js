@@ -40,6 +40,9 @@ Page({
 
     mapLoaded: true,
 
+    currentSwiperIndex: 0,
+    focusList: [], // 你的数据列表
+
     rankList: [
       { tier: "all", label: "全部段位", icon: "0" }, // 对应 0.png
       { tier: "Iron", label: "黑铁", icon: "5" }, // 对应 3.png
@@ -167,7 +170,7 @@ Page({
     // 5. 更新报点
     // this.updateCallouts();
 
-    this.fetchMapRecommendations();
+    // this.fetchMapRecommendations();
 
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({
@@ -219,8 +222,16 @@ Page({
     } catch (err) {
       console.error("加载特工图标失败", err);
     } finally {
+      console.log(this.data.agentList);
+
       wx.hideLoading();
     }
+  },
+
+  onSwiperChange(e) {
+    this.setData({
+      currentSwiperIndex: e.detail.current,
+    });
   },
 
   // 辅助函数：转换英文 Role 到中文映射 Key
@@ -301,30 +312,6 @@ Page({
     }
   },
 
-  // 2. 选择地图后的回调
-  onMapSelect(e) {
-    // 根据你 map-picker 组件里 triggerEvent 传回的字段获取
-    const { index, label } = e.detail;
-
-    // 确保 index 是数字类型
-    const mapIdx = parseInt(index);
-
-    this.setData({
-      currentMapIdx: mapIdx,
-      currentMapLabel: label,
-      isMapPopupShow: false,
-    });
-
-    // 恢复显示自定义 TabBar
-    const tabBar = this.getTabBar();
-    if (tabBar) {
-      tabBar.setTabBarHidden(false);
-    }
-
-    // 选择完地图后，立即刷新战绩列表
-    this.updateDisplayStats();
-  },
-
   onMapSelect(e) {
     const { value, label, icon } = e.detail; // 这里的 value 就是 index
     const index = parseInt(value);
@@ -383,256 +370,47 @@ Page({
     });
   },
 
-  updateDisplayStats() {
-    const { maps, currentMapIdx, rankIndex, rankList, agentList } = this.data;
-    const valorantMasterData = this.allData;
-    // 1. 安全检查：确保数据源和索引存在
-    if (
-      !maps[currentMapIdx] ||
-      !rankList[rankIndex] ||
-      typeof valorantMasterData === "undefined"
-    ) {
-      return;
-    }
+  // index.js
+  navToAgentStrategy(e) {
+    const { agent } = e.currentTarget.dataset;
+    const map = this.data.maps[this.data.currentMapIdx];
 
-    // 2. 获取匹配词
-    const mapDisplayName = maps[currentMapIdx].displayName;
-    const mapKey = targetMaps[mapDisplayName] || "all";
-    const currentRankWord = rankList[rankIndex].tier;
-
-    console.log(`🔍 正在筛选 - 地图: ${mapKey}, 段位: ${currentRankWord}`);
-
-    // 3. 过滤逻辑
-    let filtered = valorantMasterData.filter((item) => {
-      // 确保 item.Map 和 item.Rank_Level 存在再进行比对
-      const isMapMatch =
-        item.Map && item.Map.toLowerCase() === mapKey.toLowerCase();
-      const isRankMatch =
-        item.Rank_Level &&
-        item.Rank_Level.toLowerCase() === currentRankWord.toLowerCase();
-      return isMapMatch && isRankMatch;
-    });
-
-    if (filtered.length === 0) {
-      console.warn("未找到匹配数据");
-      this.setData({ displayStats: [] });
-      return;
-    }
-
-    // 4. 数据加工 (针对你提供的新数据结构)
-    const processed = filtered.map((stat) => {
-      // 查找特工静态配置（头像、职业）
-      const agentInfo = agentList.find(
-        (a) =>
-          a.displayNameEn === stat.Agent_EN || a.displayName === stat.Agent,
-      );
-
-      // 计算胜率数字（用于排序和样式判断）
-      const winValue = parseFloat(stat.Win_Rate.replace("%", "")) || 0;
-
-      return {
-        ...stat,
-        finalName: stat.Agent,
-        agentIcon: agentInfo ? agentInfo.displayIcon : "",
-        roleIcon: agentInfo ? roleIconMap[agentInfo.role] : "",
-
-        // 核心展示数据处理
-        winValue: winValue, // 纯数字，用于 WXML 判断 {{item.winValue >= 50}}
-        winRateDisplay: winValue.toFixed(1), // 格式化显示如 "47.9"
-
-        kd: stat.KD || "0.00",
-        pickRate: stat.Pick_Rate ? stat.Pick_Rate.replace("%", "") : "0.0",
-        matches: stat.Matches || "0",
-
-        // 因为新数据里没有 ACS 和 KDA，这里给个占位符防止 WXML 报错
-        avgScore: "N/A",
-        kda: { k: "-", d: "-", a: "-" },
-      };
-    });
-
-    // 5. 排序：按胜率降序
-    processed.sort((a, b) => b.winValue - a.winValue);
-
-    // 6. 赋予排名序号
-    const displayStats = processed.map((item, index) => ({
-      ...item,
-      rankPos: index + 1,
-    }));
-
-    // 7. 更新视图
-    this.setData({ displayStats });
-  },
-
-  updateDisplayStats() {
-    const { maps, currentMapIdx, rankIndex, rankList, agentList } = this.data;
-    const valorantMasterData = this.allData;
-
-    // 1. 安全检查：确保索引是有效的数字且数据已加载
-    const mapIdx = parseInt(currentMapIdx);
-    const rIdx = parseInt(rankIndex);
-
-    if (
-      isNaN(mapIdx) ||
-      isNaN(rIdx) ||
-      !maps ||
-      !maps[mapIdx] ||
-      !rankList ||
-      !rankList[rIdx] ||
-      !valorantMasterData
-    ) {
-      console.warn("⏳ 筛选条件或大数据源尚未就绪", { mapIdx, rIdx });
-      return;
-    }
-
-    // 2. 获取匹配词：处理“全部”逻辑
-    const currentMap = maps[mapIdx];
-    const mapDisplayName = currentMap.displayName;
-
-    // 🚩 核心修正：如果地图名是“全部”，映射为 "all"；否则去 targetMaps 找
-    const mapKey =
-      mapDisplayName === "全部" ? "all" : targetMaps[mapDisplayName] || "all";
-    const currentRankWord = rankList[rIdx].tier;
-
-    console.log(
-      `📊 执行过滤 -> 地图Key: ${mapKey}, 段位Word: ${currentRankWord}`,
+    // 🚩 核心：从 agentList 中通过英文名找到对应的 uuid
+    const agentInfo = this.data.agentList.find(
+      (a) =>
+        a.displayNameEn === agent.Agent_EN || a.displayName === agent.Agent,
     );
+    const targetId = agentInfo ? agentInfo.uuid : agent.Agent_EN;
 
-    // 3. 过滤逻辑
-    let filtered = valorantMasterData.filter((item) => {
-      // 确保字段存在并统一转小写比对
-      const itemMap = (item.Map || "").toLowerCase();
-      const itemRank = (item.Rank_Level || "").toLowerCase();
-      const targetMap = mapKey.toLowerCase();
-      const targetRank = currentRankWord.toLowerCase();
+    wx.vibrateShort({ type: "light" });
 
-      return itemMap === targetMap && itemRank === targetRank;
-    });
-
-    // 4. 空数据处理：如果没搜到，清空列表
-    if (filtered.length === 0) {
-      console.warn("❌ 未找到匹配数据，请检查 JSON 中的 Map/Rank_Level 字段");
-      this.setData({ displayStats: [] });
-      return;
-    }
-
-    // 5. 数据加工 (保持你的逻辑，优化头像匹配)
-    const processed = filtered.map((stat) => {
-      const agentInfo = agentList.find(
-        (a) =>
-          a.displayNameEn === stat.Agent_EN || a.displayName === stat.Agent,
-      );
-
-      const winValue = parseFloat(stat.Win_Rate.replace("%", "")) || 0;
-
-      return {
-        ...stat,
-        finalName: stat.Agent,
-        agentIcon: agentInfo ? agentInfo.displayIcon : "",
-        roleIcon: agentInfo ? roleIconMap[agentInfo.role] : "",
-        winValue: winValue,
-        winRateDisplay: winValue.toFixed(1),
-        kd: stat.KD || "0.00",
-        pickRate: stat.Pick_Rate ? stat.Pick_Rate.replace("%", "") : "0.0",
-        matches: stat.Matches || "0",
-        avgScore: "N/A",
-        kda: { k: "-", d: "-", a: "-" },
-      };
-    });
-
-    // 6. 排序与排名
-    processed.sort((a, b) => b.winValue - a.winValue);
-    const displayStats = processed.map((item, index) => ({
-      ...item,
-      rankPos: index + 1,
-    }));
-
-    // 7. 更新视图并重置滚动位置
-    this.setData({
-      displayStats,
-      scrollTop: 0, // 切换条件后回到顶部
+    wx.navigateTo({
+      // 传 uuid 过去是最稳的
+      url: `/packageStrategy/pages/list/list?agentId=${targetId}&mapId=${map.uuid}&type=agent`,
     });
   },
 
-  updateDisplayStats() {
-    const {
-      maps,
-      currentMapIdx,
-      rankIndex,
-      rankList,
-      agentList,
-      roleOptions,
-      roleIndex,
-    } = this.data;
-    const valorantMasterData = this.allData;
+  // index.js
 
-    // 1. 安全检查
-    const mapIdx = parseInt(currentMapIdx);
-    const rIdx = parseInt(rankIndex);
-    if (
-      isNaN(mapIdx) ||
-      isNaN(rIdx) ||
-      !maps ||
-      !maps[mapIdx] ||
-      !valorantMasterData
-    )
-      return;
+  navToAgentStrategy(e) {
+    const { agent } = e.currentTarget.dataset;
+    // 1. 获取当前选中的地图对象
+    const currentMap = this.data.maps[this.data.currentMapIdx];
+    const mapId = currentMap ? currentMap.uuid : "all";
 
-    // 2. 获取筛选词
-    const mapKey =
-      maps[mapIdx].displayName === "全部"
-        ? "all"
-        : targetMaps[maps[mapIdx].displayName] || "all";
-    const currentRankWord = rankList[rIdx].tier;
-    const targetRoleValue = roleOptions[roleIndex].value; // 如 'Sentinel' 或 'all'
+    // 2. 查找特工对应的 UUID (假设数据里存在，或者通过配置查找)
+    // 如果 item 里没有 uuid，建议在 updateDisplayStats 时就补全，或者直接传 Agent_EN
+    const agentInfo = this.data.agentList.find(
+      (a) => a.Agent_EN === agent.Agent_EN || a.displayName === agent.Agent,
+    );
+    const targetAgentId = agentInfo ? agentInfo.uuid : agent.Agent_EN;
 
-    // 3. 基础过滤：地图 + 段位
-    let filtered = valorantMasterData.filter((item) => {
-      return (
-        (item.Map || "").toLowerCase() === mapKey.toLowerCase() &&
-        (item.Rank_Level || "").toLowerCase() === currentRankWord.toLowerCase()
-      );
+    // wx.vibrateShort({ type: 'light' });
+
+    // 3. 执行跳转，带上精准的 uuid
+    wx.navigateTo({
+      url: `/packageStrategy/pages/list/list?agentId=${targetAgentId}&mapId=${mapId}&type=agent`,
     });
-
-    // 4. 加工数据并进行“职业筛选”
-    const processed = [];
-    filtered.forEach((stat) => {
-      // 找到该特工的详细配置（为了拿职业信息）
-      const agentInfo = agentList.find(
-        (a) =>
-          a.displayNameEn === stat.Agent_EN || a.displayName === stat.Agent,
-      );
-
-      // 🚩 职业二次过滤逻辑
-      if (targetRoleValue !== "all") {
-        // 如果选了特定职业，但当前特工不属于该职业，则跳过
-        if (!agentInfo || agentInfo.role !== targetRoleValue) return;
-      }
-
-      const winValue = parseFloat(stat.Win_Rate.replace("%", "")) || 0;
-
-      processed.push({
-        ...stat,
-        agentIcon: agentInfo ? agentInfo.displayIcon : "",
-        // 使用你提供的本地资源映射
-        roleIcon: agentInfo
-          ? roleIconMap[this._getRoleChineseName(agentInfo.role)] || ""
-          : "",
-        winValue: winValue,
-        winRateDisplay: winValue.toFixed(1),
-        kd: stat.KD || "0.00",
-        pickRate: stat.Pick_Rate ? stat.Pick_Rate.replace("%", "") : "0.0",
-        matches: stat.Matches || "0",
-      });
-    });
-
-    // 5. 排序与更新
-    processed.sort((a, b) => b.winValue - a.winValue);
-    const displayStats = processed.map((item, index) => ({
-      ...item,
-      rankPos: index + 1,
-    }));
-
-    this.setData({ displayStats, scrollTop: 0 });
   },
 
   updateDisplayStats() {
@@ -715,6 +493,7 @@ Page({
     }));
 
     this.setData({ displayStats, scrollTop: 0 });
+    console.log(this.data.displayStats);
   },
 
   // 辅助函数：将英文 Role 转为对应的中文 Key 以匹配你的 roleIconMap
@@ -807,42 +586,6 @@ Page({
     });
   },
 
-  fetchMapRecommendations() {
-    const currentMap = this.data.maps[this.data.currentMapIdx];
-    if (!currentMap) return;
-
-    const db = wx.cloud.database(); // 确保定义了 db
-
-    db.collection("points")
-      .where({
-        mapId: currentMap.uuid,
-      })
-      .limit(10) // 既然分了两行，建议把上限调到10，每行5个左右视觉更饱满
-      .orderBy("createTime", "desc")
-      .get()
-      .then((res) => {
-        const allPoints = res.data;
-
-        // 核心过滤逻辑：根据你数据库里的字段（假设字段名是 side）
-        // 如果你的字段名不同，请修改下面的 'atk' 和 'def'
-        const atkPoints = allPoints.filter(
-          (p) => p.side === "atk" || p.type === "进攻",
-        );
-        const defPoints = allPoints.filter(
-          (p) => p.side === "def" || p.type === "防守",
-        );
-
-        this.setData({
-          recommendPoints: allPoints, // 用于控制整体的 wx:if
-          atkPoints: atkPoints,
-          defPoints: defPoints,
-        });
-      })
-      .catch((err) => {
-        console.error("推荐点位加载失败", err);
-      });
-  },
-
   navToPointDetail(e) {
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({
@@ -927,33 +670,6 @@ Page({
           icon: "none",
         });
       },
-    });
-  },
-
-  // 更新当前地图的报点区域（按 A/B/中区 分类）
-  updateCallouts() {
-    const map = this.data.maps[this.data.currentMapIdx];
-    if (!map || !map.callouts) return;
-
-    // 按 superRegionName 分组，方便列表展示
-    const groups = {};
-    map.callouts.forEach((c) => {
-      const groupName = c.superRegionName || "其他";
-      if (!groups[groupName]) groups[groupName] = [];
-      groups[groupName].push(c.regionName);
-    });
-
-    this.setData({ currentCallouts: groups });
-  },
-
-  // 跳转详情页
-  navToDetail(e) {
-    const { region } = e.currentTarget.dataset;
-    const map = this.data.maps[this.data.currentMapIdx];
-    const agent = this.data.agents[this.data.currentAgentIdx];
-
-    wx.navigateTo({
-      url: `/pages/map-detail/map-detail?mapId=${map.uuid}&agentId=${agent.uuid}&region=${region}`,
     });
   },
 

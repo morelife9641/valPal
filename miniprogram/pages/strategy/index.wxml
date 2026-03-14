@@ -1,6 +1,6 @@
 <view class="tactical-container">
     <view class="intel-section">
-        <swiper class="intel-swiper" autoplay circular interval="4500" indicator-dots indicator-active-color="#FF4655">
+        <swiper class="intel-swiper" autoplay circular interval="4500" bindchange="onSwiperChange">
             <swiper-item wx:for="{{focusList}}" wx:key="_id">
                 <view class="intel-card" bindtap="navToNewsDetail" data-id="{{item._id}}">
                     <image src="{{item.thumb ? item.thumb : '/assets/logos/EDG.png'}}" mode="aspectFill" class="intel-img" />
@@ -15,6 +15,9 @@
                 </view>
             </swiper-item>
         </swiper>
+        <view class="custom-dots">
+            <view wx:for="{{focusList}}" wx:key="index" class="dot-line {{index === currentSwiperIndex ? 'active' : ''}}"></view>
+        </view>
     </view>
     <view class="quick-nav-bar">
         <view class="nav-item" bindtap="navToWiki">

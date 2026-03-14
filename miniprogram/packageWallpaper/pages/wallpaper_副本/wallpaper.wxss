@@ -1,0 +1,618 @@
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0f1923; /* 瓦罗兰特深色底色 */
+}
+
+.canvas-full-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #000000 !important;
+  /* 确保这个容器本身也是不透明的 */
+  opacity: 1 !important;
+}
+
+#testCanvas,
+canvas[canvas-id="testCanvas"] {
+  width: 100%;
+  height: 100%;
+  /* background-color: #f5f5f5; */
+  z-index: 1;
+}
+
+/* 头部 */
+/* 容器定位 */
+/* 1. 基础容器：穿透点击但锁定交互区 */
+.ui-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.action-menu {
+  position: absolute;
+  left: 30rpx;
+  top: 2vh;
+  display: flex;
+  white-space: nowrap;
+  flex-direction: column;
+  gap: 20rpx;
+  pointer-events: auto; /* 恢复点击 */
+}
+
+/* 2. 菜单组：关键是利用动画改变 max-width */
+.menu-group {
+  display: flex;
+  height: 60rpx; /* 统一高度，约原 50% */
+  background: #0f1923; /* 纯黑底色，解决透明感 */
+  border: 1rpx solid #333;
+  width: 140rpx; /* 初始宽度 */
+  transition: width 0.3s ease-out;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0; /* 防止被挤压 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 🚩 增加平滑过渡动画 */
+}
+
+.menu-group:nth-child(1) {
+  width: 140rpx;
+}
+.menu-group:nth-child(2) {
+  width: 140rpx;
+}
+.menu-group:nth-child(3) {
+  width: 140rpx;
+}
+
+/* --- 展开态宽度（.active）：label + sub-options 的总宽 --- */
+/* 根据你子按钮的数量调整下面的数值 */
+.menu-group:nth-child(1).active {
+  width: 280rpx;
+}
+.menu-group:nth-child(2).active {
+  width: 420rpx;
+}
+.menu-group:nth-child(3).active {
+  width: 560rpx;
+}
+
+/* 展开状态：宽度直接拉长 */
+.menu-group.active {
+  width: 500rpx;
+  border-color: #ff4655;
+}
+
+/* 3. 左侧固定标签 */
+.category-label {
+  flex-shrink: 0; /* 绝对禁止压缩 */
+  width: 140rpx;
+  height: 100%;
+  background: #1f2326;
+  border-left: 4rpx solid #ff4655;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.label-cn {
+  color: #ece8e1;
+  font-size: 20rpx;
+  font-weight: bold;
+}
+
+/* 4. 滚动区域：核心修复点 */
+.sub-options {
+  width: 100%;
+  height: 100%;
+  white-space: nowrap; /* 强制内容不换行 */
+}
+
+/* 5. 按钮项：显式定宽解决点不动 */
+.opt-item {
+  display: inline-flex; /* 配合 nowrap 排成一排 */
+  align-items: center;
+  justify-content: center;
+  width: 140rpx; /* 显式定宽，保证点击热区 */
+  height: 60rpx;
+  color: #ece8e1;
+  font-weight: bold;
+  letter-spacing: 1.2;
+  font-size: 20rpx;
+  border-right: 4rpx solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  vertical-align: top;
+}
+
+.opt-item:active {
+  background: #ff4655;
+  color: #fff;
+}
+
+/* 特殊高亮 */
+.opt-item.highlight {
+  color: #ff4655;
+  font-weight: bold;
+}
+/* 按钮 */
+.base-wrapper {
+  position: relative !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  display: block !important;
+}
+/* 左上主操作区 */
+.canvas-operation-left {
+  position: absolute !important;
+  top: 30rpx;
+  left: 30rpx;
+  z-index: 100 !important;
+  pointer-events: auto; /* 确保能点到 */
+}
+
+/* 武器装饰组 - 纵向展开 */
+.weapon-group {
+  position: relative;
+}
+
+.weapon-submenu-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-top: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.weapon-group.expanded .weapon-submenu-vertical {
+  max-height: 250rpx;
+  opacity: 1;
+  margin-top: 8rpx;
+}
+
+.weapon-group.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+/* 英雄卡片优化 */
+.item-card {
+  display: inline-block;
+  width: 160rpx;
+  margin: 30rpx 20rpx;
+  text-align: center;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.item-card image {
+  width: 120rpx;
+  height: 120rpx;
+  background: #1f2326;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* 模拟瓦罗兰特的几何边框 */
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 80% 100%, 0 100%);
+}
+
+.item-card.selected image {
+  border: 4rpx solid #ff4655;
+  box-shadow: 0 0 20rpx rgba(255, 70, 85, 0.4);
+  transform: translateY(-10rpx);
+}
+
+.item-card text {
+  display: block;
+  /* margin-top: 15rpx; */
+  font-size: 22rpx;
+  color: #8b8b8b;
+  font-weight: bold;
+}
+
+.item-card.selected text {
+  color: #ff4655;
+}
+
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  /* 遮罩稍微快一点，为弹出层铺垫 */
+  transition: all 0.3s ease;
+}
+
+.mask.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 1. 弹出层容器：加入缩放效果 */
+.bottom-popup {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  background-color: #0f1923;
+  z-index: 1001;
+  border-top: 4rpx solid #ff4655;
+  height: 60vh;
+  /* 初始状态：完全透明、向下偏移、稍微缩小 */
+  transform: translateY(100%) scaleY(0.8);
+  transform-origin: bottom;
+  opacity: 0 !important;
+  visibility: hidden !important;
+
+  /* 关键：使用贝塞尔曲线模拟游戏的清脆感 */
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease-out,
+    visibility 0.4s;
+}
+
+/* 2. 显示态：恢复原状 */
+.bottom-popup.show {
+  transform: translateY(0) scaleY(1);
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative;
+}
+
+/* 3. 内部英雄卡片：入场动画 */
+.item-card {
+  opacity: 0;
+  transform: translateX(40rpx); /* 从右侧滑入 */
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 当父级 show 时，所有卡片滑入 */
+.bottom-popup.show .item-card {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 4. 为前几个英雄添加交错延迟（模拟逐个弹出的高级感） */
+.item-card:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.item-card:nth-child(2) {
+  transition-delay: 0.15s;
+}
+.item-card:nth-child(3) {
+  transition-delay: 0.2s;
+}
+.item-card:nth-child(4) {
+  transition-delay: 0.25s;
+}
+.item-card:nth-child(5) {
+  transition-delay: 0.3s;
+}
+
+/* 内部页眉：英雄选择标题 */
+.popup-header {
+  /* height: 100rpx; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40rpx;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 70, 85, 0.1) 0%,
+    transparent 100%
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.popup-header text {
+  color: #ece8e1;
+  font-size: 28rpx;
+  font-weight: 800;
+  /* text-transform: uppercase; */
+  letter-spacing: 4rpx;
+}
+
+.close-btn:active {
+  color: #ff4655;
+}
+
+.selector-view-vertical {
+  height: 53vh;
+  /* 确保这里没有 white-space: nowrap; */
+}
+
+.item-grid {
+  display: flex; /* 必须开启 flex */
+  flex-wrap: wrap; /* 必须开启换行，否则 width: 25% 也没用 */
+  width: 100%; /* 确保宽度充满 */
+  align-content: flex-start;
+}
+
+.item-card-vertical {
+  width: 25%; /* 此时一行四个生效 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 10rpx;
+  /* flex-wrap: nowrap;  这一行在子元素上写是没意义的，可以删掉 */
+}
+
+.icon-box {
+  width: 100%;
+  height: 160rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1rpx solid rgba(236, 232, 225, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 4rpx;
+}
+
+.item-card-vertical.selected .icon-box {
+  border-color: #ff4655;
+  background: rgba(255, 70, 85, 0.1);
+}
+
+/* 选中时的倒三角装饰 */
+.item-card-vertical.selected .icon-box::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 10rpx solid transparent;
+  border-top-color: #ff4655;
+  border-right-color: #ff4655;
+}
+
+.agent-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.agent-name {
+  font-size: 18rpx;
+  color: rgba(236, 232, 225, 0.6);
+  text-align: center;
+  margin-top: 12rpx;
+  width: 100%;
+  /* 🚩 文字过长省略号，防止撑乱网格 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.load-more-tip {
+  text-align: center;
+  font-size: 20rpx;
+  color: rgba(236, 232, 225, 0.3);
+  padding: 20rpx 0;
+  letter-spacing: 2rpx;
+}
+
+/* 英雄卡片 */
+.item-card {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin-left: 30rpx !important;
+  position: relative !important;
+}
+
+.item-card image {
+  /* width: 140rpx !important; */
+  /* height: 140rpx !important; */
+  background-color: #1f2326 !important;
+  border: 2rpx solid rgba(255, 255, 255, 0.1) !important;
+  /* 模拟游戏里的切角矩形头像框 */
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%) !important;
+  transition: all 0.3s !important;
+}
+
+.item-card text {
+  margin-top: 15rpx;
+  font-size: 22rpx;
+  color: #8b8b8b;
+  font-weight: bold;
+}
+
+/* 选中态：红色高亮 */
+.item-card.selected image {
+  border: 4rpx solid #ff4655;
+  background: linear-gradient(135deg, rgba(255, 70, 85, 0.3) 0%, #1f2326 100%);
+  transform: translateY(-10rpx);
+}
+
+.item-card.selected text {
+  color: #ff4655;
+}
+
+/* 卡片背后增加一个微弱的序号或装饰文本 */
+.item-card::before {
+  content: "//";
+  position: absolute;
+  top: -10rpx;
+  right: 20rpx;
+  font-size: 18rpx;
+  color: rgba(255, 70, 85, 0.3);
+}
+
+/* Tabs 样式 */
+.tabs-view {
+  padding: 10rpx 20rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  height: 60rpx;
+}
+.tab-item {
+  display: inline-block;
+  padding: 10rpx 30rpx;
+  color: #888;
+  font-size: 26rpx;
+  transition: all 0.3s;
+}
+.tab-item.active {
+  color: #ff4655;
+  font-weight: bold;
+  border-bottom: 4rpx solid #ff4655;
+}
+
+/* 底部炫彩条样式 */
+.chroma-bar-wrapper {
+  bottom: 0px;
+  width: 100%;
+  z-index: 998;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: 12rpx 60rpx;
+  background: #0f1923;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+.chroma-tip {
+  font-size: 24rpx;
+  color: #aaa;
+  margin-right: 20rpx;
+  /* margin-bottom: 10rpx; */
+}
+.chroma-scroll {
+  flex: 1;
+  white-space: nowrap;
+}
+.chroma-dot {
+  display: inline-block;
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 2rpx solid transparent;
+  overflow: hidden;
+}
+.chroma-dot.active {
+  border-color: #ff4655;
+  transform: scale(1.1);
+}
+.swatch-img {
+  width: 100%;
+  height: 100%;
+}
+
+/* 保存方案弹窗 */
+.save-modal-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 25, 35, 0.85);
+  backdrop-filter: blur(10px);
+}
+.modal-content {
+  box-sizing: border-box;
+  position: relative;
+  width: 600rpx;
+  background: #0f1923;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  padding: 40rpx 0;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+.v-line {
+  width: 6rpx;
+  height: 30rpx;
+  background: #ff4655;
+  margin-right: 15rpx;
+}
+.modal-title {
+  color: #ece8e1;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+  font-size: 28rpx;
+}
+
+.input-label {
+  font-size: 20rpx;
+  color: #8b9196;
+  margin-bottom: 15rpx;
+  display: block;
+  text-transform: uppercase;
+}
+.valo-input {
+  background: #1f2326;
+  border: 1rpx solid #383e42;
+  padding: 20rpx;
+  color: #ece8e1;
+  font-size: 26rpx;
+  margin-bottom: 30rpx;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15rpx;
+  margin-bottom: 40rpx;
+}
+.tag-item {
+  padding: 10rpx 25rpx;
+  font-size: 22rpx;
+  color: #8b9196;
+  background: #1f2326;
+  border: 1rpx solid #383e42;
+  transition: all 0.2s;
+}
+.tag-item.active {
+  background: rgba(255, 70, 85, 0.1);
+  border-color: #ff4655;
+  color: #ff4655;
+  font-weight: bold;
+  box-shadow: 0 0 10rpx rgba(255, 70, 85, 0.2);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20rpx;
+}
+.modal-btn {
+  flex: 1;
+  height: 80rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  border: none;
+}
+.modal-btn.cancel {
+  background: #383e42;
+  color: #ece8e1;
+}
+.modal-btn.confirm {
+  background: #ff4655;
+  color: #fff;
+}
+
+/* 卡面逻辑 */
+/* 容器与遮罩 */

@@ -22,11 +22,25 @@
     "miniprogram": {
       "list": [
         {
+          "name": "packageWallpaper/pages/display/display",
+          "pathName": "packageWallpaper/pages/display/display",
+          "query": "mode=agent",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
+          "name": "packageStrategy/pages/list/list",
+          "pathName": "packageStrategy/pages/list/list",
+          "query": "mapId=all&agentId=Clove&type=agent",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/valo_news/index",
           "pathName": "pages/valo_news/index",
           "query": "",
-          "scene": null,
-          "launchMode": "default"
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "pages/skins/index",

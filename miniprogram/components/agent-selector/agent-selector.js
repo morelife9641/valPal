@@ -72,6 +72,10 @@ Component({
         filteredList: filtered,
       });
     },
+    prevent() {
+      // 无需写逻辑，仅仅作为事件拦截
+      return;
+    },
 
     onClose() {
       this.triggerEvent("close");

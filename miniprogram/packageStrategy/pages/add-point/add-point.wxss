@@ -456,3 +456,38 @@ textarea.custom-textarea {
   font-weight: bold;
   border-left: 1rpx solid rgba(255, 70, 85, 0.2);
 }
+
+/* 特工选择框内部布局 */
+.agent-select-inner {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.mini-agent-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 15rpx;
+  border-radius: 4rpx;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.placeholder-text {
+  color: #8b9196;
+}
+
+.arrow-down {
+  font-size: 18rpx;
+  color: #ff4655;
+  margin-left: 10rpx;
+}
+
+/* 之前你代码里的 align-height 确保高度统一 */
+.align-height {
+  height: 90rpx;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}

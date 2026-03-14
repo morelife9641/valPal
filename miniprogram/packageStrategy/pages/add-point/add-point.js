@@ -18,14 +18,11 @@ Page({
     },
   },
 
-  onLoad() {
-    // 1. 获取原始数据
+  onLoad(options) {
+    // --- 1. 获取基础配置数据 ---
     const rawMaps = Array.isArray(mapsData) ? mapsData : mapsData.maps || [];
-    const agents = Array.isArray(AGENTS_CONFIG)
-      ? AGENTS_CONFIG
-      : AGENTS_CONFIG.agents || [];
 
-    // 2. 定义目标地图白名单 (只要这些 key 对应的 displayName)
+    // --- 2. 过滤地图 (保持你原有的逻辑) ---
     const targetMaps = {
       幽邃地窟: "abyss",
       霓虹町: "split",
@@ -36,51 +33,43 @@ Page({
       盐海矿镇: "corrode",
     };
     const allowedNames = Object.keys(targetMaps);
-
-    // 3. 过滤地图：只保留白名单内的地图，并提取必要字段
     const filteredMaps = rawMaps
       .filter((m) => allowedNames.includes(m.displayName))
       .map((m) => ({
         uuid: m.uuid,
         displayName: m.displayName,
-        displayIcon: m.displayIcon, // 绘图/预览底图
-        listViewIconTall: m.listViewIconTall, // 备用
+        displayIcon: m.displayIcon,
       }));
 
-    // 4. 初始化默认选中状态
-    let mapIndex = -1;
-    let defaultMap = null;
-    let currentMapIcon = "";
+    // --- 🚩 3. 解析从 Lineup 页面传来的参数 ---
+    const { agentId, agentName, mapId } = options;
 
-    if (filteredMaps.length > 0) {
-      mapIndex = 0;
-      defaultMap = filteredMaps[0];
-      currentMapIcon = defaultMap.displayIcon;
+    // 匹配地图 Index
+    let mapIndex = 0;
+    if (mapId) {
+      const foundIdx = filteredMaps.findIndex((m) => m.uuid === mapId);
+      if (foundIdx > -1) mapIndex = foundIdx;
     }
 
-    // 5. 统一同步数据
+    const defaultMap = filteredMaps[mapIndex] || null;
+
+    // --- 4. 统一同步数据 ---
     this.setData({
       maps: filteredMaps,
-      allAgents: agents,
-
-      // 地图选择器状态
       mapIndex: mapIndex,
       mapName: defaultMap ? defaultMap.displayName : "",
-      currentMapIcon: currentMapIcon,
+      currentMapIcon: defaultMap ? defaultMap.displayIcon : "",
 
-      // 初始化提交给后端的表单数据结构
+      // 🚩 初始化表单：优先使用传来的参数
+      "formData.agentId": agentId || "",
+      "formData.agentName": agentName || "",
       "formData.mapId": defaultMap ? defaultMap.uuid : "",
       "formData.side": "atk",
+      "formData.pointType": "A",
       "formData.markPoints": [],
       "formData.standImg": [],
-      "formData.aimImg": [],
-      "formData.enemyImg": [],
-      "formData.resultImg": [],
       "formData.title": "",
-      "formData.desc": "",
     });
-
-    console.log("添加页初始化完成，默认地图:", this.data.mapName);
   },
 
   onInputChange(e) {
@@ -130,8 +119,6 @@ Page({
     this.setData({
       "formData.pointType": point,
     });
-    // 增加震动反馈
-    // wx.vibrateShort({ type: 'light' });
   },
 
   // 1. 切换阵营
@@ -154,23 +141,6 @@ Page({
   onMapChange(e) {
     const idx = e.detail.value;
     const selected = this.data.maps[idx];
-    this.setData(
-      {
-        mapIndex: idx,
-        mapName: selected.displayName,
-        "formData.mapId": selected.uuid,
-        currentMapIcon: selected.displayIcon, // 核心：用于绘图
-      },
-      () => {
-        // 选完地图立即初始化 Canvas 并画底图
-        this.initMapCanvas();
-      },
-    );
-  },
-
-  onMapChange(e) {
-    const idx = e.detail.value;
-    const selected = this.data.maps[idx];
 
     // 1. 清空旧标点（可选）：换地图通常意味着之前的标点失效了
     // 2. 更新底图路径
@@ -183,6 +153,25 @@ Page({
     });
 
     // 这里的 this.initMapCanvas(); 直接删掉
+  },
+
+  // 🚩 特工选择器方法
+  openAgentSelector() {
+    this.setData({ showAgentPopup: true });
+  },
+
+  closeAgentSelector() {
+    this.setData({ showAgentPopup: false });
+  },
+
+  onAgentSelect(e) {
+    const { item } = e.detail; // 对应组件 triggerEvent("select", { item })
+    this.setData({
+      "formData.agentId": item.uuid,
+      "formData.agentName": item.displayName,
+      showAgentPopup: false,
+    });
+    // wx.vibrateShort({ type: "light" });
   },
 
   // 点击点位删除
@@ -579,6 +568,104 @@ Page({
       wx.showModal({
         title: "部署失败",
         content: "网络环境不稳定，请检查重试",
+        showCancel: false,
+      });
+    }
+  },
+
+  async submitForm() {
+    const { formData, mapName } = this.data;
+    const userInfo = wx.getStorageSync("userInfo") || {};
+    const isAnonymous = formData.isAnonymous || false;
+
+    // --- 1. 基础校验 (保持不变) ---
+    if (!formData.title)
+      return wx.showToast({ title: "请输入方案标题", icon: "none" });
+    if (!formData.mapId)
+      return wx.showToast({ title: "请选择地图", icon: "none" });
+    if (!formData.pointType)
+      return wx.showToast({ title: "请选择区域", icon: "none" });
+
+    wx.showLoading({ title: "数据同步中...", mask: true });
+
+    try {
+      // --- 2. 图片上传逻辑 (保持不变) ---
+      const imgFields = ["standImg", "aimImg", "enemyImg", "resultImg"];
+      const finalFormData = { ...formData };
+      for (const field of imgFields) {
+        const imgList = formData[field];
+        if (!imgList || imgList.length === 0) continue;
+        const uploadPromises = imgList.map(async (item, index) => {
+          if (
+            item.url.startsWith("http://tmp") ||
+            item.url.startsWith("wxfile://")
+          ) {
+            const cloudPath = `valorant/points/${Date.now()}_${field}_${index}.jpg`;
+            const cloudUrl = await this.uploadFilePromise(cloudPath, item.url);
+            return { ...item, url: cloudUrl };
+          }
+          return item;
+        });
+        finalFormData[field] = await Promise.all(uploadPromises);
+      }
+
+      // --- 3. 构造提交数据 (增加关键词优化) ---
+      const submitData = {
+        ...finalFormData,
+        mapName: mapName,
+        createTime: new Date(),
+        updateTime: new Date(),
+        status: 1,
+        // 🚩 关键词增加特工名，方便后续全局搜索
+        _keywords: [formData.title, mapName, formData.agentName || "通用"].join(
+          ",",
+        ),
+        creator: {
+          nickname: isAnonymous ? "匿名特工" : userInfo.nickname || "未知特工",
+          avatar: isAnonymous
+            ? "/images/default-avatar.png"
+            : userInfo.avatarUrl || "",
+          _id: userInfo._id || "",
+          isAnonymous: isAnonymous,
+        },
+        stats: { up: 0, down: 0, hot: 0, view: 0 },
+      };
+
+      // --- 🚩 4. 核心区分：选择数据库集合 ---
+      const db = wx.cloud.database();
+      // 如果选了特工，进专项库；没选，进通用库
+      const collectionName = formData.agentId ? "lineup_points" : "points";
+
+      console.log(`正在向 ${collectionName} 部署数据...`);
+      await db.collection(collectionName).add({ data: submitData });
+
+      wx.hideLoading();
+
+      // --- 5. 交互弹窗 (保持不变) ---
+      wx.showModal({
+        title: "部署成功",
+        content: `该${formData.agentName || "通用"}选位方案已同步。`,
+        cancelText: "返回列表",
+        confirmText: "继续添加",
+        success: (res) => {
+          const eventChannel = this.getOpenerEventChannel();
+          if (eventChannel && eventChannel.emit) {
+            eventChannel.emit("refreshList");
+          }
+          if (res.confirm) {
+            this.resetForm();
+            wx.pageScrollTo({ scrollTop: 0, duration: 300 });
+          } else if (res.cancel) {
+            wx.navigateBack();
+          }
+        },
+      });
+    } catch (err) {
+      console.error("同步失败：", err);
+      wx.hideLoading();
+      wx.showModal({
+        title: "部署失败",
+        content: "网络环境不稳定",
         showCancel: false,
       });
     }

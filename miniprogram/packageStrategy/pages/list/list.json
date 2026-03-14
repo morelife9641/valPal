@@ -1,6 +1,10 @@
 {
   "navigationBarTitleText": "点位列表",
   "usingComponents": {
-    "login-popup": "../../../components/login-popup/login-popup"
+    "map-popup": "../../../components/map-picker/map-picker",
+    "agent-selector": "../../../components/agent-selector/agent-selector",
+    "login-popup": "../../../components/login-popup/login-popup",
+    "side-popup": "../../../components/side-picker/side-picker",
+    "pos-popup": "../../../components/pos-picker/pos-picker"
   }
 }

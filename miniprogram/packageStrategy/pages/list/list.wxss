@@ -6,6 +6,114 @@
   flex-direction: column;
 }
 
+.hero-select-section {
+  width: 100%;
+  padding: 0rpx 0rpx;
+  padding-top: 0;
+  box-sizing: border-box;
+}
+
+.hero-selector-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 140rpx; /* 稍微收紧，更有精致感 */
+  padding: 0 30rpx;
+  box-sizing: border-box;
+  transition: transform 0.1s ease;
+  overflow: hidden;
+  /* 🚩 瓦罗兰特招牌切角 */
+  /* clip-path: polygon(0 0, 100% 0, 100% 70%, 96% 100%, 0 100%); */
+}
+
+.hero-selector-card:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.hero-avatar-wrap {
+  width: 100rpx;
+  height: 100rpx;
+  margin-right: 24rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-icon {
+  width: 100%;
+  height: 100%;
+  /* 增加微弱光晕，防止在暗色背景下死板 */
+  filter: drop-shadow(0 0 10rpx rgba(255, 255, 255, 0.1));
+}
+
+.hero-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.role-row {
+  display: flex;
+  align-items: center;
+  margin-top: 8rpx;
+}
+.td-role-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 10rpx;
+}
+
+.cn-name {
+  font-size: 34rpx;
+  font-weight: 900;
+  color: #ece8e1;
+  margin-top: 14rpx;
+  letter-spacing: 4rpx;
+  text-transform: uppercase;
+}
+
+.role-label {
+  font-size: 24rpx;
+  color: rgba(236, 232, 225, 0.4);
+  margin-top: 4rpx;
+  letter-spacing: 2rpx;
+}
+
+.switch-hint {
+  position: absolute;
+  right: 40rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: row; /* 🚩 核心：横向排列 */
+  align-items: center; /* 🚩 垂直居中 */
+  gap: 12rpx; /* 文字和点之间的间距 */
+  opacity: 0.6; /* 默认半透明，增加高级感 */
+}
+
+.switch-hint text {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.switch-dot {
+  width: 10rpx;
+  height: 10rpx;
+  background-color: #ff4655;
+  /* 🚩 瓦服特色：把正方形旋转45度变成菱形 */
+  transform: rotate(45deg);
+  box-shadow: 0 0 8rpx rgba(255, 70, 85, 0.5); /* 增加一点微光 */
+}
+
+/* 激活反馈 */
+.hero-selector-card:active .switch-hint {
+  opacity: 1;
+}
+
 .header-filter-row {
   position: sticky;
   top: 0;
@@ -13,21 +121,37 @@
 
   /* 🚩 关键：去掉外边距，改用内边距 */
   margin: 0;
-  padding: 20rpx;
+  /* padding: 20rpx; */
 
   /* 🚩 底色优化：使用半透明 + 毛玻璃，减少视觉上的“沉重感” */
   /* background: rgba(31, 35, 38, 0.9); */
   background: #0f1923;
-  backdrop-filter: blur(20rpx); /* 现代手机会有磨砂玻璃感 */
+  /* backdrop-filter: blur(20rpx); 现代手机会有磨砂玻璃感 */
 
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
-
+  flex-direction: column; /* 🚩 核心：让子元素垂直堆叠 */
+  /* background: transparent; 之前说的，透出底部的渐变 */
+  width: 100%;
   /* 🚩 移除硬边框，改用更深一点的投影或极细线 */
   border-bottom: 1rpx solid rgba(236, 232, 225, 0.08);
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.4);
+}
+.agent-value-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.mini-agent-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 8rpx;
+  background: rgba(255, 255, 255, 0.1);
+  /* 瓦服切角感 */
+  /* clip-path: polygon(0 0, 100% 0, 100% 80%, 80% 100%, 0 100%); */
 }
 
 /* 容器：平分三份 */
@@ -35,6 +159,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 20rpx;
+  /* padding-bottom: 20rpx; */
+  box-sizing: border-box;
   /* padding: 20rpx; */
   gap: 15rpx; /* 按钮间距 */
   background: #0f1923; /* 瓦蓝背景底色 */
@@ -61,7 +188,7 @@
 }
 
 .filter-view-btn:nth-child(1) {
-  flex: 1.1;
+  flex: 0.6;
 }
 
 /* 地图按钮：通过 nth-child(2) 增加一个汉字的宽度权重 */
@@ -72,7 +199,7 @@
 /* 阵营和位置按钮：稍微收缩 */
 .filter-view-btn:nth-child(3),
 .filter-view-btn:nth-child(4) {
-  flex: 0.9; /* 稍微减小比例 */
+  flex: 0.6; /* 稍微减小比例 */
 }
 
 /* 4. 细节优化：缩减文字间距 */
@@ -90,6 +217,41 @@
   justify-content: center;
   flex: 1;
   overflow: hidden; /* 防止文字溢出 */
+}
+
+/* 🚩 专门处理地图选择器的容器 */
+.map-selector-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* 🚩 新增一个行容器，让地图名和数字排在一起 */
+.value-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline; /* 🚩 关键：让数字和文字底部对齐，视觉更自然 */
+  gap: 12rpx; /* 地图名和数字的间距 */
+  width: 100%;
+}
+
+.btn-value {
+  /* 保持原有样式，如有冲突可在下面覆盖 */
+  font-size: 28rpx;
+  font-weight: 900;
+  color: #ece8e1;
+}
+
+/* 🚩 独特的角标样式 */
+.count-badge {
+  font-size: 24rpx;
+  /* font-family: "IBM Plex Mono", monospace; 战术等宽字体 */
+  font-weight: 600;
+  color: #ece8e1; /* 瓦罗兰特红，起到强调作用 */
+  /* opacity: 0.9; */
+  opacity: 0.4; /* 40% 的不透明度，使其呈现出一种高级的灰色质感 */
+
+  letter-spacing: 1rpx;
 }
 
 .btn-label {
@@ -145,7 +307,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 15rpx;
+  /* margin-left: 15rpx; */
 }
 
 .add-icon {
@@ -159,12 +321,6 @@
   font-weight: 900;
   letter-spacing: 2rpx;
   margin-bottom: 4rpx;
-}
-
-.value-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .value {
@@ -198,203 +354,227 @@
 /* --- 2. 列表内容区域 --- */
 /* 列表容器 */
 .content-scroll-box {
-  padding: 20rpx 30rpx;
+  padding: 20rpx 10rpx;
+  padding-top: 0;
   background: #0f1923;
 }
 
-/* 卡片主体 */
+.strategy-card:first-child {
+  margin-top: 0;
+}
+
 .strategy-card {
-  display: flex;
-  background: rgba(236, 232, 225, 0.03); /* 极淡的底色 */
-  margin-bottom: 24rpx;
-  height: 180rpx; /* 缩减高度，更显精致 */
   position: relative;
-  /* border: 1rpx solid rgba(236, 232, 225, 0.05); */
-}
-.strategy-card.atk {
-  border-top: 2rpx solid #ff4655; /* 加粗顶部色条，增加权重 */
-
-  /* 给左侧一个非常淡的红色渐变，勾勒轮廓 */
-  background: linear-gradient(135deg, rgba(255, 70, 85, 0.05) 0%, #16212b 40%);
+  height: 220rpx; /* 稍微加高，给大字留空间 */
+  margin-bottom: 14rpx;
+  background: #1c252e;
+  overflow: hidden;
 }
 
-/* 防守方 */
-.strategy-card.def {
-  border-top: 2rpx solid #00eeff;
-  /* border-bottom: 2rpx solid #00eeff; */
-
-  background: linear-gradient(135deg, rgba(0, 238, 255, 0.05) 0%, #16212b 40%);
-}
-
-/* 左侧地图图 */
-.card-left {
-  width: 180rpx;
+/* 背景图与喷雾控制 */
+.card-bg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  position: relative;
-  flex-shrink: 0;
+  z-index: 1;
 }
-
 .map-preview-img {
   width: 100%;
   height: 100%;
-  filter: grayscale(0.3) brightness(0.8); /* 稍微压暗，更有质感 */
+  filter: grayscale(1) brightness(0.9); /* 调亮了亮度 */
+  opacity: 0.8;
 }
 
-/* 阵营指示条：改为细长的侧边条 */
-.side-indicator-bar {
+/* 🚩 喷雾层：你可以调整 rgba 的 0.6 来控制亮度 */
+.strategy-card.atk::after {
+  content: "";
   position: absolute;
+  bottom: 0;
   left: 0;
-  top: 0;
-  width: 6rpx;
+  width: 100%;
   height: 100%;
+  z-index: 2;
+  background: linear-gradient(0deg, rgba(255, 70, 85, 0.6) 0%, transparent 70%);
 }
-.side-indicator-bar.atk {
-  background: #ff4655;
-  box-shadow: 4rpx 0 10rpx rgba(255, 70, 85, 0.3);
-}
-.side-indicator-bar.def {
-  background: #00eeff;
-  box-shadow: 4rpx 0 10rpx rgba(0, 238, 255, 0.3);
+.strategy-card.def::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background: linear-gradient(0deg, rgba(0, 238, 255, 0.5) 0%, transparent 70%);
 }
 
-/* 右侧内容区 */
-.card-right {
-  flex: 1;
-  padding: 20rpx 24rpx;
+/* 内容布局层 */
+.card-content-overlay {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  padding: 30rpx 20rpx;
+  box-sizing: border-box;
+}
+
+/* --- 左侧：大地图名 --- */
+.info-left {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-width: 0;
-}
-
-/* 第一行：标题 + 星星 */
-.card-top-row {
-  display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; /* 🚩 核心：让所有内容沉到底部 */
   align-items: flex-start;
+  flex: 1;
 }
 
-.card-title {
-  font-size: 30rpx;
-  font-weight: 800;
-  color: #ece8e1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-family: "Oswald", sans-serif; /* 模拟瓦罗兰特字体 */
+.strategy-detail {
+  display: flex;
+  align-items: center;
+  margin-top: 10rpx;
+  gap: 12rpx;
+}
+
+.side-row {
+  width: 100%;
+  margin-bottom: 24rpx;
+  /* border: 1rpx solid rgba(255, 255, 255, 0.3); 关键：半透细描边 */
+}
+.side-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16rpx;
+  font-weight: 900;
+  padding: 4rpx 16rpx; /* 增加一点厚度感 */
+  /* border-radius: 2rpx; */
+  line-height: 1;
+}
+
+.side-tag.atk {
+  background: #ff4655;
+  color: #fff;
+}
+.side-tag.def {
+  background: #00eeff;
+  color: #0f1923;
+}
+
+/* 2. 点位标签：镂空描边感 (更有档案气息) */
+.point-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16rpx;
+  font-weight: 900;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1); /* 极淡的背景 */
+  padding: 4rpx 10rpx; /* 稍微比 side-tag 瘦一点，形成主次 */
+  /* border-radius: 2rpx; */
+  line-height: 1;
+  letter-spacing: 1rpx;
+}
+
+/* 3. 底部大图：最醒目 */
+.map-big-title {
+  font-size: 60rpx; /* 🚩 调大字号，作为视觉底座 */
+  font-weight: bold;
+  color: #ffffff;
   text-transform: uppercase;
+  line-height: 0.8; /* 🚩 紧凑行高，让字看起来更硬核 */
+  /* letter-spacing: -2rpx; */
+  text-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.4);
+}
+.strategy-desc {
+  font-size: 30rpx;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: bold;
+  margin-bottom: 4rpx;
+  /* 确保长标题能换行或截断 */
+  /* display: -webkit-box; */
+  /* -webkit-line-clamp: 1; */
+  /* -webkit-box-orient: vertical; */
+  overflow: hidden;
 }
 
+/* --- 右侧：辅助信息区 --- */
+.info-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 收藏在上，日期在下 */
+  align-items: flex-end;
+}
 .favorite-star {
-  font-size: 36rpx;
-  color: rgba(255, 255, 255, 0.15);
-  margin-top: -6rpx;
+  font-size: 40rpx;
+  color: rgba(255, 255, 255, 0.3);
 }
 .favorite-star.active {
   color: #ff4655;
 }
-
-/* 第二行：地图 + 点位Tag */
-.card-mid-row {
+.user-meta {
   display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.map-label {
-  font-size: 20rpx;
-  color: rgba(236, 232, 225, 0.5);
-  font-weight: 600;
-}
-
-.point-tag {
-  font-size: 18rpx;
-  background: rgba(236, 232, 225, 0.1);
-  color: #ece8e1;
-  padding: 2rpx 12rpx;
-  border-radius: 2rpx;
-  font-weight: 900;
-}
-
-/* 第三行：时间 + 阵营文字 */
-.card-bottom-row {
-  display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: flex-end;
 }
-
-.side-text {
+.contributor {
+  display: inline-block;
+  margin-bottom: 4rpx;
   font-size: 18rpx;
-  font-weight: 900;
-  letter-spacing: 2rpx;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: bold;
 }
-.side-text.atk {
-  color: #ff4655;
-}
-.side-text.def {
-  color: #00eeff;
-}
-
-.date-text {
-  font-size: 18rpx;
-  color: rgba(236, 232, 225, 0.2);
+.date {
+  font-size: 16rpx;
+  color: rgba(255, 255, 255, 0.3);
   font-family: monospace;
 }
 
 /* 缺省 */
 /* 1. 容器居中 */
 .presets-empty-container {
+  position: relative;
+  width: 100%;
+  height: 80vh; /* 占据大部分屏幕 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 0;
-  width: 100%;
+  overflow: hidden;
 }
 
-/* 2. 战术边框 */
-.tactical-frame {
-  position: relative;
-  width: 240rpx;
-  height: 240rpx;
-  background: rgba(255, 70, 85, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-bottom: 60rpx;
-}
-
-/* 绘制四个角的小红点/折线 */
-.corner-t-l,
-.corner-t-r,
-.corner-b-l,
-.corner-b-r {
+/* --- 背景海报处理 --- */
+.empty-bg-wrapper {
   position: absolute;
-  width: 10rpx;
-  height: 10rpx;
-  border: 2rpx solid #ff4655;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
-.corner-t-l {
-  top: -2rpx;
-  left: -2rpx;
-  border-right: 0;
-  border-bottom: 0;
+
+.agent-poster {
+  width: 100%;
+  height: 100%;
+  filter: grayscale(0.5) contrast(1.1); /* 稍微去色，增加氛围 */
+  opacity: 0.4;
 }
-.corner-t-r {
-  top: -2rpx;
-  right: -2rpx;
-  border-left: 0;
-  border-bottom: 0;
+
+.empty-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
-.corner-b-l {
-  bottom: -2rpx;
-  left: -2rpx;
-  border-right: 0;
-  border-top: 0;
-}
-.corner-b-r {
-  bottom: -2rpx;
-  right: -2rpx;
-  border-left: 0;
-  border-top: 0;
+
+.bottom-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: linear-gradient(to top, #0f1923 20%, transparent 100%);
 }
 
 /* 3. 核心图标与动画 */
@@ -407,83 +587,46 @@
   overflow: hidden;
 }
 
-/* 3. 核心图标与动画 */
-.empty-icon-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.pulse-ring {
-  width: 80rpx;
-  height: 80rpx;
-  border: 2rpx solid rgba(255, 70, 85, 0.3);
-  border-radius: 50%;
-  animation: pulse 2s infinite ease-out;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-
-.scan-line-v {
-  position: absolute;
-  width: 2rpx;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent, #ff4655, transparent);
-  left: 50%;
-  animation: scanLR 3s infinite linear;
-}
-
-@keyframes scanLR {
-  0% {
-    left: 0%;
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    left: 100%;
-    opacity: 0;
-  }
-}
-
-/* 4. 文字组 */
 .text-group {
-  text-align: center;
-  margin-bottom: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.agent-poster {
+  width: 100%;
+  height: 90%; /* 稍微拉高 */
+  transform: translateY(5%); /* 向上偏移把头部拽出来 */
+  /* 🚩 极致抽色、压暗 */
+  filter: grayscale(1) brightness(0.95) contrast(0.9);
+  opacity: 0.6;
+}
+
+.empty-status-code {
+  font-family: monospace;
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 4rpx;
+  margin-bottom: 10rpx;
 }
 
 .empty-main-title {
-  display: block;
-  font-size: 32rpx;
+  font-size: 40rpx;
   font-weight: 900;
-  color: #ff4655;
-  /* font-style: italic; */
+  color: #ece8e1;
+  z-index: 9;
   letter-spacing: 4rpx;
+  text-transform: uppercase;
 }
 
 .empty-sub-title {
-  display: block;
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(236, 232, 225, 0.4);
   margin-top: 10rpx;
 }
 
 .deco-bar {
   width: 60rpx;
   height: 4rpx;
-  background: #ff4655;
-  margin: 20rpx auto;
+  margin-top: 30rpx;
 }

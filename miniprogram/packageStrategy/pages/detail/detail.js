@@ -18,14 +18,22 @@ Page({
   },
 
   onLoad(options) {
-    if (options.mode === "preview") {
-      // 入口 A：预览模式，通常不需要查点赞状态
+    const { id, type, mode } = options;
+
+    // 🚩 1. 存下核心标识：id 和 type（agent 或 common）
+    this.setData({
+      recordId: id || "",
+      recordType: type || "common", // 没传 type 默认按通用处理
+    });
+
+    if (mode === "preview") {
+      // 入口 A：预览模式
       this.loadPreviewData();
-    } else if (options.id) {
-      // 入口 B：从列表点击进入
-      this.fetchDbDetail(options.id);
-      // 🚩 新增：查询当前用户对该条数据的评价记录
-      this.fetchUserAction(options.id);
+    } else if (id) {
+      // 入口 B：正常查库模式
+      // 🚩 2. 传参时同时带上 id 和 type，确保函数知道去哪个 collection 查
+      this.fetchDbDetail(id, type || "common");
+      this.fetchUserAction(id, type || "common");
     }
   },
 
@@ -134,6 +142,47 @@ Page({
 
       // 🚩 2. 获取档案后，紧接着查询当前用户的点赞/踩状态
       this.fetchUserAction(id);
+    } catch (err) {
+      console.error("获取详情失败", err);
+      wx.showToast({ title: "档案已销毁", icon: "none" });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
+  async fetchDbDetail(id, type) {
+    wx.showLoading({ title: "同步战术档案..." });
+    const db = wx.cloud.database();
+
+    // 🚩 核心区分：如果是 agent 类型，查 lineup_points，否则查 points
+    const collectionName = type === "agent" ? "lineup_points" : "points";
+
+    try {
+      const res = await db.collection(collectionName).doc(id).get();
+      let detailData = res.data;
+
+      if (!detailData.stats) {
+        detailData.stats = { up: 0, down: 0, hot: 0, view: 0 };
+      }
+
+      this.setData(
+        {
+          detail: detailData,
+          isPreview: false,
+        },
+        () => {
+          this.initMapIcon(detailData.mapId);
+        },
+      );
+
+      this.fetchUserAction(id);
+
+      // 🚩 顺便自增浏览量（也要区分集合）
+      db.collection(collectionName)
+        .doc(id)
+        .update({
+          data: { "stats.view": db.command.inc(1) },
+        });
     } catch (err) {
       console.error("获取详情失败", err);
       wx.showToast({ title: "档案已销毁", icon: "none" });

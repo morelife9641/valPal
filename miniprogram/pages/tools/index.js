@@ -173,11 +173,18 @@ Page({
 
   // 个人中心页的跳转方法
   navToSkinCombo() {
-    console.log(1);
-
     wx.reLaunch({
       // 传入 own=1 标识
       url: "/pages/skins/index?own=1",
+    });
+  },
+
+  // 跳转到我的准星收藏
+  navToMyCrosshair() {
+    wx.navigateTo({
+      // 🚩 路径拼接规则：/分包root/页面path
+      // 传入 isFav=1 或 own=1 供目标页面判断是否只显示收藏
+      url: "/packageTools/pages/crosshair/list?isFav=1",
     });
   },
 
@@ -291,6 +298,46 @@ Page({
             uploadCount: 0,
           });
           this.syncUserState();
+        }
+      },
+    });
+  },
+
+  handleLogout() {
+    wx.showModal({
+      title: "注销确认",
+      content: "确定注销当前特工档案吗？",
+      confirmText: "确认注销",
+      cancelText: "返回",
+      confirmColor: "#ff4655", // 保持你的瓦红主题色
+      success: (res) => {
+        if (res.confirm) {
+          // 1. 清除全局状态
+          app.globalData.isLogin = false;
+          app.globalData.userInfo = null;
+
+          // 2. 清除缓存
+          wx.clearStorageSync();
+
+          // 3. 🚩 关键：重置当前页面的 Data 状态，让视图强制刷新
+          this.setData(
+            {
+              isLogin: false,
+              userInfo: null,
+              favoriteCount: 0,
+              uploadCount: 0,
+              hasCheckedIn: false,
+            },
+            () => {
+              // 4. 执行状态同步逻辑（可选，如果有其他联动逻辑）
+              this.syncUserState();
+
+              wx.showToast({
+                title: "连接已断开",
+                icon: "none",
+              });
+            },
+          );
         }
       },
     });

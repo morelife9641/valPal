@@ -5,21 +5,23 @@
     <view class="badge-wrapper">
         <view class="badge-strap"></view>
         <view class="id-card">
-            <view class="cross-mark tl">✖</view>
-            <view class="cross-mark tr">✖</view>
-            <view class="cross-mark bl">✖</view>
-            <view class="cross-mark br">✖</view>
             <view class="inner-panel">
                 <view class="avatar-box" bindtap="{{!isLogin ? 'handleLoginClick' : ''}}">
                     <image class="avatar" src="{{isLogin ? userInfo.avatarUrl : '../../assets/default_icon.png'}}" mode="aspectFill"></image>
                 </view>
-                <view class="name-overlay">
-                    <text class="nickname">{{isLogin ? userInfo.nickname : '游客'}}</text>
+                <view class="user-info-area">
+                    <view class="name-wrap">
+                        <text class="nickname-label">{{isLogin ? userInfo.nickname : '游客'}}</text>
+                        <text class="identity-tag">
+                            <!-- {{isLogin ? 'AUTHORIZED AGENT' : 'UNAUTHORIZED'}} -->
+                        </text>
+                    </view>
+                    <view class="name-deco-line"></view>
                 </view>
             </view>
             <view class="stats-module">
                 <view class="stats-body">
-                    <view class="menu-row" bindtap="openDonate">
+                    <!-- <view class="menu-row" bindtap="openDonate">
                         <view class="point-display">
                             <text class="s-num">{{userInfo.points || 0}}</text>
                             <view class="s-lab">点数</view>
@@ -30,35 +32,31 @@
                             </view>
                             <text class="m-arrow"></text>
                         </view>
-                    </view>
-                    <view class="menu-row" bindtap="navToFavorites">
+                    </view> -->
+                    <!-- <view class="menu-row" bindtap="navToFavorites">
                         <text class="m-title">我上传的</text>
-                        <!-- <text class="m-arrow">></text> -->
-                    </view>
+                    </view> -->
                     <view class="menu-row" bindtap="navToSkinCombo">
                         <text class="m-title">收藏装配</text>
-                        <!-- <text class="m-arrow">></text> -->
                     </view>
-                    <view class="menu-row" bindtap="navToFavorites">
+                    <view class="menu-row" bindtap="navToMyCrosshair">
+                        <text class="m-title">收藏准星</text>
+                    </view>
+                    <!-- <view class="menu-row" bindtap="navToFavorites">
                         <text class="m-title">收藏战术</text>
-                        <!-- <text class="m-arrow">></text> -->
                     </view>
                     <view class="menu-row" bindtap="navToFavorites">
                         <text class="m-title">收藏参数</text>
-                        <!-- <text class="m-arrow">></text> -->
                     </view>
                     <view class="menu-row" bindtap="navToFavorites">
                         <text class="m-title">意见反馈</text>
-                        <!-- <text class="m-arrow">></text> -->
-                    </view>
-                    <view class="menu-row" bindtap="navToFavorites">
+                    </view> -->
+                    <!-- <view class="menu-row" bindtap="navToFavorites">
                         <text class="m-title">联系客服</text>
                         <text class="m-arrow"></text>
-                    </view>
-                    <!-- <view class="menu-module"> -->
+                    </view> -->
                     <view class="menu-row logout" bindtap="handleLogout" wx:if="{{isLogin}}">
                         <text class="m-title">退出登陆</text>
-                        <!-- <text class="m-arrow">></text> -->
                     </view>
                     <!-- </view> -->
                 </view>

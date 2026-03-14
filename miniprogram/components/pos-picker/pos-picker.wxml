@@ -1,0 +1,14 @@
+<view class="popup-mask {{visible ? 'show' : ''}}" bindtap="close" catchtouchmove="prevent">
+    <view class="popup-content" catchtap="prevent">
+        <view class="p-header">
+            <text class="p-title">选择目标区域</text>
+            <view class="p-close" bindtap="close">✕</view>
+        </view>
+        <view class="pos-container">
+            <view wx:for="{{posOptions}}" wx:key="value" class="pos-btn {{activeValue === item.value ? 'active' : ''}}" bindtap="onSelect" data-item="{{item}}">
+                <text class="pos-letter">{{item.label}}</text>
+                <text class="pos-desc">{{item.desc}}</text>
+            </view>
+        </view>
+    </view>
+</view>

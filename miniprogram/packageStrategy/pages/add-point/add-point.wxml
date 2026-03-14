@@ -16,6 +16,18 @@
                     </picker>
                 </view>
             </view>
+            <view class="form-group">
+                <text class="label">所属特工</text>
+                <view class="custom-select align-height" bindtap="openAgentSelector">
+                    <view class="agent-select-inner">
+                        <image wx:if="{{formData.agentId}}" class="mini-agent-icon" src="https://636c-cloud1-5gqun0xd80e8dd85-1396911701.tcb.qcloud.la/icons/{{formData.agentId}}.png" mode="aspectFit" />
+                        <text class="{{formData.agentName ? '' : 'placeholder-text'}}">
+                            {{formData.agentName || '选择特工 (不选则为通用)'}}
+                        </text>
+                    </view>
+                    <view class="arrow-down">▼</view>
+                </view>
+            </view>
             <view class="form-row-split">
                 <view class="form-group flex-1">
                     <text class="label">阵营</text>
@@ -134,3 +146,4 @@
         </view>
     </view>
 </view>
+<agent-selector show="{{showAgentPopup}}" currentAgentUuid="{{formData.agentId}}" bind:close="closeAgentSelector" bind:select="onAgentSelect" />

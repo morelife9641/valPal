@@ -137,7 +137,7 @@
   box-sizing: border-box;
   border: 1rpx solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 30rpx 60rpx rgba(0, 0, 0, 0.8);
-  border-radius: 20rpx;
+  /* border-radius: 20rpx; */
   margin: -10rpx 0 20rpx;
   margin-top: -20rpx;
   height: 80vh;
@@ -210,7 +210,8 @@
   box-sizing: border-box;
   display: flex;
   justify-content: center;
-  border-radius: 20rpx;
+  /* border-radius: 20rpx; */
+  flex-direction: column;
   align-items: center;
   overflow: hidden; /* 必须加，防止巨大的背景字撑开容器 */
 }
@@ -220,15 +221,15 @@
 /* 1. 头像外框（描边层） */
 /* 1. 头像外框（描边层） */
 .avatar-box {
-  width: 400rpx;
-  height: 400rpx;
+  width: 300rpx;
+  height: 300rpx;
   background: #ff4655;
   position: relative;
   z-index: 10; /* 🚩 提高层级，压在文字上面 */
   padding: 3rpx;
-  border: 1px solid red;
+  /* border: 1px solid red; */
   /* 调整后的深切梯形：短边变长，向内延伸更深 */
-  clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0);
+  /* clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0); */
 }
 
 /* 2. 内层背景 */
@@ -241,7 +242,7 @@
   bottom: 3rpx;
   background: #0f1923;
   z-index: -1;
-  clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0);
+  /* clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0); */
 }
 
 /* 3. 图片层 */
@@ -256,56 +257,30 @@
   width: 100%;
   height: 100%;
   display: block;
-  clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0);
+  /* clip-path: polygon(93% 0, 93% 20%, 100% 31%, 100% 100%, 0 100%, 0 0); */
 }
 
-.name-overlay {
-  position: absolute;
-  /* 🚩 直接定位在头像框右侧，且允许它稍微超出边界被父级 overflow 裁切 */
-  right: 40rpx;
-  top: 50%;
-  transform: translateY(-50%); /* 仅垂直居中 */
-
+.user-info-area {
+  margin-top: 30rpx;
   display: flex;
-  flex-direction: column; /* 竖向排列 */
-  align-items: center;
-  z-index: 1;
-  pointer-events: none;
+  flex-direction: column;
 }
 
-.nickname {
-  display: block;
-  writing-mode: vertical-rl;
-  font-size: 160rpx;
+.name-wrap {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* 🚩 昵称主标题 */
+.nickname-label {
+  color: #ece8e1;
+  font-size: 44rpx; /* 大气 */
   font-weight: 900;
-  line-height: 0.8;
-  text-transform: uppercase;
-  white-space: nowrap;
-  letter-spacing: -8rpx;
-
-  /* 🚩 1. 增强底色：不再完全透明，给一个极淡的瓦色红 */
-  color: rgba(255, 70, 85, 0.08);
-
-  /* 🚩 2. 强化描边：加粗线条并提升亮度 */
-  -webkit-text-stroke: 2rpx rgba(255, 70, 85, 0.6);
-
-  /* 🚩 3. 核心：外发光 (Glow) 效果，让字从背景中“跳”出来 */
-  /* 使用多层阴影，一层负责厚度，一层负责光晕 */
-  text-shadow:
-    4rpx 0rpx 0rpx rgba(255, 70, 85, 0.2),
-    /* 侧边厚度感 */ 0 0 15rpx rgba(255, 70, 85, 0.4); /* 红色背光感 */
-
-  /* 🚩 4. 增加微弱的渐变，让长文字有头尾变化 */
-  background: linear-gradient(
-    to bottom,
-    #ff4655 0%,
-    rgba(255, 70, 85, 0.3) 50%,
-    rgba(256, 232, 225, 0.8) 100%
-  );
-  -webkit-background-clip: text;
-
-  /* 解决某些机型 background-clip 导致描边消失的问题 */
-  /* 如果发现文字变黑了，请注释掉上面 background 两行 */
+  letter-spacing: 2rpx;
+  text-transform: uppercase; /* 如果是英文则全大写 */
+  line-height: 1.2;
+  text-shadow: 0 0 10rpx rgba(236, 232, 225, 0.2);
 }
 
 /* ================= 统计数据面板 ================= */

@@ -1,5 +1,28 @@
 <view class="detail-container">
     <view class="header-filter-row">
+        <view class="hero-select-section" bindtap="onAgentCardClick">
+            <block wx:if="{{filterAgent && filterAgent.displayIcon}}">
+                <view bindchange="onAgentCardClick" value="{{agentIndex}}" range="{{agentList}}" range-key="displayName">
+                    <view class="hero-selector-card" style="{{filterAgent.themeStyle}}">
+                        <view class="hero-avatar-wrap">
+                            <image class="hero-icon" src="{{filterAgent.displayIcon}}" mode="aspectFit" />
+                        </view>
+                        <view class="hero-detail">
+                            <text class="cn-name">{{filterAgent.displayName}}</text>
+                            <view class="role-row">
+                                <image class="td-role-icon" src="../../../assets/{{filterAgent.role}}.png" mode="aspectFit" />
+                                <!-- <image wx:if="{{filterAgent.roleIcon}}" class="td-role-icon" src="{{filterAgent.roleIcon}}" mode="aspectFit" /> -->
+                                <text class="role-label">{{filterAgent.role}}</text>
+                            </view>
+                        </view>
+                        <view class="switch-hint">
+                            <text>更换</text>
+                            <!-- <view class="switch-dot"></view> -->
+                        </view>
+                    </view>
+                </view>
+            </block>
+        </view>
         <view class="filter-btns">
             <view class="filter-view-btn {{isFavoriteOnly ? 'active' : ''}}" bindtap="toggleFavoriteFilter">
                 <view class="btn-content">
@@ -7,16 +30,19 @@
                     <text class="btn-value">{{isFavoriteOnly ? '已收藏' : '全部'}}</text>
                 </view>
             </view>
-            <picker class="filter-view-btn {{filterMap.uuid ? 'active' : ''}}" bindchange="onMapChange" value="{{mapIndex}}" range="{{maps}}" range-key="displayName">
-                <view class="btn-content">
+            <view class="filter-view-btn {{filterMap.uuid !== 'all' ? 'active' : ''}}" bindtap="openMapPopup">
+                <view class="btn-content map-selector-content">
                     <text class="btn-label">地图</text>
-                    <text class="btn-value">{{filterMap.displayName || '全部地图'}}</text>
+                    <view class="value-row">
+                        <text class="btn-value">{{filterMap.displayName || '全部地图'}}</text>
+                        <text class="count-badge">({{totalCount || 0}})</text>
+                    </view>
                 </view>
-                <view wx:if="{{filterMap.uuid}}" class="clear-icon" catchtap="clearMapFilter">
+                <view wx:if="{{filterMap.uuid && filterMap.uuid !== 'all'}}" class="clear-icon" catchtap="clearMapFilter">
                     ✕
                 </view>
-            </picker>
-            <picker class="filter-view-btn {{filterSideLabel!== '全部'?'active':''}}" bindchange="onSideChange" value="{{mapIndex}}" range="{{sideOptions}}" range-key="name">
+            </view>
+            <!-- <picker class="filter-view-btn {{filterSideLabel!== '全部'?'active':''}}" bindchange="onSideChange" value="{{mapIndex}}" range="{{sideOptions}}" range-key="name">
                 <view class="btn-content">
                     <text class="btn-label">阵营</text>
                     <text class="btn-value">{{filterSideLabel || '全部'}}</text>
@@ -24,64 +50,77 @@
                 <view wx:if="{{filterSideLabel!== '全部'}}" class="clear-icon" catchtap="clearSideFilter">
                     ✕
                 </view>
-            </picker>
-            <picker class="filter-view-btn {{pointType !== '' ? 'active' : ''}}" bindchange="onPointChange" value="{{pointIndex}}" range="{{pointOptions}}" range-key="name">
+            </picker> -->
+            <view class="filter-view-btn {{filterSide !== 'all' ? 'active' : ''}}" bindtap="openSidePopup">
                 <view class="btn-content">
-                    <text class="btn-label">位置</text>
-                    <text class="btn-value">{{filterPointLabel}}</text>
+                    <text class="btn-label">阵营</text>
+                    <text class="btn-value">{{sideLabel}}</text>
                 </view>
-                <view wx:if="{{pointType !== ''}}" class="clear-icon" catchtap="clearPointFilter">
+                <view wx:if="{{filterSide !== 'all'}}" class="clear-icon" catchtap="clearSideFilter">
                     ✕
                 </view>
-            </picker>
-        </view>
-        <view class="add-btn-wrap" bindtap="goToAdd">
-            <view class="add-icon">+</view>
+            </view>
+            <view class="filter-view-btn {{filterPos !== 'all' ? 'active' : ''}}" bindtap="openPosPopup">
+                <view class="btn-content">
+                    <text class="btn-label">区域</text>
+                    <view class="value-row">
+                        <text class="btn-value">{{posLabel || '全部'}}</text>
+                    </view>
+                </view>
+                <view wx:if="{{filterPos !== 'all'}}" class="clear-icon" catchtap="clearPosFilter">
+                    ✕
+                </view>
+            </view>
+            <!-- <view class="add-btn-wrap" bindtap="goToAdd">
+                <view class="add-icon">+</view>
+            </view> -->
         </view>
     </view>
     <view class="content-scroll-box">
         <view class="strategy-list">
             <view class="strategy-card {{item.side}}" wx:for="{{filteredList}}" wx:key="_id" bindtap="goToDetail" data-id="{{item._id}}">
-                <view class="card-left">
+                <view class="card-bg-layer">
                     <image src="{{item.mapThumb}}" mode="aspectFill" class="map-preview-img" />
                 </view>
-                <view class="card-right">
-                    <view class="card-top-row">
-                        <text class="card-title">{{item.title}}</text>
+                <view class="card-content-overlay">
+                    <view class="info-left">
+                        <view class="strategy-desc">{{item.title}}</view>
+                        <view class="side-row">
+                            <view class="side-tag {{item.side}}">
+                                {{item.side === 'atk' ? '进攻' : '防守'}}
+                            </view>
+                            <view class="point-tag">{{item.pointType || '其他'}}</view>
+                        </view>
+                        <text class="map-big-title">{{item.mapName}}</text>
+                    </view>
+                    <view class="info-right">
                         <view class="favorite-star {{item.isFavorite ? 'active' : ''}}" catchtap="toggleFavorite" data-id="{{item._id}}">
                             {{item.isFavorite ? '★' : '☆'}}
                         </view>
-                    </view>
-                    <view class="card-mid-row">
-                        <text class="map-label">{{item.mapName}}</text>
-                        <view class="point-tag">{{item.pointType || '其他'}}</view>
-                    </view>
-                    <view class="card-bottom-row">
-                        <text class="side-text {{item.side}}">
-                            {{item.side === 'atk' ? '攻方' : '守方'}}
-                        </text>
-                        <text class="date-text">{{item.dateDisplay}}</text>
+                        <view class="user-meta">
+                            <text class="contributor">贡献者：{{item.creator.nickname}}</text>
+                            <text class="date">{{item.dateDisplay}}</text>
+                        </view>
                     </view>
                 </view>
             </view>
         </view>
         <view wx:if="{{filteredList.length === 0}}" class="presets-empty-container">
-            <view class="tactical-frame">
-                <view class="corner-t-l"></view>
-                <view class="corner-t-r"></view>
-                <view class="corner-b-l"></view>
-                <view class="corner-b-r"></view>
-                <view class="empty-icon-wrapper">
-                    <view class="pulse-ring"></view>
-                    <view class="central-dot"></view>
-                    <view class="scan-line-v"></view>
-                </view>
+            <view class="empty-bg-wrapper">
+                <image class="agent-poster" src="{{filterAgent.bustPortrait}}" mode="aspectFill" />
+                <view class="empty-mask" style="background: linear-gradient(0deg, #0f1923 10%, {{filterAgent.themeColor || 'rgba(236, 232, 225, 0.1)'}} 100%); opacity: 0.3;"></view>
+                <view class="bottom-fade"></view>
             </view>
             <view class="text-group">
                 <text class="empty-main-title">暂无数据</text>
-                <view class="deco-bar"></view>
+                <!-- <view class="deco-bar"></view> -->
+                <view class="deco-bar" style="background: {{filterAgent.themeColor}}"></view>
             </view>
         </view>
     </view>
 </view>
+<side-popup visible="{{showSidePopup}}" activeValue="{{filterSide}}" bind:change="onSideChange" bind:close="closeSidePopup" />
+<map-popup visible="{{showMapPopup}}" activeIndex="{{mapIndex}}" bind:change="onMapChange" bind:close="closeMapPopup" />
+<agent-selector show="{{showPopup && popupType === 'hero'}}" currentAgentUuid="{{currentAgent.uuid}}" bind:close="togglePanel" bind:select="selectAgent" />
 <login-popup id="loginPopup" show="{{showLoginPopup}}" bind:close="onLoginClose" bind:register="onRegister" />
+<pos-popup visible="{{showPosPopup}}" activeValue="{{filterPos}}" bind:change="onPosChange" bind:close="closePosPopup" />

@@ -34,9 +34,9 @@
             <view class="thumb-container">
                 <!-- <view class="item-cat-tag {{item.category}}">{{item.categoryLabel}}</view> -->
                 <image src="{{item.thumb ? item.thumb : '../../assets/logos/EDG.png'}}" mode="aspectFill" class="news-thumb"></image>
-                <view class="item-admin-btn" wx:if="{{isAdmin}}" catchtap="onAdminEdit" data-id="{{item._id}}">
+                <!-- <view class="item-admin-btn" wx:if="{{isAdmin}}" catchtap="onAdminEdit" data-id="{{item._id}}">
                     <text>编辑</text>
-                </view>
+                </view> -->
             </view>
         </view>
     </view>

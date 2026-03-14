@@ -1,96 +1,307 @@
-.detail-container {
-  min-height: 100vh;
-  background-color: #0f1923;
+/* --- 基础设置 & 全局背景 --- */
+page {
+  background: #0f1923; /* 瓦罗兰特主底色 */
   color: #ece8e1;
-  padding: 0 30rpx;
-  padding-bottom: 100rpx;
+  /* font-family:
+    "PingFang SC",
+    -apple-system,
+    sans-serif; */
 }
 
-/* 预览水印 */
+.detail-container {
+  padding-bottom: 180rpx;
+}
+
+/* 顶部预览模式提示 */
 .preview-header {
   background: #ff4655;
   color: #fff;
-  font-size: 20rpx;
-  /* font-weight: 900; */
   text-align: center;
+  font-size: 22rpx;
   padding: 10rpx 0;
-  margin: 0 -30rpx 30rpx;
   letter-spacing: 4rpx;
+  font-weight: 900;
+  position: sticky;
+  top: 0;
+  z-index: 200;
 }
 
-/* 头部样式 */
+/* --- Header 区域：强化攻防区分 --- */
 .top-header {
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid rgba(236, 232, 225, 0.1);
-}
-.title-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-}
-.main-title {
-  font-size: 44rpx;
-  font-weight: 900;
-  /* font-style: italic; */
-  color: #ff4655;
-  flex: 1;
-}
-.side-tag {
-  font-size: 18rpx;
-  padding: 4rpx 12rpx;
-  background: rgba(236, 232, 225, 0.1);
-  font-weight: 900;
-  margin-top: 10rpx;
-}
-.side-tag.atk {
-  color: #ff4655;
-  border-left: 4rpx solid #ff4655;
-}
-.side-tag.def {
-  color: #00eeff;
-  border-left: 4rpx solid #00eeff;
+  padding: 30rpx 30rpx 40rpx;
+  position: relative;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid rgba(236, 232, 225, 0.05);
 }
 
-.map-info-row {
-  margin-top: 15rpx;
-  display: flex;
-  justify-content: space-between;
-  font-size: 20rpx;
-  color: rgba(236, 232, 225, 0.4);
+/* 攻防氛围渲染：整个头部带上色调倾向 */
+.top-header.atk {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 70, 85, 0.15) 0%,
+    transparent 100%
+  );
+}
+.top-header.def {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 238, 255, 0.1) 0%,
+    transparent 100%
+  );
 }
 
-/* 模块标题 */
-.module-section {
-  margin-top: 20rpx;
-}
-.module-head {
+.agent-title-row {
   display: flex;
   align-items: center;
-  margin-bottom: 25rpx;
-  font-size: 22rpx;
-  font-weight: 900;
-  color: rgba(236, 232, 225, 0.6);
-}
-.head-line {
-  width: 8rpx;
-  height: 24rpx;
-  background: #ff4655;
-  margin-right: 15rpx;
+  gap: 20rpx;
 }
 
-/* --- 地图标点核心容器 --- */
+.header-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* 🚩 英雄小图标样式 */
+.header-agent-icon {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 4rpx;
+  flex-shrink: 0;
+}
+
+.title-area {
+  /* display: inline-flex;  */
+  align-items: center;
+  /* background: rgba(236, 232, 225, 0.05);  */
+  padding: 16rpx;
+  padding-left: 0;
+  height: 44rpx; /* 固定高度让它们看起来像一个模组 */
+  padding-bottom: 0;
+}
+
+/* 1. 地图名称：增加前缀感 */
+.map-name {
+  font-size: 26rpx;
+  font-weight: 900;
+  color: #ece8e1;
+  padding: 0 20rpx;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+  position: relative;
+}
+
+/* 在地图名和标签之间加一个几何斜线分割，增强协同性 */
+.map-name::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1rpx;
+  background: rgba(236, 232, 225, 0.2);
+  transform: rotate(15deg);
+}
+
+/* 阵营状态：使用半透明背景或发光文字区分 */
+.side-badge.atk {
+  color: #ff4655;
+  /* 增加一个非常淡的红色背景，与地图名的灰色区分 */
+  background: rgba(255, 70, 85, 0.1);
+}
+
+.side-badge.def {
+  color: #00eeff;
+  background: rgba(0, 238, 255, 0.1);
+}
+
+/* 攻防实色标签：一眼识别 */
+.side-badge {
+  display: inline-block;
+  font-size: 22rpx;
+  font-weight: 900;
+  padding: 4rpx 12rpx;
+  border-radius: 2rpx;
+  letter-spacing: 2rpx;
+  vertical-align: middle;
+  text-transform: uppercase;
+  /* width: 80rpx; */
+  align-items: center;
+}
+.side-badge.atk {
+  background: #ff4655;
+  color: #fff;
+}
+.side-badge.def {
+  background: #00eeff;
+  color: #0f1923;
+}
+
+.main-title {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #ece8e1;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.map-meta {
+  margin-top: 20rpx;
+  font-size: 22rpx;
+  color: rgba(236, 232, 225, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.map-name {
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #ece8e1;
+  letter-spacing: 2rpx;
+  display: inline-block;
+  margin-right: 20rpx;
+  vertical-align: middle;
+}
+
+.date-label {
+  font-size: 18rpx;
+  color: rgba(236, 232, 225, 0.2); /* 极淡，不抢戏 */
+}
+
+/* --- 贡献者区域：档案卡片化 --- */
+/* --- 贡献者区域：档案标签化 --- */
+.contributor-box {
+  margin-top: 40rpx;
+  display: flex;
+  align-items: center; /* 🚩 核心：确保头像和文字容器垂直居中对齐 */
+  background: rgba(236, 232, 225, 0.03);
+  border: 1rpx solid rgba(236, 232, 225, 0.08);
+  padding: 20rpx 24rpx;
+  border-radius: 4rpx;
+  width: fit-content; /* 宽度随内容自适应 */
+}
+
+.user-avatar {
+  width: 72rpx; /* 稍微加大一点点，增强视觉平衡 */
+  height: 72rpx;
+  border-radius: 4rpx;
+  border: 1rpx solid rgba(236, 232, 225, 0.2);
+  margin-right: 24rpx; /* 增加与文字的间距 */
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 🚩 让三行文字在 72rpx 的高度内均匀分布 */
+  gap: 2rpx; /* 控制行与行之间的微小间距 */
+}
+
+.user-label {
+  font-size: 16rpx;
+  color: rgba(236, 232, 225, 0.3);
+  font-weight: 900;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.user-name {
+  font-size: 26rpx;
+  color: #ece8e1; /* 使用你要求的显眼米白 */
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.date-label {
+  font-size: 18rpx;
+  color: rgba(236, 232, 225, 0.2);
+  font-family:
+    "IBM Plex Mono", Consolas, monospace; /* 使用等宽字体，更有档案感 */
+  margin-top: 4rpx;
+}
+
+/* --- 视频按钮逻辑 --- */
+.video-trigger-container {
+  padding: 30rpx;
+  /* padding-top: 20rpx; */
+  padding-bottom: 10rpx;
+}
+.video-btn {
+  position: relative;
+  height: 80rpx;
+  width: 40%;
+  /* 使用瓦服经典的黄色系，不属于任何阵营，但极其显眼 */
+  background: #ece8e1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  /* 倾斜切角效果 */
+  /* clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%); */
+  transition: all 0.2s ease;
+}
+.video-btn-content {
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+}
+.v-icon {
+  font-size: 28rpx;
+  color: #0f1923; /* 深色文字与亮色背景形成极强对比 */
+  margin-right: 20rpx;
+}
+.v-cn {
+  font-size: 28rpx;
+  font-weight: 900;
+  color: #0f1923;
+  letter-spacing: 4rpx;
+  text-transform: uppercase;
+}
+.v-en {
+  font-size: 16rpx;
+  color: rgba(255, 70, 85, 0.5);
+  font-family: monospace;
+}
+
+/* --- 模块标题：视觉瘦身（去掉竖线） --- */
+.module-section {
+  margin: 20rpx 20rpx 0; /* 统一左右 40rpx 边距 */
+  /* margin-top: 20rpx; */
+}
+.module-head {
+  padding: 0 30rpx;
+  margin-bottom: 14rpx;
+  margin-top: 10rpx;
+}
+/* 改用文字底部的装饰短线，不再使用乱糟糟的侧边竖线 */
+.module-head text {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: rgba(236, 232, 225, 0.5);
+  letter-spacing: 4rpx;
+  text-transform: uppercase;
+  position: relative;
+  padding-bottom: 10rpx;
+  color: rgba(236, 232, 225, 0.9); /* 较亮的标签色 */
+  border-bottom: 4rpx solid rgba(236, 232, 225, 0.5);
+}
+
+/* --- 地图标点核心 (保持原逻辑样式) --- */
 .map-mark-container {
-  width: 100%;
-  height: 500rpx;
+  /* width: 100%; */
+  height: 520rpx;
   background: #05090d;
-  border: 1rpx solid rgba(236, 232, 225, 0.1);
+  border-top: 1rpx solid rgba(236, 232, 225, 0.1);
+  border-bottom: 1rpx solid rgba(236, 232, 225, 0.1);
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
-.map-area {
-  width: 100%;
-  height: 100%;
-}
+.map-area,
 .map-touch-view {
   width: 100%;
   height: 100%;
@@ -101,7 +312,6 @@
   opacity: 0.6;
 }
 
-/* 标点样式复现 */
 .map-pointer {
   position: absolute;
   width: 24rpx;
@@ -120,7 +330,6 @@
 .map-pointer.def .pointer-core {
   border-color: #00eeff;
 }
-
 .pointer-ripple {
   position: absolute;
   top: 0;
@@ -147,323 +356,113 @@
   }
 }
 
-/* --- Swiper 图片浏览器 --- */
+/* --- 图片查看器 swiper --- */
 .viewer-container {
-  width: 100%;
-  height: 480rpx;
-  background: #000;
   position: relative;
-  border: 1rpx solid rgba(236, 232, 225, 0.1);
+  /* margin: 0 30rpx; */
+  background: #000;
 }
 .image-swiper {
-  width: 100%;
-  height: 100%;
+  height: 450rpx;
 }
 .main-img {
   width: 100%;
   height: 100%;
 }
 
-.frame-corner {
-  position: absolute;
-  width: 30rpx;
-  height: 30rpx;
-  border: 4rpx solid #ff4655;
-  z-index: 10;
-}
-.frame-corner.lt {
-  top: -2rpx;
-  left: -2rpx;
-  border-right: none;
-  border-bottom: none;
-}
-.frame-corner.rb {
-  bottom: -2rpx;
-  right: -2rpx;
-  border-left: none;
-  border-top: none;
-}
-
 .swiper-counter {
   position: absolute;
-  right: 20rpx;
   bottom: 20rpx;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 4rpx 15rpx;
-  font-size: 18rpx;
-  font-family: monospace;
+  right: 20rpx;
+  background: rgba(15, 25, 35, 0.8);
+  padding: 4rpx 16rpx;
+  font-size: 20rpx;
   color: #ff4655;
-  z-index: 11;
+  font-family: monospace;
 }
 
-/* 备注盒子 */
+/* 描述文字 & 总结卡片 */
 .memo-box {
-  background: rgba(236, 232, 225, 0.03);
-  padding: 12rpx;
-  border-left: 2rpx solid rgba(255, 70, 85, 0.5);
-  display: flex;
-  gap: 15rpx;
-  align-items: center;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.03);
+  margin: 0 0rpx;
 }
-.memo-deco {
-  width: 4rpx;
-  height: 30rpx;
-  background: #ff4655;
-  flex-shrink: 0;
-}
-.memo-text {
-  font-size: 26rpx;
+.memo-content {
+  font-size: 28rpx;
   line-height: 1.6;
-  color: #ece8e1;
+  color: rgba(236, 232, 225, 0.8);
 }
-
 .desc-card {
-  background: rgba(236, 232, 225, 0.02);
-  border: 1rpx dashed rgba(236, 232, 225, 0.2);
-  padding: 30rpx;
+  margin: 0 20rpx;
+  padding: 20rpx;
+  /* background: rgba(255, 70, 85, 0.05); */
+  /* border-left: 6rpx solid #ff4655; */
   font-size: 28rpx;
   line-height: 1.8;
 }
 
-.tactical-assess-widget {
-  position: fixed;
-  right: 30rpx;
-  bottom: calc(100rpx + env(safe-area-inset-bottom)); /* 避开底部操作区 */
-  z-index: 110;
-  display: flex;
-  flex-direction: column;
-  width: 90rpx; /* 窄窄的小方块 */
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+.memo-content,
+.desc-card {
+  /* 之前是 28rpx，现在调小到 24rpx，确保小于 Label 的视觉重量 */
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: rgba(236, 232, 225, 0.5); /* 降低亮度，营造“备注”感 */
+  text-align: justify;
+  word-break: break-all;
+  color: #8b9196;
 }
 
-/* 隐藏状态：缩回右侧边缘 */
-.widget-hidden {
-  transform: translateX(110rpx);
-  opacity: 0.5;
-}
-
-.widget-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 25, 35, 0.9);
-  backdrop-filter: blur(15rpx);
-  border: 1rpx solid rgba(236, 232, 225, 0.15);
-  /* 🚩 瓦罗兰特风格切角 */
-  clip-path: polygon(0 0, 100% 0, 100% 85%, 70% 100%, 0 100%);
-  z-index: -1;
-}
-
-.widget-item {
-  height: 100rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.w-count {
-  font-size: 24rpx;
-  font-weight: 900;
-  font-family: "DIN Alternate", monospace;
-  color: rgba(236, 232, 225, 0.8);
-}
-
-.w-icon {
-  font-size: 20rpx;
-  margin: 4rpx 0;
-  opacity: 0.6;
-}
-
-.widget-divider {
-  height: 1rpx;
-  width: 50%;
-  align-self: center;
-  background: rgba(236, 232, 225, 0.1);
-}
-
-/* 🚩 激活状态：注入能量光 */
-.widget-item.up.active {
-  color: #00eeff;
-  background: rgba(0, 238, 255, 0.15);
-  text-shadow: 0 0 10rpx rgba(0, 238, 255, 0.5);
-}
-
-.widget-item.down.active {
-  color: #ff4655;
-  background: rgba(255, 70, 85, 0.15);
-  text-shadow: 0 0 10rpx rgba(255, 70, 85, 0.5);
-}
-
-/* 装饰：激活时左侧的小竖条 */
-.widget-item.active::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 20%;
-  height: 60%;
-  width: 4rpx;
-  background: currentColor;
-}
-
+/* --- 底部悬浮交互栏 (毛玻璃) --- */
 .tactical-horizontal-widget {
   position: fixed;
-  right: 30rpx;
-  bottom: calc(120rpx + env(safe-area-inset-bottom));
-  z-index: 110;
+  bottom: 60rpx;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   height: 80rpx;
-  min-width: 240rpx;
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  background: rgba(31, 35, 38, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 50rpx;
+  padding: 0 40rpx;
+  z-index: 100;
+  box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.5);
+  transition: all 0.3s;
 }
-
-/* 隐藏状态：向右滑出并淡出 */
 .widget-hidden {
-  transform: translateX(50rpx);
-  opacity: 0;
-  pointer-events: none;
+  transform: translate(-50%, 200%);
 }
-
-.h-widget-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 25, 35, 0.9);
-  backdrop-filter: blur(12rpx);
-  border: 1rpx solid rgba(236, 232, 225, 0.2);
-  /* 🚩 战术切角：右上和左下直角，右下大切角 */
-  /* clip-path: polygon(0 0, 100% 0, 100% 60%, 85% 100%, 0 100%); */
-  z-index: -1;
-}
-
 .h-widget-item {
-  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  height: 100%;
-  padding: 0 20rpx;
-  transition: all 0.2s;
+  padding: 20rpx;
 }
-
+.h-icon {
+  font-size: 32rpx;
+  margin: 0 10rpx;
+  color: #8b9196;
+}
 .h-count {
   font-size: 28rpx;
-  font-weight: 900;
-  /* font-family: "DIN Alternate", monospace; */
-  color: #ece8e1;
+  font-family: monospace;
+  font-weight: bold;
 }
-
-.h-icon {
-  font-size: 20rpx;
-  opacity: 0.7;
+.h-widget-item.up.active .h-icon,
+.h-widget-item.up.active .h-count {
+  color: #ff4655;
 }
-
+.h-widget-item.down.active .h-icon,
+.h-widget-item.down.active .h-count {
+  color: #00eeff;
+}
 .h-divider {
   width: 1rpx;
   height: 30rpx;
-  background: rgba(236, 232, 225, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 30rpx;
 }
 
-/* 🚩 激活态颜色 */
-.h-widget-item.up.active {
-  color: #00eeff;
-  background: rgba(0, 238, 255, 0.15);
-}
-
-.h-widget-item.down.active {
-  color: #ff4655;
-  background: rgba(255, 70, 85, 0.15);
-}
-
-/* 激活时顶部的亮条指示 */
-.h-widget-item.active::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 15%;
-  right: 15%;
-  height: 4rpx;
-  background: currentColor;
-  box-shadow: 0 0 8rpx currentColor;
-}
-
-.video-trigger-container {
-  padding: 40rpx 30rpx;
-  background: #0f1923;
-}
-
-.video-btn {
-  position: relative;
-  height: 120rpx;
-  background: #1f2326;
-  border: 1rpx solid rgba(255, 70, 85, 0.3);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  padding: 0 40rpx;
-  /* 🚩 瓦式非对称切角 */
-  clip-path: polygon(0 0, 100% 0, 100% 70%, 92% 100%, 0 100%);
-}
-
-.video-btn-content {
-  display: flex;
-  align-items: center;
-  z-index: 2;
-}
-
-.v-icon {
-  font-size: 40rpx;
-  color: #ff4655;
-  margin-right: 30rpx;
-  text-shadow: 0 0 15rpx rgba(255, 70, 85, 0.6);
-}
-
-.v-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.v-cn {
-  font-size: 30rpx;
-  color: #ece8e1;
-  font-weight: bold;
-  letter-spacing: 2rpx;
-}
-
-.v-en {
-  font-size: 16rpx;
-  color: rgba(255, 70, 85, 0.6);
-  font-weight: 800;
-  margin-top: 4rpx;
-}
-
-/* 🚩 呼吸灯荧光效果 */
-.video-btn-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, rgba(255, 70, 85, 0.1), transparent);
-  animation: v-pulse 2s infinite;
-}
-
-@keyframes v-pulse {
-  0% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 0.3;
-  }
+.footer-safe-area {
+  height: 80rpx;
 }

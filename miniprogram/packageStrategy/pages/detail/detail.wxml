@@ -1,21 +1,24 @@
 <view class="detail-container">
     <view class="preview-header" wx:if="{{isPreview}}">预览</view>
-    <view class="top-header">
-        <view class="title-row">
-            <text class="main-title">{{detail.title}}</text>
-        </view>
-        <view class="side-tag {{detail.side}}">{{detail.side === 'atk' ? '攻击方' : '防守方'}}</view>
-        <view class="map-info-row">
-            <text class="map-name">{{detail.mapName}}</text>
-            <text class="date-label">{{detail.createTimeDisplay || ''}}</text>
-        </view>
-        <view class="contributor-row">
-            <view class="user-chip">
-                <image class="user-avatar" src="{{detail.creator.avatar || '../../../assets/default_icon.png'}}" mode="aspectFill" />
-                <view class="user-meta">
-                    贡献者：
-                    <text class="user-name">{{detail.creator.nickname || '未知特工'}}</text>
+    <view class="top-header {{detail.side}}">
+        <view class="header-main-info">
+            <view class="title-area">
+                <view class="map-name">{{detail.mapName}}</view>
+                <view class="side-badge {{detail.side}}">
+                    {{detail.side === 'atk' ? '攻击方' : '防守方'}}
                 </view>
+            </view>
+            <view class="agent-title-row">
+                <image wx:if="{{detail.agentId}}" class="header-agent-icon" src="https://636c-cloud1-5gqun0xd80e8dd85-1396911701.tcb.qcloud.la/icons/{{detail.agentId}}.png" mode="aspectFit" />
+                <text class="main-title">{{detail.title}}</text>
+            </view>
+        </view>
+        <view class="contributor-box">
+            <image class="user-avatar" src="{{detail.creator.avatar || '../../../assets/default_icon.png'}}" mode="aspectFill" />
+            <view class="user-info">
+                <text class="user-label">贡献者：</text>
+                <text class="user-name">{{detail.creator.nickname || '未知特工'}}</text>
+                <text class="date-label">{{detail.createTimeDisplay || '2024/05/20'}}</text>
             </view>
         </view>
     </view>
@@ -25,8 +28,8 @@
             <view class="video-btn-content">
                 <text class="v-icon">▶</text>
                 <view class="v-text">
-                    <text class="v-cn">调取实机演示</text>
-                    <text class="v-en">// LIVE_RECORDING</text>
+                    <text class="v-cn">视频演示</text>
+                    <!-- <text class="v-en">// LIVE_RECORDING</text> -->
                 </view>
             </view>
             <view class="v-corner"></view>
@@ -64,8 +67,8 @@
                         <image src="{{imgItem.url}}" mode="aspectFit" class="main-img" bindtap="previewImage" data-src="{{imgItem.url}}" data-list="{{detail[mod.key]}}" />
                     </swiper-item>
                 </swiper>
-                <view class="frame-corner lt"></view>
-                <view class="frame-corner rb"></view>
+                <!-- <view class="frame-corner lt"></view> -->
+                <!-- <view class="frame-corner rb"></view> -->
                 <view class="swiper-counter">
                     <text wx:if="{{mod.key === 'standImg'}}">{{standIndex + 1}}</text>
                     <text wx:if="{{mod.key === 'aimImg'}}">{{aimIndex + 1}}</text>

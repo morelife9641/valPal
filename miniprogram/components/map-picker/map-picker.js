@@ -40,34 +40,38 @@ Component({
     // 1. 初始化并过滤地图数据
 
     initMapData() {
-      // 1. 先从原始数据中找出“基础训练”这一项，作为“全部”的底图
+      const cloudBase =
+        "https://636c-cloud1-5gqun0xd80e8dd85-1396911701.tcb.qcloud.la/maps/";
       const trainingMap = mapsData.find((m) => m.displayName === "基础训练");
 
-      // 2. 过滤出你白名单中的其他地图（排除掉“全部”和“基础训练”本身，防止重复）
-      let filtered = mapsData.filter(
-        (map) =>
-          Object.keys(this.data.targetMaps).includes(map.displayName) &&
-          map.displayName !== "全部" &&
-          map.displayName !== "基础训练",
-      );
+      let filtered = mapsData
+        .filter(
+          (map) =>
+            Object.keys(this.data.targetMaps).includes(map.displayName) &&
+            map.displayName !== "全部" &&
+            map.displayName !== "基础训练",
+        )
+        .map((map) => {
+          // 🚩 核心：如果配置里是 uuid，拼接成可访问的 https 地址
+          return {
+            ...map,
+            // 假设你的图片命名规则是 [uuid]_listviewicon.png
+            listViewIcon: `${cloudBase}${map.uuid}_listviewicon.png`,
+          };
+        });
 
-      // 3. 构造“全部”选项
       const allOption = {
-        // 如果找到了基础训练，就用它的数据，否则用兜底图
-        ...(trainingMap || {}),
         displayName: "全部地图",
-        uuid: "all", // 保持逻辑上的 all 标识
-        // 强制使用基础训练那张蓝色的背景图作为“全部”的图标
+        uuid: "all",
+        // 同样处理“全部”的底图
         listViewIcon: trainingMap
-          ? trainingMap.listViewIcon
+          ? `${cloudBase}${trainingMap.uuid}_listviewicon.png`
           : "/assets/icons/all_maps.png",
       };
 
-      // 4. 将构造好的“全部”塞到数组首位
       filtered.unshift(allOption);
 
       this.setData({ mapList: filtered }, () => {
-        // 数据准备好后，通知父组件初始状态
         this._notifyChange(this.properties.activeIndex);
       });
     },

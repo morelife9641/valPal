@@ -125,3 +125,20 @@
     </view>
 </root-portal>
 <login-popup id="loginPopup" show="{{showLoginPopup}}" bind:close="onLoginClose" bind:register="onRegister" />
+<!-- 选跳转的创建方式 -->
+<view class="popup-mask {{showEditorSwitch ? 'show' : ''}}" bindtap="closeEditorSwitch" catchtouchmove="prevent">
+    <view class="editor-popup-content" catchtap="prevent">
+        <view class="editor-options-wrap">
+            <view class="editor-btn" bindtap="navToEditor" data-type="crosshair">
+                <text class="editor-btn-text">生成准星壁纸</text>
+                <view class="deco-line-left"></view>
+                <view class="deco-line-right"></view>
+            </view>
+            <view class="editor-btn" bindtap="navToEditor" data-type="agent">
+                <text class="editor-btn-text">生成特工壁纸</text>
+                <view class="deco-line-left"></view>
+                <view class="deco-line-right"></view>
+            </view>
+        </view>
+    </view>
+</view>

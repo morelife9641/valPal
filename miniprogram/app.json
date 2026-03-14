@@ -26,6 +26,8 @@
       "name": "wallpaperEditor",
       "pages": [
         "pages/wallpaper/wallpaper",
+        "pages/display/display",
+
         "pages/preview/preview"
       ]
     },
@@ -42,9 +44,7 @@
   "preloadRule": {
     "pages/strategy/index": {
       "network": "all",
-      "packages": [
-        "packageStrategy"
-      ]
+      "packages": ["packageStrategy"]
     }
   },
   "window": {

@@ -1,7 +1,7 @@
 <view class="popup-mask {{visible ? 'show' : ''}}" bindtap="close" catchtouchmove="prevent">
     <view class="popup-content" catchtap="prevent">
         <view class="p-header">
-            <text class="p-title">选择作战地图</text>
+            <text class="p-title">选择地图</text>
             <view class="p-close" bindtap="close">✕</view>
         </view>
         <view class="rank-scroll" enable-flex="true">

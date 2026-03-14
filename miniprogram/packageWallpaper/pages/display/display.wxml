@@ -1,0 +1,24 @@
+<view class="valorant-container">
+    <view class="left-panel">
+        <view class="card-outline">
+            <view class="placeholder-img"></view>
+            <view class="corner-tag">PLAYER_CARD</view>
+        </view>
+    </view>
+    <view class="right-panel">
+        <view class="info-block nickname-block">
+            <view class="block-inner">
+                <view class="header-highlight"></view>
+            </view>
+        </view>
+        <view class="info-block weapon-block">
+            <view class="block-inner"></view>
+        </view>
+        <view class="info-block weapon-block">
+            <view class="block-inner"></view>
+        </view>
+        <view class="info-block weapon-block">
+            <view class="block-inner"></view>
+        </view>
+    </view>
+</view>

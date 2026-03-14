@@ -20,10 +20,11 @@ page {
   background: linear-gradient(to bottom, rgba(255, 70, 85, 0.08), transparent);
   padding-bottom: 8rpx;
   padding-top: 0;
+  position: relative;
 }
 
 .intel-swiper {
-  height: 320rpx;
+  height: 330rpx;
 }
 
 .intel-card {
@@ -44,6 +45,7 @@ page {
   left: 0;
   right: 0;
   padding: 25rpx;
+  padding-bottom: 40rpx;
   background: linear-gradient(to top, #0f1923 0%, transparent 100%);
 }
 
@@ -73,6 +75,35 @@ page {
   font-size: 28rpx;
   font-weight: bold;
   text-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.5);
+}
+
+.custom-dots {
+  position: absolute;
+  bottom: 20rpx;
+  /* 🚩 核心：先推到父容器水平中点 */
+  left: 50%;
+  /* 🚩 核心：再向左回拉自身宽度的 50% */
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 12rpx;
+  z-index: 10;
+}
+
+/* 🚩 4. 基础横线样式 */
+.dot-line {
+  width: 48rpx;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2rpx;
+  transition: all 0.3s ease;
+}
+
+/* 🚩 5. 选中后的瓦红横线（加长效果） */
+.dot-line.active {
+  width: 48rpx;
+  background: #ff4655;
+  box-shadow: 0 0 10rpx rgba(255, 70, 85, 0.5);
 }
 
 .quick-nav-bar {
@@ -1419,4 +1450,65 @@ page {
   color: #ff4655;
   transform: rotate(-180deg);
   transition: transform 0.3s ease;
+}
+
+/* 🚩 1. 外部容器：定好尺寸和边距 */
+.reset-icon-container {
+  position: relative;
+  width: 32rpx; /* 根据你的字体大小调整 */
+  height: 32rpx;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 10rpx; /* 原本 reset-icon 的边距 */
+  transition: all 0.2s ease;
+}
+
+/* 🚩 2. 正方形主体：三面有边，开口朝上 */
+.reset-square-body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 26rpx; /* 稍微小于容器，留出箭头位置 */
+  height: 26rpx;
+  /* 统一使用米白或钛金灰 */
+  border: 4rpx solid #ece8e1;
+  /* 🚩 核心：去掉顶边，制造开口 */
+  border-top: none;
+  /* 🚩 核心：绝无圆角 */
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+/* 🚩 3. 三角形箭头：利用 border 绘制 */
+.reset-arrow-head {
+  position: absolute;
+  /* 定位在开口的右上角 */
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  /* 箭头朝向左下 */
+  border-style: solid;
+  border-width: 0 0 12rpx 12rpx; /* 箭头大小 */
+  border-color: transparent transparent transparent #ece8e1; /* 实色在左 */
+
+  /* 🚩 优化：让三角形旋转 45 度，使其尖角指向开口内部 */
+  transform: rotate(-45deg);
+  transform-origin: left bottom;
+  z-index: 2;
+}
+
+/* 🚩 4. 交互反馈：点击时变为瓦红 */
+.filter-view-btn.active .reset-icon-container .reset-square-body {
+  border-color: #ff4655;
+}
+
+.filter-view-btn.active .reset-icon-container .reset-arrow-head {
+  border-left-color: #ff4655; /* 三角形的颜色在左边 */
+}
+
+/* 点击时的旋转动效 (可选，增强战术感) */
+.reset-icon-container:active {
+  transform: scale(0.9) rotate(-180deg);
+  opacity: 0.8;
 }

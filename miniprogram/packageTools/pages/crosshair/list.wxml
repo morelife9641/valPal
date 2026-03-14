@@ -1,5 +1,16 @@
 <view class="crosshair-page">
     <view class="grid-bg"></view>
+    <view class="archive-header" wx:if="{{isFavoriteOnly && fromUserCenter}}">
+        <view class="header-title">
+            <text class="title-main">收藏准星库</text>
+        </view>
+        <view class="back-area" bindtap="navBackToUser">
+            <view class="back-text">
+                <text class="cn">返回</text>
+            </view>
+        </view>
+        <view class="header-line"></view>
+    </view>
     <view class="crosshair-list">
         <view class="ch-card" wx:for="{{crosshairList}}" wx:key="_id">
             <view class="ch-preview">

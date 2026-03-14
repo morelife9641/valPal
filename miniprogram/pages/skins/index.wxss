@@ -794,3 +794,111 @@ page {
   opacity: 0 !important;
   transform: translateY(30rpx) !important; /* 向下微沉 */
 }
+
+/* 遮罩层：保持你提供的模糊效果 */
+.popup-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 25, 35, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.popup-mask.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* 🚩 弹出容器：透明黑色，居中显示 (因为是分流选择，不建议用 bottom:0) */
+.editor-popup-content {
+  box-sizing: border-box;
+  position: absolute;
+
+  background: rgba(15, 25, 35, 0.75); /* 稍微加深一点透明度更有质感 */
+  padding: 60rpx;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  opacity: 0;
+  pointer-events: none; /* 隐藏时不可点击 */
+
+  /* 🚩 上下 4rpx 灰色边框 */
+  border-top: 4rpx solid #333d46;
+  border-bottom: 4rpx solid #333d46;
+
+  /* 🚩 可选：增加一点瓦式的阴影，让它从背景中“跳”出来 */
+  box-shadow: 0 0 40rpx rgba(0, 0, 0, 0.5);
+}
+
+/* 🚩 显示状态 */
+.show .editor-popup-content {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.show .editor-popup-content {
+  transform: translateY(-50%) scale(1);
+  opacity: 1;
+}
+
+/* 内部按钮包裹 */
+.editor-options-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40rpx;
+}
+
+/* 🚩 灰色按钮基础 */
+.editor-btn {
+  position: relative;
+  width: 500rpx;
+  height: 120rpx;
+  background: #1f2326; /* 灰色按钮 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* 🚩 左右 2rpx 垂直边框 (白色或浅灰) */
+.deco-line-left,
+.deco-line-right {
+  position: absolute;
+  top: 0;
+  width: 4rpx;
+  height: 100%;
+  background: #333d46; /* 这种浅米白比纯白更有质感 */
+}
+.deco-line-left {
+  left: 0;
+}
+.deco-line-right {
+  right: 0;
+}
+
+.editor-btn-text {
+  color: #ece8e1; /* 白色文字 */
+  font-size: 32rpx;
+  font-weight: 900;
+  letter-spacing: 4rpx;
+}
+
+/* 🚩 激活态：变为瓦红 */
+.editor-btn:active {
+  background: #ff4655;
+}
+.editor-btn:active .editor-btn-text {
+  color: #0f1923;
+}
+.editor-btn:active .deco-line-left,
+.editor-btn:active .deco-line-right {
+  background: #0f1923; /* 选中时边框变色 */
+}

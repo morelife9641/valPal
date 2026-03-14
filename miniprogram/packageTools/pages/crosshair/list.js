@@ -8,11 +8,24 @@ Page({
     pageLoading: true,
     showLoginPopup: false,
     pendingId: null, // 🚩 新增：记录待操作的 ID
+    isFavoriteOnly: false, // 🚩 是否只显示收藏
+    fromUserCenter: false, // 🚩 是否从个人中心进入
   },
 
-  async onLoad() {
-    this.initData();
-    await this.checkUserAuth(); // 🚩 核心：同步登录态
+  async onLoad(options) {
+    // 1. 接收从个人中心传来的标识
+    if (options.isFav === "1") {
+      this.setData({
+        isFavoriteOnly: true,
+        fromUserCenter: true,
+      });
+      // 修改导航栏标题以符合“收藏库”语境
+      wx.setNavigationBarTitle({ title: "准星库" });
+    }
+
+    // 2. 初始化流程
+    await this.checkUserAuth(); // 同步登录态
+    this.initData(); // 🚩 注意：这里需要根据 isFavoriteOnly 调整查询
   },
 
   async checkUserAuth() {
@@ -112,46 +125,58 @@ Page({
       wx.hideLoading();
     }
   },
-
-  /**
-   * 初始化：合并静态数据与云端收藏状态
-   */
+  navBackToUser() {
+    wx.navigateBack({
+      delta: 1,
+    });
+  },
   async initData() {
+    // 🚩 0. 获取当前是否为收藏模式
+    const { isFavoriteOnly } = this.data;
+
     this.setData({ pageLoading: true });
     const db = wx.cloud.database();
 
     try {
-      // 1. 获取云端该用户的所有准星收藏 (type: 'crosshair')
+      // 1. 获取该用户的所有准星收藏
       const favRes = await db
         .collection("user_favorites")
         .where({
           type: "crosshair",
         })
         .get();
-      console.log("当前数据库返回的收藏列表:", favRes.data); // 🚩 看看这里到底是不是空的
-      // 拿到所有已收藏的 targetId 数组
+
       const myFavIds = favRes.data.map((f) => f.targetId);
-      console.log("解析出的 ID 数组:", myFavIds);
+
       // 2. 将静态数据映射并加上 isFavorite 状态
-      const mergedList = crosshairData.map((item) => {
-        // 如果你的静态数据没写 id，可以用 item.name 兜底，但建议写 id
+      let mergedList = crosshairData.map((item) => {
         const uniqueId = item.id || item.name;
         return {
           ...item,
-          _id: uniqueId, // 统一设置一个 ID 给视图绑定使用
+          _id: uniqueId,
           isFavorite: myFavIds.includes(uniqueId),
         };
       });
+
+      // 🚩 3. 核心：如果是从个人中心进来的“收藏档案库”，则过滤掉未收藏的项
+      if (isFavoriteOnly) {
+        mergedList = mergedList.filter((item) => item.isFavorite);
+      }
 
       this.setData({
         crosshairList: mergedList,
         pageLoading: false,
       });
+
+      // 如果收藏库为空，可以给个友好提示
+      if (isFavoriteOnly && mergedList.length === 0) {
+        wx.showToast({ title: "暂无档案记录", icon: "none" });
+      }
     } catch (e) {
       console.error("数据合并失败", e);
-      // 如果云端请求失败，至少显示静态内容
+      // 失败回退逻辑：非收藏模式显示全量，收藏模式显示空（或报错）
       this.setData({
-        crosshairList: crosshairData,
+        crosshairList: isFavoriteOnly ? [] : crosshairData,
         pageLoading: false,
       });
     }

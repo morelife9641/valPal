@@ -1,24 +1,24 @@
 <root-portal>
-    <view class="portal-wrapper" wx:if="{{show}}">
-        <view class="mask {{show ? 'show' : ''}}" bindtap="onClose"></view>
-        <view class="bottom-popup {{show ? 'show' : ''}}">
+    <view class="popup-mask {{show ? 'show' : ''}}" bindtap="onClose" catchtouchmove="prevent">
+        <view class="popup-content" catchtap="prevent">
+            <view class="p-header">
+                <text class="p-title">选择特工</text>
+                <view class="p-close" bindtap="onClose">✕</view>
+            </view>
             <view class="tabs-fixed-row">
                 <view wx:for="{{popupTabs}}" wx:key="*this" class="tab-pill {{currentTab === item ? 'active' : ''}}" bindtap="onTabChange" data-tab="{{item}}">
                     {{item}}
                 </view>
             </view>
-            <scroll-view scroll-x class="selector-view" enhanced show-scrollbar="{{false}}">
-                <view class="item-list">
-                    <view wx:for="{{filteredList}}" wx:key="uuid" class="item-card {{currentAgentUuid === item.uuid ? 'selected' : ''}}" bindtap="onSelect" data-item="{{item}}">
-                        <image src="{{item.displayIcon}}" class="agent-icon" mode="aspectFit"></image>
-                        <text class="agent-name">{{item.displayName}}</text>
+            <scroll-view scroll-y class="rank-scroll" enhanced show-scrollbar="{{false}}">
+                <view class="grid-container">
+                    <view wx:for="{{filteredList}}" wx:key="uuid" class="rank-item {{currentAgentUuid === item.uuid ? 'active' : ''}}" bindtap="onSelect" data-item="{{item}}">
+                        <image src="{{item.displayIcon}}" class="rank-img" mode="aspectFit"></image>
+                        <text class="rank-txt">{{item.displayName}}</text>
+                        <view wx:if="{{currentAgentUuid === item.uuid}}" class="active-tag"></view>
                     </view>
-                    <view wx:if="{{filteredList.length === 0}}" class="empty-hint-container">
-                        <view class="empty-icon">
-                            <view class="scan-bar"></view>
-                            <text class="glitch-text">404</text>
-                        </view>
-                        <text class="main-hint">加载特工信号中..</text>
+                    <view wx:if="{{filteredList.length === 0}}" class="empty-hint">
+                        <text>暂无该角色数据</text>
                     </view>
                 </view>
             </scroll-view>

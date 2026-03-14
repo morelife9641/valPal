@@ -1,0 +1,111 @@
+/* 基础弹窗样式保持统一 */
+.popup-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 25, 35, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.popup-mask.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1f2326;
+  border-top: 6rpx solid #ff4655;
+  transform: translateY(100%);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  /* padding-bottom: env(safe-area-inset-bottom); */
+}
+.show .popup-content {
+  transform: translateY(0);
+}
+
+.p-header {
+  padding: 24rpx 30rpx;
+  background: #0f1923;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+.p-title {
+  color: #ece8e1;
+  font-size: 28rpx;
+  font-weight: 900;
+  letter-spacing: 4rpx;
+}
+.p-close {
+  color: #8b9196;
+  font-size: 32rpx;
+  padding: 10rpx;
+}
+
+/* 🚩 核心：点位平铺容器 */
+.pos-container {
+  display: flex;
+  padding: 20rpx 30rpx;
+  gap: 20rpx;
+  justify-content: space-between;
+}
+
+/* 🚩 选项按钮基础样式 */
+.pos-btn {
+  flex: 1;
+  height: 140rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pos-letter {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #8b9196;
+  /* font-family: "Impact", sans-serif; */
+}
+
+.pos-desc {
+  font-size: 20rpx;
+  color: #8b9196;
+  margin-top: 6rpx;
+  font-weight: bold;
+}
+
+.pos-btn.active {
+  background: rgba(236, 232, 225, 0.15);
+  border-color: #ece8e1;
+  /* transform: translateY(-4rpx); */
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+}
+
+.pos-btn.active .pos-letter {
+  color: #ece8e1;
+  transform: scale(1.1);
+  text-shadow: 0 0 15rpx rgba(236, 232, 225, 0.3);
+}
+
+.pos-btn.active .pos-desc {
+  color: #ece8e1;
+}
+
+.pos-btn:active {
+  transform: scale(0.96);
+}
